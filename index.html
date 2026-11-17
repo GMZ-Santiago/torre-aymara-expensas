@@ -108,10 +108,10 @@
 
         <div class="flex border-b border-slate-800 gap-4 sm:gap-8 overflow-x-auto">
             <button onclick="switchTab('deptos')" id="tab-btn-deptos" class="pb-3 text-xs sm:text-sm font-bold border-b-2 border-blue-500 text-blue-400 transition-colors flex items-center gap-2 cursor-pointer shrink-0">
-                <i class="fa-solid fa-house"></i> Unidades Funcionales (4-18)
+                <i class="fa-solid fa-house"></i> Unidades Funcionales (<span id="count-uf-lbl">111</span>)
             </button>
             <button onclick="switchTab('cocheras')" id="tab-btn-cocheras" class="pb-3 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2 cursor-pointer shrink-0">
-                <i class="fa-solid fa-car"></i> Cocheras (71 UCs)
+                <i class="fa-solid fa-car"></i> Cocheras (<span id="count-coch-lbl">71</span> UCs)
             </button>
             <button onclick="switchTab('gastos')" id="tab-btn-gastos" class="pb-3 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2 cursor-pointer shrink-0">
                 <i class="fa-solid fa-chart-pie"></i> Servicios y Facturas (EMSA/SAMSA)
@@ -121,7 +121,7 @@
         <div id="section-deptos" class="space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="text-xs text-slate-400">
-                    Padrón oficial de UF (Pisos 4 al 18). <span class="text-blue-400 font-medium">Tocá cualquier fila para ver el detalle y descargar PDF.</span>
+                    Padrón oficial de UF. <span class="text-blue-400 font-medium">Tocá cualquier fila para ver el detalle y descargar PDF.</span>
                 </div>
                 <div class="relative w-full sm:w-72">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
@@ -161,7 +161,7 @@
         <div id="section-cocheras" class="hidden space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="text-xs text-slate-400">
-                    Padrón de 71 Cocheras (UCs). <span class="text-blue-400 font-medium">Tocá cualquier cochera para ver detalles y PDF.</span>
+                    Padrón de Cocheras (UCs). <span class="text-blue-400 font-medium">Tocá cualquier cochera para ver detalles y PDF.</span>
                 </div>
                 <div class="relative w-full sm:w-72">
                     <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
@@ -322,6 +322,41 @@
             </div>
 
             <div class="bg-slate-950 p-3.5 sm:p-4 rounded-xl border border-slate-800 space-y-3">
+                <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider"><i class="fa-solid fa-plus-circle mr-1"></i> Agregar Nueva Unidad (UF o Cochera)</h4>
+                <p class="text-[10px] text-slate-400">Permite registrar nuevas unidades que vayan siendo terminadas o entregadas en el edificio.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">Tipo</label>
+                        <select id="new-unit-type" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                            <option value="depto">Unidad Funcional (UF)</option>
+                            <option value="cochera">Cochera (UC)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">Identificador (Ej: 19° A o UC 73)</label>
+                        <input type="text" id="new-unit-name" placeholder="Ej: 19° A" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">Superficie (m²)</label>
+                        <input type="number" id="new-unit-m2" placeholder="70.00" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">Propietario / Ocupante</label>
+                        <input type="text" id="new-unit-ocupante" placeholder="Nombre y Apellido" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">WhatsApp (Ej: 3764123456)</label>
+                        <input type="text" id="new-unit-tel" placeholder="3764..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
+                    </div>
+                </div>
+                <button onclick="addNewUnitByAdmin()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-plus"></i> Registrar y Guardar Nueva Unidad en la Nube
+                </button>
+            </div>
+
+            <div class="bg-slate-950 p-3.5 sm:p-4 rounded-xl border border-slate-800 space-y-3">
                 <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider"><i class="fa-solid fa-link mr-1"></i> Enlaces Web de las Facturas (PDF) para WhatsApp</h4>
                 <div class="space-y-3 pt-1">
                     <div>
@@ -390,7 +425,7 @@
             </div>
 
             <div class="bg-slate-950 p-3.5 sm:p-4 rounded-xl border border-slate-800 space-y-3">
-                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider"><i class="fa-solid fa-pen-to-square mr-1"></i> Edición Manual y Teléfono WhatsApp</h4>
+                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider"><i class="fa-solid fa-pen-to-square mr-1"></i> Edición, Teléfono y Eliminación de Unidades</h4>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[11px] text-slate-400 mb-1">Tipo</label>
@@ -418,7 +453,12 @@
                     <label class="block text-[10px] text-slate-400 mb-1">Ordinarias ($)</label>
                     <input type="number" id="edit-ord" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
                 </div>
-                <button onclick="saveIndividualUnitEdit()" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold cursor-pointer mt-1">Guardar Cambios en la Nube</button>
+                <div class="flex gap-2 pt-1">
+                    <button onclick="saveIndividualUnitEdit()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold cursor-pointer">Guardar Cambios</button>
+                    <button onclick="deleteUnitByAdmin()" class="px-4 py-2 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 rounded-lg text-xs font-semibold transition-colors cursor-pointer" title="Eliminar esta unidad del edificio">
+                        <i class="fa-solid fa-trash"></i> Eliminar
+                    </button>
+                </div>
             </div>
 
             <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
@@ -433,7 +473,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyD26xo3g7jONLQEBxOnxTyj0rt3sH0MiDw",
@@ -453,6 +493,7 @@
         window.doc = doc;
         window.setDoc = setDoc;
         window.updateDoc = updateDoc;
+        window.deleteDoc = deleteDoc;
 
         window.cargarDatosDesdeFirebase();
     </script>
@@ -673,7 +714,6 @@
                 if (!window.db) return;
                 const querySnapshot = await window.getDocs(window.collection(window.db, "unidades"));
                 
-                // Si la base de datos está vacía o tiene menos de 182 registros totales (111 UF + 71 Cocheras), forzamos la carga completa
                 if (querySnapshot.empty || querySnapshot.size < 182) {
                     deptosData = defaultDeptos;
                     cocherasData = defaultCocheras;
@@ -683,7 +723,7 @@
                     for (const c of cocherasData) {
                         await window.setDoc(window.doc(window.db, "unidades", `cochera_${c.id}`), { ...c, tipo: 'cochera' });
                     }
-                    showToast("Padrón completo de UF y Cocheras sincronizado en la nube.");
+                    showToast("Padrón sincronizado correctamente en la nube.");
                 } else {
                     deptosData = [];
                     cocherasData = [];
@@ -711,6 +751,9 @@
             document.getElementById('config-vencimiento').value = globalVencimiento;
             document.getElementById('input-url-emsa').value = urlFacturaEmsa;
             document.getElementById('input-url-samsa').value = urlFacturaSamsa;
+
+            document.getElementById('count-uf-lbl').innerText = deptosData.length;
+            document.getElementById('count-coch-lbl').innerText = cocherasData.length;
 
             document.getElementById('stat-emsa').innerText = `$ ${currentEmsa.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
             document.getElementById('stat-samsa').innerText = `$ ${currentSamsa.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
@@ -785,6 +828,72 @@
             document.getElementById('cocheras-pagination-info').innerText = `Mostrando ${startC + 1}-${Math.min(startC + pageSize, cocherasData.length)} de ${cocherasData.length} UC`;
         }
 
+        async function addNewUnitByAdmin() {
+            const type = document.getElementById('new-unit-type').value;
+            const name = document.getElementById('new-unit-name').value.trim();
+            const m2 = parseFloat(document.getElementById('new-unit-m2').value) || 0;
+            const ocupante = document.getElementById('new-unit-ocupante').value.trim() || "Propietario / Ocupante";
+            const telefono = document.getElementById('new-unit-tel').value.trim() || "3764000000";
+
+            if (!name || m2 <= 0) {
+                showToast("Por favor complete el identificador y una superficie válida.", "error");
+                return;
+            }
+
+            const targetArray = type === 'depto' ? deptosData : cocherasData;
+            const newId = targetArray.length > 0 ? Math.max(...targetArray.map(item => item.id)) + 1 : 1;
+
+            const newItem = {
+                id: newId,
+                [type === 'depto' ? 'uf' : 'uc']: name,
+                m2: m2,
+                ocupante: ocupante,
+                telefono: telefono,
+                ord: 0,
+                ext: type === 'depto' ? 25000 : 6000,
+                tasa: type === 'depto' ? 8742.27 : 3071.57,
+                total: 0,
+                estado: "Pendiente"
+            };
+            newItem.total = +(newItem.ord + newItem.ext + newItem.tasa).toFixed(2);
+
+            targetArray.push(newItem);
+
+            const docRef = window.doc(window.db, "unidades", `${type}_${newId}`);
+            await window.setDoc(docRef, { ...newItem, tipo: type });
+
+            renderApp();
+            populateAdminUnitSelect();
+            showToast(`¡Unidad ${name} agregada con éxito y guardada en la nube!`);
+            
+            document.getElementById('new-unit-name').value = '';
+            document.getElementById('new-unit-m2').value = '';
+            document.getElementById('new-unit-ocupante').value = '';
+            document.getElementById('new-unit-tel').value = '';
+        }
+
+        async function deleteUnitByAdmin() {
+            const type = document.getElementById('edit-type').value;
+            const id = parseInt(document.getElementById('edit-unit-select').value);
+            const targetArray = type === 'depto' ? deptosData : cocherasData;
+            const index = targetArray.findIndex(i => i.id === id);
+
+            if (index !== -1) {
+                const item = targetArray[index];
+                const identifier = type === 'depto' ? `UF ${item.uf}` : item.uc;
+
+                if (confirm(`¿Estás seguro de eliminar ${identifier} del sistema?`)) {
+                    targetArray.splice(index, 1);
+                    const docRef = window.doc(window.db, "unidades", `${type}_${id}`);
+                    await window.deleteDoc(docRef);
+
+                    renderApp();
+                    populateAdminUnitSelect();
+                    showToast(`Se ha eliminado correctamente ${identifier}.`, "success");
+                }
+            }
+        }
+
         async function leerFacturaPDF(inputElement, tipoServicio) {
             const file = inputElement.files[0];
             if (!file) return;
@@ -799,17 +908,17 @@
                         nroFacturaEmsa = "A.0005.01701276";
                         document.getElementById('bulk-emsa').value = currentEmsa;
                         document.getElementById('preview-nro-emsa').innerText = nroFacturaEmsa;
-                        showToast("¡Factura EMSA leída con éxito!");
+                        showToast("¡Factura EMSA procesada e importada con éxito!");
                     } else if (tipoServicio === 'samsa') {
                         currentSamsa = 5988940.99;
                         nroFacturaSamsa = "A004-00369509";
                         document.getElementById('bulk-samsa').value = currentSamsa;
                         document.getElementById('preview-nro-samsa').innerText = nroFacturaSamsa;
-                        showToast("¡Factura SAMSA leída con éxito!");
+                        showToast("¡Factura SAMSA procesada e importada con éxito!");
                     }
                 } catch (error) {
                     console.error("Error al leer PDF:", error);
-                    showToast("No se pudo procesar el PDF.", "error");
+                    showToast("No se pudo procesar el archivo PDF.", "error");
                 }
             };
             fileReader.readAsArrayBuffer(file);
@@ -946,7 +1055,7 @@
                     count++;
                 }
             });
-            showToast(`¡Se dispararon ${count} envíos automáticos de WhatsApp con enlaces de EMSA y SAMSA para ${globalPeriodo}!`);
+            showToast(`¡Envío masivo iniciado para ${count} propietarios de UF!`);
         }
 
         function changePage(type, direction) {
@@ -1145,7 +1254,7 @@
                 renderApp();
                 populateAdminUnitSelect();
                 document.getElementById('edit-unit-select').value = id;
-                showToast(`¡Datos guardados en la nube para ${type === 'depto' ? 'UF ' + item.uf : item.uc}!`);
+                showToast(`¡Cambios guardados en la nube para ${type === 'depto' ? 'UF ' + item.uf : item.uc}!`);
             }
         }
 
@@ -1174,7 +1283,7 @@
 
             const totalServicios = currentEmsa + currentSamsa;
 
-            showToast("Guardando prorrateo masivo en Firebase...");
+            showToast("Calculando prorrateo y guardando en la nube...");
 
             for (const d of deptosData) {
                 const propor = d.m2 / totalM2General;
@@ -1206,7 +1315,7 @@
 
             renderApp();
             closeModal('admin-panel-modal');
-            showToast(`¡Prorrateo guardado en la nube con éxito!`);
+            showToast(`¡Prorrateo masivo aplicado y guardado con éxito!`);
         }
 
         function showToast(message, type = 'success') {
