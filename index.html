@@ -320,7 +320,7 @@
                     <textarea id="config-aviso" rows="2" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 resize-none">Estimados propietarios: Recuerden que el vencimiento de las expensas opera el día 10 de cada mes. Por favor enviar comprobante indicando UF o Cochera.</textarea>
                 </div>
             </div>
-
+            
             <div class="bg-slate-950 p-3.5 sm:p-4 rounded-xl border border-slate-800 space-y-3">
                 <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider"><i class="fa-solid fa-link mr-1"></i> Enlaces Web de las Facturas (PDF) para WhatsApp</h4>
                 <div class="space-y-3 pt-1">
@@ -363,26 +363,16 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Extraordinarias Globales UF ($)</label>
-                        <input type="number" id="bulk-ext-uf" value="25000.00" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
+                        <label class="block text-[11px] text-slate-400 mb-1">Total Extraordinarias a Prorratear ($)</label>
+                        <input type="number" id="bulk-ext-total" value="3416000.00" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
                     </div>
                     <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Extraordinarias Globales Cochera ($)</label>
-                        <input type="number" id="bulk-ext-coch" value="6000.00" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Tasa Municipal Global UF ($)</label>
-                        <input type="number" id="bulk-tasa-uf" value="8742.27" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Tasa Municipal Global Cochera ($)</label>
-                        <input type="number" id="bulk-tasa-coch" value="3071.57" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
+                        <label class="block text-[11px] text-slate-400 mb-1">Total Tasa Municipal a Prorratear ($)</label>
+                        <input type="number" id="bulk-tasa-total" value="1178491.59" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
                     </div>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-2 pt-1">
-                    <button onclick="applyGlobalBulkServices()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold cursor-pointer">Aplicar, Prorratear y Guardar en Nube</button>
+                    <button onclick="applyGlobalBulkServices()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold cursor-pointer">Aplicar Prorrateo Proporcional por m² y Guardar</button>
                     <button onclick="sendBulkWhatsAppBroadcast()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5">
                         <i class="fa-brands fa-whatsapp"></i> Envío Masivo WhatsApp
                     </button>
@@ -850,12 +840,11 @@
                 ocupante: ocupante,
                 telefono: telefono,
                 ord: 0,
-                ext: type === 'depto' ? 25000 : 6000,
-                tasa: type === 'depto' ? 8742.27 : 3071.57,
+                ext: 0,
+                tasa: 0,
                 total: 0,
                 estado: "Pendiente"
             };
-            newItem.total = +(newItem.ord + newItem.ext + newItem.tasa).toFixed(2);
 
             targetArray.push(newItem);
 
@@ -1017,7 +1006,7 @@
             const samsaLink = urlFacturaSamsa ? `🔗 *Ver Factura SAMSA:* ${urlFacturaSamsa}` : `📄 *Factura SAMSA N°:* ${nroFacturaSamsa}`;
 
             const mensaje = `🏢 *TORRE AYMARÁ (Posadas)*\nHola *${item.ocupante}*,\nTe informamos el detalle de expensas del periodo *${globalPeriodo}* para la unidad *${unidadNombre}*:\n\n` +
-                `- Ordinarias (Incluye EMSA: $${currentEmsa.toLocaleString('es-AR')} y SAMSA: $${currentSamsa.toLocaleString('es-AR')}): $${item.ord.toLocaleString('es-AR', {minimumFractionDigits: 2})}\n` +
+                `- Ordinarias: $${item.ord.toLocaleString('es-AR', {minimumFractionDigits: 2})}\n` +
                 `- Extraordinarias: $${item.ext.toLocaleString('es-AR', {minimumFractionDigits: 2})}\n` +
                 `- Tasa Municipal: $${item.tasa.toLocaleString('es-AR', {minimumFractionDigits: 2})}\n` +
                 `💰 *TOTAL A PAGAR: $${item.total.toLocaleString('es-AR', {minimumFractionDigits: 2})}*\n` +
@@ -1270,10 +1259,8 @@
 
             currentEmsa = parseFloat(document.getElementById('bulk-emsa').value) || 0;
             currentSamsa = parseFloat(document.getElementById('bulk-samsa').value) || 0;
-            const globalExtUf = parseFloat(document.getElementById('bulk-ext-uf').value) || 0;
-            const globalExtCoch = parseFloat(document.getElementById('bulk-ext-coch').value) || 0;
-            const globalTasaUf = parseFloat(document.getElementById('bulk-tasa-uf').value) || 0;
-            const globalTasaCoch = parseFloat(document.getElementById('bulk-tasa-coch').value) || 0;
+            const totalExt = parseFloat(document.getElementById('bulk-ext-total').value) || 0;
+            const totalTasa = parseFloat(document.getElementById('bulk-tasa-total').value) || 0;
 
             const totalM2Deptos = deptosData.reduce((acc, curr) => acc + curr.m2, 0);
             const totalM2Coch = cocherasData.reduce((acc, curr) => acc + curr.m2, 0);
@@ -1283,15 +1270,13 @@
 
             const totalServicios = currentEmsa + currentSamsa;
 
-            showToast("Calculando prorrateo y guardando en la nube...");
+            showToast("Calculando prorrateo proporcional por m² y guardando...");
 
             for (const d of deptosData) {
                 const propor = d.m2 / totalM2General;
-                const serviceShare = totalServicios * propor;
-
-                d.ord = +serviceShare.toFixed(2);
-                d.ext = globalExtUf;
-                d.tasa = globalTasaUf;
+                d.ord = +(totalServicios * propor).toFixed(2);
+                d.ext = +(totalExt * propor).toFixed(2);
+                d.tasa = +(totalTasa * propor).toFixed(2);
                 d.total = +(d.ord + d.ext + d.tasa).toFixed(2);
                 d.estado = "Pendiente";
 
@@ -1301,11 +1286,9 @@
 
             for (const c of cocherasData) {
                 const propor = c.m2 / totalM2General;
-                const serviceShare = totalServicios * propor;
-
-                c.ord = +serviceShare.toFixed(2);
-                c.ext = globalExtCoch;
-                c.tasa = globalTasaCoch;
+                c.ord = +(totalServicios * propor).toFixed(2);
+                c.ext = +(totalExt * propor).toFixed(2);
+                c.tasa = +(totalTasa * propor).toFixed(2);
                 c.total = +(c.ord + c.ext + c.tasa).toFixed(2);
                 c.estado = "Pendiente";
 
@@ -1315,7 +1298,7 @@
 
             renderApp();
             closeModal('admin-panel-modal');
-            showToast(`¡Prorrateo masivo aplicado y guardado con éxito!`);
+            showToast(`¡Prorrateo proporcional por m² aplicado con éxito!`);
         }
 
         function showToast(message, type = 'success') {
