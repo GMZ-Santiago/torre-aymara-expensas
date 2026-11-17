@@ -672,7 +672,9 @@
             try {
                 if (!window.db) return;
                 const querySnapshot = await window.getDocs(window.collection(window.db, "unidades"));
-                if (querySnapshot.empty) {
+                
+                // Si la base de datos está vacía o tiene menos de 182 registros totales (111 UF + 71 Cocheras), forzamos la carga completa
+                if (querySnapshot.empty || querySnapshot.size < 182) {
                     deptosData = defaultDeptos;
                     cocherasData = defaultCocheras;
                     for (const d of deptosData) {
@@ -681,7 +683,7 @@
                     for (const c of cocherasData) {
                         await window.setDoc(window.doc(window.db, "unidades", `cochera_${c.id}`), { ...c, tipo: 'cochera' });
                     }
-                    showToast("Base de datos inicializada en la nube.");
+                    showToast("Padrón completo de UF y Cocheras sincronizado en la nube.");
                 } else {
                     deptosData = [];
                     cocherasData = [];
