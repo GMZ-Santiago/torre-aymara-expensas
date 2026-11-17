@@ -363,16 +363,22 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                     <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Monto Fijo Extraordinarias por Unidad ($)</label>
-                        <input type="number" id="bulk-ext-total" value="25000.00" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
+                        <label class="block text-[11px] text-slate-400 mb-1">Extraordinarias UF (Fijo $)</label>
+                        <input type="number" id="bulk-ext-uf" value="25000.00" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
                     </div>
                     <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Total Tasa Municipal a Prorratear ($)</label>
-                        <input type="number" id="bulk-tasa-total" value="1178491.59" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
+                        <label class="block text-[11px] text-slate-400 mb-1">Extraordinarias UC / Cochera (Fijo $)</label>
+                        <input type="number" id="bulk-ext-uc" value="6000.00" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
                     </div>
                 </div>
-                <div class="flex flex-col sm:flex-row gap-2 pt-1">
-                    <button onclick="applyGlobalBulkServices()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold cursor-pointer">Aplicar Prorrateo (Servicios/Tasa) y Extraordinarias Fijas</button>
+
+                <div class="pt-2">
+                    <label class="block text-[11px] text-slate-400 mb-1">Total Tasa Municipal a Prorratear ($)</label>
+                    <input type="number" id="bulk-tasa-total" value="1178491.59" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-2 pt-2">
+                    <button onclick="applyGlobalBulkServices()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold cursor-pointer">Aplicar Prorrateo y Extraordinarias (UF y UC)</button>
                     <button onclick="sendBulkWhatsAppBroadcast()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5">
                         <i class="fa-brands fa-whatsapp"></i> Envío Masivo WhatsApp
                     </button>
@@ -625,78 +631,78 @@
         ];
 
         const defaultCocheras = [
-            { id: 1, uc: "UC 1 (P.B.)", m2: 24.60, ocupante: "Area Maria Cristina / Ranaletti Eugenia", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 2, uc: "UC 2 (P.B.)", m2: 24.60, ocupante: "Garzon Maceda Carlos Alejandro", telefono: "3764631235", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 3, uc: "UC 3 (P.B.)", m2: 24.60, ocupante: "Cardinali Luis Marcelo", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 4, uc: "UC 4 (P.B.)", m2: 24.60, ocupante: "Usteris Graciela", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 5, uc: "UC 5 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos / Prates Julian", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 6, uc: "UC 6 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos / Kosak Ulises", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 7, uc: "UC 7 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos / Aquino Fabricio", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 8, uc: "UC 8 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos 16 C", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 9, uc: "UC 9 (P.B.)", m2: 24.60, ocupante: "Yendreka Miguel Angel", telefono: "3764366264", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 10, uc: "UC 10 (P.B.)", m2: 24.60, ocupante: "Biale Rosana Andrea", telefono: "3764581128", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 11, uc: "UC 11 (P.B.)", m2: 24.60, ocupante: "Fideicomiso (vendido)", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 1264381.89, estado: "Pendiente" },
-            { id: 12, uc: "UC 12 (P.B.)", m2: 24.60, ocupante: "Fideicomiso (vendido)", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 1264381.89, estado: "Pendiente" },
-            { id: 13, uc: "UC 13 (Piso 1)", m2: 24.60, ocupante: "Colombo Edgardo Jose / Kuhn Gabriela", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 14, uc: "UC 14 (Piso 1)", m2: 24.60, ocupante: "Placa Norte SRL / Otaño Pedro / Kuhn Lucas", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 15, uc: "UC 15 (Piso 1)", m2: 24.60, ocupante: "Bencivenga Porporatto Pablo Nicolas", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 16, uc: "UC 16 (Piso 1)", m2: 24.60, ocupante: "Placa Norte SRL / Otaño Pedro / Prieto Sergio", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 17, uc: "UC 17 (Piso 1)", m2: 24.60, ocupante: "Carlos Gonzalo Bordon Berger", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 18, uc: "UC 18 (Piso 1)", m2: 24.60, ocupante: "Kramer Edgardo Roberto - Brandalisse Susana", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 19, uc: "UC 19 (Piso 1)", m2: 24.60, ocupante: "Claudio Honorio De Langhe", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 20, uc: "UC 20 (Piso 1)", m2: 24.60, ocupante: "Gimenez Jorge Lisandro / Tkachuk And", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 21, uc: "UC 21 (Piso 1)", m2: 24.60, ocupante: "Ferreyra Fabiana Elizabeth / Vergara Bruno", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 22, uc: "UC 22 (Piso 1)", m2: 24.60, ocupante: "Bencivenga Pablo / Scheveloff Kevin", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 23, uc: "UC 23 (Piso 1)", m2: 24.60, ocupante: "Celenza Irene", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 24, uc: "UC 24 (Piso 1)", m2: 24.60, ocupante: "Barua Maria Gloria / Vogeli Javier H", telefono: "3764227641", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 25, uc: "UC 25 (Piso 1)", m2: 24.60, ocupante: "Graces Aldo Eladio / Caceres Natalia", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 26, uc: "UC 26 (Piso 1)", m2: 24.60, ocupante: "Taeda SA - Jorge Ranger / Rivelli Araceli", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 27, uc: "UC 27 (Piso 1)", m2: 22.70, ocupante: "Taeda SA - Jorge Ranger / Pereyra Noemi", telefono: "3764000000", ord: 6300.00, ext: 25000.00, tasa: 2834.33, total: 34134.33, estado: "Pendiente" },
-            { id: 28, uc: "UC 28 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL", telefono: "3764660578", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 33157.18, estado: "Pendiente" },
-            { id: 29, uc: "UC 29 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL", telefono: "3764660578", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 33157.18, estado: "Pendiente" },
-            { id: 30, uc: "UC 30 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL", telefono: "3764660578", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 33157.18, estado: "Pendiente" },
-            { id: 31, uc: "UC 31 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL / Candiyu Lorena Marta", telefono: "3764660578", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 33157.18, estado: "Pendiente" },
-            { id: 32, uc: "UC 32 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL / Insaurrralde Yanina", telefono: "3764660578", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 33157.18, estado: "Pendiente" },
-            { id: 33, uc: "UC 33 (Piso 2)", m2: 20.24, ocupante: "Surcan Walter Ramon", telefono: "3764000000", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 33157.18, estado: "Pendiente" },
-            { id: 34, uc: "UC 34 (Piso 2)", m2: 20.24, ocupante: "Fideicomiso", telefono: "3764000000", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 1092845.00, estado: "Pendiente" },
-            { id: 35, uc: "UC 35 (Piso 2)", m2: 20.24, ocupante: "Fraga Jorge Horacio / Hillan Kobylanski", telefono: "3764000000", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 33157.18, estado: "Pendiente" },
-            { id: 36, uc: "UC 36 (Piso 2)", m2: 24.60, ocupante: "Fideicomiso", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 1246879.16, estado: "Pendiente" },
-            { id: 37, uc: "UC 37 (Piso 2)", m2: 24.60, ocupante: "Sesmero María Gabriela", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 38, uc: "UC 38 (Piso 2)", m2: 24.60, ocupante: "Resalum SRL", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 39, uc: "UC 39 (Piso 2)", m2: 24.60, ocupante: "Alemann Alicia", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 40, uc: "UC 40 (Piso 2)", m2: 24.60, ocupante: "Gonzalez Paulino / Gonzalez Melisa", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 41, uc: "UC 41 (Piso 2)", m2: 24.60, ocupante: "Von Specht Ruben Enrique / Wolenberg Ingrid", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 42, uc: "UC 42 (Piso 2)", m2: 24.60, ocupante: "Caldi Luciano", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 43, uc: "UC 43 (Piso 2)", m2: 24.60, ocupante: "Alemann Alicia", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 44, uc: "UC 44 (Piso 2)", m2: 24.60, ocupante: "Rivero Alejandra Veronica", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 45, uc: "UC 45 (Piso 2)", m2: 24.60, ocupante: "Pinturas Misioneras S.A. / Britez Maria Victor", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 46, uc: "UC 46 (Piso 2)", m2: 24.60, ocupante: "Cabrera Matias", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 47, uc: "UC 47 (Piso 2)", m2: 24.60, ocupante: "Esquivel Emilio Jose", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 48, uc: "UC 48 (Piso 2)", m2: 24.60, ocupante: "Skuarek Jorge / Borjas Brenda", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 52414.29, estado: "Pendiente" },
-            { id: 49, uc: "UC 49 (Piso 2)", m2: 24.60, ocupante: "Pistan Jose Carlos / Maldonado Alicia", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 50, uc: "UC 50 (Piso 2)", m2: 24.60, ocupante: "Ortiz Victor Hugo", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 51, uc: "UC 51 (Piso 2)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 52, uc: "UC 52 (Piso 2)", m2: 24.60, ocupante: "Pistan Jose Carlos", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 52414.29, estado: "Pendiente" },
-            { id: 53, uc: "UC 53 (Piso 3)", m2: 24.60, ocupante: "Placa Norte SRL / Anabela Bareiro", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 54, uc: "UC 54 (Piso 3)", m2: 24.60, ocupante: "Arq. Alejandra Vicente / Niz Melanie Itati", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 55, uc: "UC 55 (Piso 3)", m2: 20.24, ocupante: "Montenegro Marcelo", telefono: "3764000000", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 33157.18, estado: "Pendiente" },
-            { id: 56, uc: "UC 56 (Piso 3)", m2: 20.24, ocupante: "Truquin Cecilia", telefono: "3764718205", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 33157.18, estado: "Pendiente" },
-            { id: 57, uc: "UC 57 (Piso 3)", m2: 20.24, ocupante: "Fideicomiso", telefono: "3764000000", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 1439456.14, estado: "Pendiente" },
-            { id: 58, uc: "UC 58 (Piso 3)", m2: 20.24, ocupante: "Lopez Horacio", telefono: "3764000000", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 33157.18, estado: "Pendiente" },
-            { id: 59, uc: "UC 59 (Piso 3)", m2: 20.24, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 1439456.14, estado: "Pendiente" },
-            { id: 60, uc: "UC 60 (Piso 3)", m2: 20.24, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 5630.00, ext: 25000.00, tasa: 2527.18, total: 1439456.14, estado: "Pendiente" },
-            { id: 61, uc: "UC 61 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 1605635.47, estado: "Pendiente" },
-            { id: 62, uc: "UC 62 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 1605635.47, estado: "Pendiente" },
-            { id: 63, uc: "UC 63 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 1605635.47, estado: "Pendiente" },
-            { id: 64, uc: "UC 64 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 1605635.47, estado: "Pendiente" },
-            { id: 65, uc: "UC 65 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 1605635.47, estado: "Pendiente" },
-            { id: 66, uc: "UC 66 (Piso 3)", m2: 24.60, ocupante: "Davalos Carlos", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 67, uc: "UC 67 (Piso 3)", m2: 24.60, ocupante: "Acosta Carla", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 36582.28, estado: "Pendiente" },
-            { id: 68, uc: "UC 68 (Piso 3)", m2: 24.60, ocupante: "Acosta Amelia / Lezcano José Luis", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 41511.57, estado: "Pendiente" },
-            { id: 69, uc: "UC 69 (Piso 3)", m2: 24.60, ocupante: "Clarise Dietz", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 70, uc: "UC 70 (Piso 3)", m2: 24.60, ocupante: "Pinturas Misioneras S.A. / Cecilia Roses", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" },
-            { id: 71, uc: "UC 71 (Piso 3)", m2: 24.60, ocupante: "Fideicomiso", telefono: "3764000000", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 1264381.89, estado: "Pendiente" },
-            { id: 72, uc: "UC 72 (Piso 3)", m2: 24.60, ocupante: "Barua Maria Gloria", telefono: "3764227641", ord: 6840.00, ext: 25000.00, tasa: 3071.57, total: 34911.57, estado: "Pendiente" }
+            { id: 1, uc: "UC 1 (P.B.)", m2: 24.60, ocupante: "Area Maria Cristina / Ranaletti Eugenia", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 2, uc: "UC 2 (P.B.)", m2: 24.60, ocupante: "Garzon Maceda Carlos Alejandro", telefono: "3764631235", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 3, uc: "UC 3 (P.B.)", m2: 24.60, ocupante: "Cardinali Luis Marcelo", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 4, uc: "UC 4 (P.B.)", m2: 24.60, ocupante: "Usteris Graciela", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 5, uc: "UC 5 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos / Prates Julian", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 6, uc: "UC 6 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos / Kosak Ulises", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 7, uc: "UC 7 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos / Aquino Fabricio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 8, uc: "UC 8 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos 16 C", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 9, uc: "UC 9 (P.B.)", m2: 24.60, ocupante: "Yendreka Miguel Angel", telefono: "3764366264", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 10, uc: "UC 10 (P.B.)", m2: 24.60, ocupante: "Biale Rosana Andrea", telefono: "3764581128", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 11, uc: "UC 11 (P.B.)", m2: 24.60, ocupante: "Fideicomiso (vendido)", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1245381.89, estado: "Pendiente" },
+            { id: 12, uc: "UC 12 (P.B.)", m2: 24.60, ocupante: "Fideicomiso (vendido)", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1245381.89, estado: "Pendiente" },
+            { id: 13, uc: "UC 13 (Piso 1)", m2: 24.60, ocupante: "Colombo Edgardo Jose / Kuhn Gabriela", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 14, uc: "UC 14 (Piso 1)", m2: 24.60, ocupante: "Placa Norte SRL / Otaño Pedro / Kuhn Lucas", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 15, uc: "UC 15 (Piso 1)", m2: 24.60, ocupante: "Bencivenga Porporatto Pablo Nicolas", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 16, uc: "UC 16 (Piso 1)", m2: 24.60, ocupante: "Placa Norte SRL / Otaño Pedro / Prieto Sergio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 17, uc: "UC 17 (Piso 1)", m2: 24.60, ocupante: "Carlos Gonzalo Bordon Berger", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 18, uc: "UC 18 (Piso 1)", m2: 24.60, ocupante: "Kramer Edgardo Roberto - Brandalisse Susana", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 19, uc: "UC 19 (Piso 1)", m2: 24.60, ocupante: "Claudio Honorio De Langhe", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 20, uc: "UC 20 (Piso 1)", m2: 24.60, ocupante: "Gimenez Jorge Lisandro / Tkachuk And", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 21, uc: "UC 21 (Piso 1)", m2: 24.60, ocupante: "Ferreyra Fabiana Elizabeth / Vergara Bruno", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 22, uc: "UC 22 (Piso 1)", m2: 24.60, ocupante: "Bencivenga Pablo / Scheveloff Kevin", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 23, uc: "UC 23 (Piso 1)", m2: 24.60, ocupante: "Celenza Irene", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 24, uc: "UC 24 (Piso 1)", m2: 24.60, ocupante: "Barua Maria Gloria / Vogeli Javier H", telefono: "3764227641", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 25, uc: "UC 25 (Piso 1)", m2: 24.60, ocupante: "Graces Aldo Eladio / Caceres Natalia", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 26, uc: "UC 26 (Piso 1)", m2: 24.60, ocupante: "Taeda SA - Jorge Ranger / Rivelli Araceli", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 27, uc: "UC 27 (Piso 1)", m2: 22.70, ocupante: "Taeda SA - Jorge Ranger / Pereyra Noemi", telefono: "3764000000", ord: 6300.00, ext: 6000.00, tasa: 2834.33, total: 15134.33, estado: "Pendiente" },
+            { id: 28, uc: "UC 28 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL", telefono: "3764660578", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
+            { id: 29, uc: "UC 29 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL", telefono: "3764660578", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
+            { id: 30, uc: "UC 30 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL", telefono: "3764660578", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
+            { id: 31, uc: "UC 31 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL / Candiyu Lorena Marta", telefono: "3764660578", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
+            { id: 32, uc: "UC 32 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL / Insaurrralde Yanina", telefono: "3764660578", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
+            { id: 33, uc: "UC 33 (Piso 2)", m2: 20.24, ocupante: "Surcan Walter Ramon", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
+            { id: 34, uc: "UC 34 (Piso 2)", m2: 20.24, ocupante: "Fideicomiso", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 1073845.00, estado: "Pendiente" },
+            { id: 35, uc: "UC 35 (Piso 2)", m2: 20.24, ocupante: "Fraga Jorge Horacio / Hillan Kobylanski", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
+            { id: 36, uc: "UC 36 (Piso 2)", m2: 24.60, ocupante: "Fideicomiso", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1227879.16, estado: "Pendiente" },
+            { id: 37, uc: "UC 37 (Piso 2)", m2: 24.60, ocupante: "Sesmero María Gabriela", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 38, uc: "UC 38 (Piso 2)", m2: 24.60, ocupante: "Resalum SRL", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 39, uc: "UC 39 (Piso 2)", m2: 24.60, ocupante: "Alemann Alicia", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 40, uc: "UC 40 (Piso 2)", m2: 24.60, ocupante: "Gonzalez Paulino / Gonzalez Melisa", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 41, uc: "UC 41 (Piso 2)", m2: 24.60, ocupante: "Von Specht Ruben Enrique / Wolenberg Ingrid", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 42, uc: "UC 42 (Piso 2)", m2: 24.60, ocupante: "Caldi Luciano", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 43, uc: "UC 43 (Piso 2)", m2: 24.60, ocupante: "Alemann Alicia", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 44, uc: "UC 44 (Piso 2)", m2: 24.60, ocupante: "Rivero Alejandra Veronica", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 45, uc: "UC 45 (Piso 2)", m2: 24.60, ocupante: "Pinturas Misioneras S.A. / Britez Maria Victor", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 46, uc: "UC 46 (Piso 2)", m2: 24.60, ocupante: "Cabrera Matias", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 47, uc: "UC 47 (Piso 2)", m2: 24.60, ocupante: "Esquivel Emilio Jose", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 48, uc: "UC 48 (Piso 2)", m2: 24.60, ocupante: "Skuarek Jorge / Borjas Brenda", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 33414.29, estado: "Pendiente" },
+            { id: 49, uc: "UC 49 (Piso 2)", m2: 24.60, ocupante: "Pistan Jose Carlos / Maldonado Alicia", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 50, uc: "UC 50 (Piso 2)", m2: 24.60, ocupante: "Ortiz Victor Hugo", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 51, uc: "UC 51 (Piso 2)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 52, uc: "UC 52 (Piso 2)", m2: 24.60, ocupante: "Pistan Jose Carlos", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 33414.29, estado: "Pendiente" },
+            { id: 53, uc: "UC 53 (Piso 3)", m2: 24.60, ocupante: "Placa Norte SRL / Anabela Bareiro", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 54, uc: "UC 54 (Piso 3)", m2: 24.60, ocupante: "Arq. Alejandra Vicente / Niz Melanie Itati", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 55, uc: "UC 55 (Piso 3)", m2: 20.24, ocupante: "Montenegro Marcelo", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
+            { id: 56, uc: "UC 56 (Piso 3)", m2: 20.24, ocupante: "Truquin Cecilia", telefono: "3764718205", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
+            { id: 57, uc: "UC 57 (Piso 3)", m2: 20.24, ocupante: "Fideicomiso", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 1420456.14, estado: "Pendiente" },
+            { id: 58, uc: "UC 58 (Piso 3)", m2: 20.24, ocupante: "Lopez Horacio", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
+            { id: 59, uc: "UC 59 (Piso 3)", m2: 20.24, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 1420456.14, estado: "Pendiente" },
+            { id: 60, uc: "UC 60 (Piso 3)", m2: 20.24, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 1420456.14, estado: "Pendiente" },
+            { id: 61, uc: "UC 61 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1586635.47, estado: "Pendiente" },
+            { id: 62, uc: "UC 62 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1586635.47, estado: "Pendiente" },
+            { id: 63, uc: "UC 63 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1586635.47, estado: "Pendiente" },
+            { id: 64, uc: "UC 64 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1586635.47, estado: "Pendiente" },
+            { id: 65, uc: "UC 65 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1586635.47, estado: "Pendiente" },
+            { id: 66, uc: "UC 66 (Piso 3)", m2: 24.60, ocupante: "Davalos Carlos", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 67, uc: "UC 67 (Piso 3)", m2: 24.60, ocupante: "Acosta Carla", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 17582.28, estado: "Pendiente" },
+            { id: 68, uc: "UC 68 (Piso 3)", m2: 24.60, ocupante: "Acosta Amelia / Lezcano José Luis", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 22511.57, estado: "Pendiente" },
+            { id: 69, uc: "UC 69 (Piso 3)", m2: 24.60, ocupante: "Clarise Dietz", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 70, uc: "UC 70 (Piso 3)", m2: 24.60, ocupante: "Pinturas Misioneras S.A. / Cecilia Roses", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
+            { id: 71, uc: "UC 71 (Piso 3)", m2: 24.60, ocupante: "Fideicomiso", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1245381.89, estado: "Pendiente" },
+            { id: 72, uc: "UC 72 (Piso 3)", m2: 24.60, ocupante: "Barua Maria Gloria", telefono: "3764227641", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" }
         ];
 
         async function cargarDatosDesdeFirebase() {
@@ -832,6 +838,7 @@
 
             const targetArray = type === 'depto' ? deptosData : cocherasData;
             const newId = targetArray.length > 0 ? Math.max(...targetArray.map(item => item.id)) + 1 : 1;
+            const extDefault = type === 'depto' ? 25000 : 6000;
 
             const newItem = {
                 id: newId,
@@ -840,9 +847,9 @@
                 ocupante: ocupante,
                 telefono: telefono,
                 ord: 0,
-                ext: 25000,
+                ext: extDefault,
                 tasa: 0,
-                total: 25000,
+                total: extDefault,
                 estado: "Pendiente"
             };
 
@@ -1259,7 +1266,8 @@
 
             currentEmsa = parseFloat(document.getElementById('bulk-emsa').value) || 0;
             currentSamsa = parseFloat(document.getElementById('bulk-samsa').value) || 0;
-            const montoFijoExtra = parseFloat(document.getElementById('bulk-ext-total').value) || 0;
+            const montoExtraUF = parseFloat(document.getElementById('bulk-ext-uf').value) || 0;
+            const montoExtraUC = parseFloat(document.getElementById('bulk-ext-uc').value) || 0;
             const totalTasa = parseFloat(document.getElementById('bulk-tasa-total').value) || 0;
 
             const totalM2Deptos = deptosData.reduce((acc, curr) => acc + curr.m2, 0);
@@ -1270,13 +1278,13 @@
 
             const totalServicios = currentEmsa + currentSamsa;
 
-            showToast("Aplicando prorrateo de servicios y tasa por m² y monto fijo de extraordinarias...");
+            showToast("Aplicando prorrateo de servicios y montos fijos diferenciados de extraordinarias...");
 
             for (const d of deptosData) {
                 const propor = d.m2 / totalM2General;
                 d.ord = +(totalServicios * propor).toFixed(2);
                 d.tasa = +(totalTasa * propor).toFixed(2);
-                d.ext = montoFijoExtra; // Monto fijo por unidad
+                d.ext = montoExtraUF; // Fijo para UF
                 d.total = +(d.ord + d.ext + d.tasa).toFixed(2);
                 d.estado = "Pendiente";
 
@@ -1288,7 +1296,7 @@
                 const propor = c.m2 / totalM2General;
                 c.ord = +(totalServicios * propor).toFixed(2);
                 c.tasa = +(totalTasa * propor).toFixed(2);
-                c.ext = montoFijoExtra; // Monto fijo por unidad
+                c.ext = montoExtraUC; // Fijo para UC / Cocheras
                 c.total = +(c.ord + c.ext + c.tasa).toFixed(2);
                 c.estado = "Pendiente";
 
@@ -1298,7 +1306,7 @@
 
             renderApp();
             closeModal('admin-panel-modal');
-            showToast(`¡Cálculos aplicados con éxito! Extraordinarias fijas de $${montoFijoExtra.toLocaleString('es-AR')}`);
+            showToast(`¡Cálculos aplicados! Extraordinarias UF: $${montoExtraUF.toLocaleString('es-AR')} | UC: $${montoExtraUC.toLocaleString('es-AR')}`);
         }
 
         function showToast(message, type = 'success') {
