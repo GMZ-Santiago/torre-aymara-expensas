@@ -4,38 +4,70 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Expensas | Edificio Torre Aymará - Posadas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@600;700;900&display=swap">
+<meta name="theme-color" content="#0a101f">
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style type="text/tailwindcss">
-@layer components {
-  .inp { @apply w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500; }
-  .lbl { @apply block text-[11px] text-slate-400 mb-1; }
-  .btn { @apply px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors inline-flex items-center justify-center gap-1.5; }
-  .card { @apply bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl; }
-  .sec { @apply bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3; }
-  .modal { @apply fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50; }
-  .box { @apply bg-slate-900 border border-slate-800 rounded-2xl w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto; }
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --color-slate-50: #f5f7fc; --color-slate-100: #e9edf6; --color-slate-200: #d5dcec; --color-slate-300: #b0bbd3;
+  --color-slate-400: #8995b3; --color-slate-500: #65718f; --color-slate-600: #4a5572; --color-slate-700: #323d58;
+  --color-slate-800: #212b44; --color-slate-900: #151d33; --color-slate-950: #0a101f;
+  --color-blue-300: #f1dca6; --color-blue-400: #e6c57c; --color-blue-500: #cda752; --color-blue-600: #94701f;
+  --color-blue-950: #2b2211;
 }
+@layer components {
+  .inp { @apply w-full bg-slate-950/70 border border-white/10 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition; }
+  .lbl { @apply block text-[11px] text-slate-400 mb-1; }
+  .btn { @apply px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition inline-flex items-center justify-center gap-1.5 active:scale-[.97] focus-visible:outline-2 focus-visible:outline-blue-400; }
+  .glass-btn { @apply bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200; }
+  .glass, .card { @apply bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,.28)]; }
+  .card { @apply p-4 sm:p-6; }
+  .sec { @apply bg-slate-950/60 p-4 rounded-xl border border-white/10 space-y-3; }
+  .modal { @apply fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-3 z-50; }
+  .box { @apply bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto; }
+  .tabb { @apply shrink-0 cursor-pointer px-4 py-2 rounded-full text-xs font-semibold text-slate-300 bg-slate-900/70 backdrop-blur border border-white/10 hover:text-white hover:bg-slate-800/80 transition inline-flex items-center gap-2; }
+  .tabb.on { @apply bg-blue-600 text-white border-blue-400/40 shadow-[0_6px_20px_rgba(148,112,31,.35)]; }
+  .cnt { @apply text-[10px] bg-white/10 rounded-full px-1.5 py-0.5; }
+}
+body { background: radial-gradient(1200px 600px at 85% -10%, rgba(205,167,82,.10), transparent 60%), radial-gradient(900px 500px at -10% 30%, rgba(60,90,170,.14), transparent 60%), var(--color-slate-950); background-attachment: fixed; }
+.hero { position: relative; overflow: hidden; min-height: 380px; display: flex; flex-direction: column; }
+#hero-art { position: absolute; inset: 0; background-size: cover; background-position: center bottom; transform: scale(1.04); animation: pan 40s ease-in-out infinite alternate; }
+.hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(8,12,24,.55) 0%, rgba(8,12,24,.05) 40%, rgba(10,16,31,.85) 88%, var(--color-slate-950) 100%); pointer-events: none; }
+.hero > *:not(#hero-art) { position: relative; z-index: 2; }
+@keyframes pan { from { transform: scale(1.04) translateX(-1.2%); } to { transform: scale(1.04) translateX(1.2%); } }
+@media (prefers-reduced-motion: reduce) { #hero-art { animation: none; } * { scroll-behavior: auto !important; } }
+::-webkit-scrollbar { height: 8px; width: 8px; } ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); border-radius: 8px; }
 </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between">
+<body class="font-sans antialiased min-h-screen flex flex-col text-slate-100">
 
 <div id="toasts" class="fixed bottom-5 right-5 z-[60] space-y-2 px-4"></div>
 
-<header class="bg-slate-950 border-b border-slate-800 shadow-2xl">
-  <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
-    <div class="flex items-center gap-3">
-      <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center"><i class="fa-solid fa-building-columns text-white text-lg"></i></div>
-      <div>
-        <h1 class="text-xl font-black text-white">Torre Aymará</h1>
-        <p class="text-xs text-slate-400"><i class="fa-solid fa-location-dot text-blue-500"></i> Beethoven 1650 • Posadas, Misiones</p>
-      </div>
+<header class="hero">
+  <div id="hero-art"></div>
+  <div class="max-w-7xl mx-auto w-full px-4 pt-4 flex justify-between items-center gap-3">
+    <div class="flex items-center gap-2.5 glass !rounded-full pl-2 pr-4 py-1.5">
+      <span class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-300 to-blue-600 flex items-center justify-center text-slate-950"><i class="fa-solid fa-building text-sm"></i></span>
+      <span class="text-xs font-semibold tracking-wide text-slate-200 hidden sm:inline">Portal de expensas</span>
     </div>
-    <div class="flex items-center gap-2 bg-slate-900/80 p-2 rounded-xl border border-slate-800">
-      <span id="role" class="px-3 py-1.5 rounded-lg text-xs bg-slate-800 text-slate-300">Residente</span>
-      <button id="btn-admin" onclick="adminBtn()" class="btn bg-blue-600 hover:bg-blue-500 text-white"><i class="fa-solid fa-lock"></i> Ingresar</button>
-      <button id="btn-out" onclick="salir()" class="btn bg-slate-800 hover:bg-slate-700 text-slate-200 hidden">Salir</button>
+    <div class="flex items-center gap-2 glass !rounded-full p-1.5">
+      <span id="role" class="px-3 py-1.5 rounded-full text-xs bg-slate-800 text-slate-300">Residente</span>
+      <button id="btn-admin" onclick="adminBtn()" class="btn !rounded-full bg-blue-600 hover:bg-blue-500 text-white"><i class="fa-solid fa-lock"></i> Ingresar</button>
+      <button id="btn-out" onclick="salir()" class="btn !rounded-full bg-slate-800 hover:bg-slate-700 text-slate-200 hidden">Salir</button>
+    </div>
+  </div>
+  <div class="max-w-7xl mx-auto w-full px-4 pt-14 pb-10 sm:pt-20 mt-auto">
+    <p class="text-[11px] uppercase tracking-[.35em] text-blue-300/90 mb-2">Consorcio · Posadas, Misiones</p>
+    <h1 class="font-display text-5xl sm:text-7xl font-black text-white leading-none drop-shadow-[0_4px_24px_rgba(0,0,0,.45)]">Torre Aymará</h1>
+    <p class="text-sm text-slate-300 mt-3"><i class="fa-solid fa-location-dot text-blue-400"></i> Beethoven 1650 · Transparencia y control de las expensas del edificio</p>
+    <div class="flex flex-wrap gap-2 mt-5 text-xs">
+      <span class="glass !rounded-full px-3.5 py-1.5"><i class="fa-regular fa-calendar text-blue-400"></i> Período <b id="hero-per" class="text-white">—</b></span>
+      <span class="glass !rounded-full px-3.5 py-1.5"><i class="fa-regular fa-clock text-blue-400"></i> Vence <b id="hero-venc" class="text-white">—</b></span>
     </div>
   </div>
 </header>
@@ -43,7 +75,7 @@
 <main class="max-w-7xl mx-auto px-4 py-6 w-full space-y-5 flex-grow">
   <div id="err" class="hidden bg-rose-950/60 border border-rose-500/40 text-rose-200 rounded-xl p-3 text-xs"></div>
 
-  <section class="bg-blue-950/30 border border-blue-500/30 rounded-2xl p-4 flex gap-3">
+  <section class="bg-blue-950/50 backdrop-blur border border-blue-500/30 rounded-2xl p-4 flex gap-3">
     <i class="fa-solid fa-bullhorn text-blue-400 mt-1"></i>
     <div><h2 class="text-xs font-bold text-blue-400">Avisos de la administración</h2><p id="aviso" class="text-sm text-slate-200 mt-1"></p></div>
   </section>
@@ -57,30 +89,56 @@
       <div class="flex flex-wrap items-center gap-2 text-xs">
         <label for="sel-periodo" class="text-slate-400">Período</label>
         <select id="sel-periodo" onchange="cambiarPeriodo(this.value)" class="inp !w-auto"></select>
-        <span class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg">Vence: <strong id="h-venc" class="text-white">—</strong></span>
+        <span class="bg-slate-950/50 border border-white/10 px-3 py-1.5 rounded-lg">Vence: <strong id="h-venc" class="text-white">—</strong></span>
       </div>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
-      <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">Banco</span><b id="b-banco"></b></div>
-      <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">CBU</span><b id="b-cbu" class="font-mono text-blue-400"></b></div>
-      <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">Alias</span><b id="b-alias" class="font-mono text-emerald-400"></b></div>
-      <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">CUIT</span><b id="b-cuit" class="font-mono"></b></div>
+      <div class="bg-slate-950/50 border border-white/10 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">Banco</span><b id="b-banco"></b></div>
+      <div class="bg-slate-950/50 border border-white/10 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">CBU</span><b id="b-cbu" class="font-mono text-blue-400"></b></div>
+      <div class="bg-slate-950/50 border border-white/10 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">Alias</span><b id="b-alias" class="font-mono text-emerald-400"></b></div>
+      <div class="bg-slate-950/50 border border-white/10 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">CUIT</span><b id="b-cuit" class="font-mono"></b></div>
     </div>
     <p id="mora-info" class="text-xs text-amber-400/90"></p>
   </section>
 
-  <nav class="flex border-b border-slate-800 gap-6 overflow-x-auto" id="tabs">
-    <button data-t="depto" onclick="tab('depto')" class="pb-3 text-sm shrink-0 cursor-pointer"><i class="fa-solid fa-house"></i> Unidades Funcionales (<span id="n-depto">0</span>)</button>
-    <button data-t="cochera" onclick="tab('cochera')" class="pb-3 text-sm shrink-0 cursor-pointer"><i class="fa-solid fa-car"></i> Cocheras (<span id="n-cochera">0</span>)</button>
-    <button data-t="resumen" onclick="tab('resumen')" class="pb-3 text-sm shrink-0 cursor-pointer"><i class="fa-solid fa-chart-pie"></i> Resumen y facturas</button>
+  <nav class="flex gap-2 overflow-x-auto pb-1 sticky top-2 z-30" id="tabs" aria-label="Secciones">
+    <button data-t="depto" onclick="tab('depto')" class="tabb"><i class="fa-solid fa-house"></i> Unidades funcionales <span class="cnt" id="n-depto">0</span></button>
+    <button data-t="cochera" onclick="tab('cochera')" class="tabb"><i class="fa-solid fa-car"></i> Cocheras <span class="cnt" id="n-cochera">0</span></button>
+    <button data-t="resumen" onclick="tab('resumen')" class="tabb"><i class="fa-solid fa-file-invoice-dollar"></i> <span id="lbl-resumen">Facturas EMSA / SAMSA</span></button>
+    <button data-t="balance" id="tab-balance" onclick="tab('balance')" class="tabb hidden"><i class="fa-solid fa-scale-balanced"></i> Balance y gastos</button>
   </nav>
 
   <div id="sec-depto" class="space-y-3"></div>
   <div id="sec-cochera" class="hidden space-y-3"></div>
   <div id="sec-resumen" class="hidden space-y-4"></div>
+  <div id="sec-balance" class="hidden space-y-5"></div>
 </main>
 
-<footer class="border-t border-slate-800 bg-slate-950 py-5 text-center text-xs text-slate-500">Edificio Torre Aymará • Firebase + Vercel</footer>
+<footer class="mt-8 border-t border-white/10 bg-slate-950/70 backdrop-blur py-6 text-center text-xs text-slate-500"><span class="font-display text-slate-300">Torre Aymará</span> · Beethoven 1650, Posadas, Misiones · Gestión de expensas</footer>
+
+<!-- Gasto -->
+<div id="m-gasto" class="modal"><div class="box max-w-md">
+  <div class="flex justify-between items-center border-b border-white/10 pb-3"><h3 id="mg-title" class="font-bold"><i class="fa-solid fa-receipt text-blue-400"></i> Registrar gasto</h3>
+    <button onclick="closeModal('m-gasto')" aria-label="Cerrar" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button></div>
+  <div class="grid grid-cols-2 gap-3">
+    <div class="col-span-2"><label class="lbl" for="mg-concepto">Concepto</label><input id="mg-concepto" list="dl-conceptos" oninput="conceptoElegido()" placeholder="Elegí uno de la lista o escribí el tuyo" class="inp"><datalist id="dl-conceptos"></datalist></div>
+    <div><label class="lbl" for="mg-rubro">Rubro</label><select id="mg-rubro" class="inp"></select></div>
+    <div><label class="lbl" for="mg-tipo">Tipo</label><select id="mg-tipo" class="inp"><option value="ord">Gasto común</option><option value="ext">Extraordinario</option></select></div>
+    <div><label class="lbl" for="mg-fecha">Fecha de pago</label><input id="mg-fecha" type="date" class="inp"></div>
+    <div><label class="lbl" for="mg-monto">Importe ($)</label><input id="mg-monto" type="number" step="0.01" min="0" class="inp"></div>
+    <div class="col-span-2"><label class="lbl" for="mg-comp">N° de comprobante / factura (opcional)</label><input id="mg-comp" class="inp" placeholder="Ej.: 0001-00000032"></div>
+  </div>
+  <div class="flex gap-2"><button onclick="closeModal('m-gasto')" class="btn bg-slate-800 text-slate-300 w-1/2">Cancelar</button><button onclick="guardarGasto()" class="btn bg-blue-600 hover:bg-blue-500 text-white w-1/2">Guardar</button></div>
+</div></div>
+
+<!-- Otro ingreso -->
+<div id="m-otro" class="modal"><div class="box max-w-sm">
+  <div class="flex justify-between items-center border-b border-white/10 pb-3"><h3 id="mo-title" class="font-bold"><i class="fa-solid fa-coins text-emerald-400"></i> Otro ingreso</h3>
+    <button onclick="closeModal('m-otro')" aria-label="Cerrar" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button></div>
+  <div><label class="lbl" for="mo-concepto">Concepto</label><input id="mo-concepto" list="dl-otros" class="inp" placeholder="Ej.: Kit de seguridad, controles, llaves"><datalist id="dl-otros"><option value="Transferencias por kit de seguridad / controles / llaves"><option value="Devolución de gastos pagados desde la cuenta del fideicomiso"><option value="Alquiler de salón / amenities"></datalist></div>
+  <div><label class="lbl" for="mo-monto">Importe ($)</label><input id="mo-monto" type="number" step="0.01" min="0" class="inp"></div>
+  <div class="flex gap-2"><button onclick="closeModal('m-otro')" class="btn bg-slate-800 text-slate-300 w-1/2">Cancelar</button><button onclick="guardarOtro()" class="btn bg-emerald-600 hover:bg-emerald-500 text-white w-1/2">Guardar</button></div>
+</div></div>
 
 <!-- Detalle -->
 <div id="m-detail" class="modal"><div class="box max-w-lg">
@@ -135,6 +193,19 @@
     <h4 class="text-xs font-bold text-emerald-400">Aviso en cartelera</h4>
     <textarea id="c-aviso" rows="2" class="inp resize-none"></textarea>
     <button onclick="guardarAviso()" class="btn bg-emerald-600 text-white">Guardar aviso</button>
+  </div>
+
+  <div class="sec">
+    <h4 class="text-xs font-bold text-blue-400">Seguridad de los datos de cobranza</h4>
+    <p class="text-[11px] text-slate-400">Los pagos, saldos anteriores y recargos se guardan en una zona que solo lee el administrador. Si ya tenías períodos cargados antes de esta versión, tocá el botón una vez para moverlos.</p>
+    <button onclick="protegerDatos()" class="btn bg-blue-600 hover:bg-blue-500 text-white"><i class="fa-solid fa-shield-halved"></i> Proteger datos de períodos anteriores</button>
+  </div>
+
+  <div class="sec">
+    <h4 class="text-xs font-bold text-blue-400">Foto del edificio (encabezado)</h4>
+    <p class="text-[11px] text-slate-400">Pegá el enlace (https://…) de una foto de la fachada y se usa como fondo del encabezado. Si lo dejás vacío se muestra la ilustración por defecto. Conviene una foto horizontal y de buena calidad.</p>
+    <input id="c-fondo" placeholder="https://…/fachada.jpg" class="inp">
+    <button onclick="guardarFondo()" class="btn bg-blue-600 hover:bg-blue-500 text-white">Aplicar foto</button>
   </div>
 
   <div class="sec">
@@ -253,7 +324,8 @@ const BANCO = { banco: "Galicia (Fideicomiso Aymara)", cbu: "0070070220000012166
 const PS = 10;
 const MES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
 const S = { user:null, isAdmin:false, units:[], priv:{}, periodos:[], pid:null, liqs:{}, gen:{aviso:''}, tab:'depto',
-            q:{depto:'',cochera:''}, page:{depto:1,cochera:1}, sel:null, cola:[], ci:0 };
+            q:{depto:'',cochera:''}, page:{depto:1,cochera:1}, sel:null, cola:[], ci:0, hist:{}, bf:{rubro:'',q:''}, kpi:{}, gedit:null, oedit:null };
+window.S = S;
 
 const $ = id => document.getElementById(id);
 window.$ = $;
@@ -369,8 +441,15 @@ async function cargarPrivados() {
   if (!S.isAdmin) return;
   (await getDocs(collection(db, 'privado'))).forEach(d => S.priv[d.id] = d.data());
 }
+// Datos de cobranza (saldo anterior, recargo, pagos, marca "Debe") viven en periodos/{pid}/cuenta, que solo lee el administrador.
+// periodos/{pid}/liq guarda únicamente lo que corresponde pagar en el mes y es lo único que ve un residente.
+const PRIV_KEYS = ['deudaAnterior', 'recargo', 'pagos', 'debe'];
+const splitLiq = l => { const pub = {}, pri = {}; for (const k in l) (PRIV_KEYS.includes(k) ? pri : pub)[k] = l[k]; return [pub, pri]; };
+const opsLiq = (pid, id, l) => { const [pub, pri] = splitLiq(l); return [b => b.set(doc(db, 'periodos', pid, 'liq', id), clean(pub)), b => b.set(doc(db, 'periodos', pid, 'cuenta', id), clean(pri))]; };
 async function leerLiqs(pid) {
-  const m = {}; (await getDocs(collection(db, 'periodos', pid, 'liq'))).forEach(d => m[d.id] = d.data()); return m;
+  const m = {}; (await getDocs(collection(db, 'periodos', pid, 'liq'))).forEach(d => m[d.id] = d.data());
+  if (S.isAdmin) (await getDocs(collection(db, 'periodos', pid, 'cuenta'))).forEach(d => { m[d.id] = { ...(m[d.id] || {}), ...d.data() }; });
+  return m;
 }
 async function cargarPeriodo() { S.liqs = S.pid ? await leerLiqs(S.pid) : {}; }
 async function cargar() {
@@ -389,7 +468,7 @@ async function cargar() {
   }
   renderAll();
 }
-async function cambiarPeriodo(v) { S.pid = v; await cargarPeriodo(); renderAll(); }
+async function cambiarPeriodo(v) { if (S.pid) S.hist[S.pid] = ingresosDe(S.liqs); S.pid = v; await cargarPeriodo(); renderAll(); }
 
 /* ---------- Autenticación ---------- */
 onAuthStateChanged(auth, async user => {
@@ -398,7 +477,7 @@ onAuthStateChanged(auth, async user => {
     try { S.isAdmin = (await getDoc(doc(db, 'admins', user.uid))).exists(); } catch (e) {}
     if (!S.isAdmin) toast('Este usuario no tiene permisos de administrador.', 'error');
   }
-  await cargarPrivados(); renderAll();
+  await cargarPrivados(); await cargarPeriodo(); renderAll();
 });
 async function login() {
   try { await signInWithEmailAndPassword(auth, $('l-mail').value.trim(), $('l-pass').value); closeModal('m-login'); $('l-pass').value = ''; if (S.isAdmin) adminBtn(); }
@@ -435,22 +514,31 @@ function renderTabla(t) {
   const L = lista(t), pages = Math.max(1, Math.ceil(L.length / PS)), A = S.isAdmin;
   S.page[t] = Math.min(S.page[t], pages);
   const s = (S.page[t] - 1) * PS, rows = L.slice(s, s + PS);
-  const cols = ['Unidad','m²','Titular','Ordinarias','EMSA/SAMSA','Extra','Tasa','Saldo ant.','Mora','Total','Saldo','Estado', A ? 'WA' : null].filter(Boolean);
+  const cols = (A ? ['Unidad','m²','Titular','Ordinarias','EMSA/SAMSA','Extra','Tasa','Saldo ant.','Mora','Total','Saldo','Estado','WA'] : ['Unidad','m²','Titular','Ordinarias','EMSA/SAMSA','Extra','Tasa','Total del mes']);
   $('th-' + t).innerHTML = `<tr>${cols.map(h => `<th class="p-3 font-semibold">${h}</th>`).join('')}</tr>`;
   $('tb-' + t).innerHTML = rows.map(u => {
-    const l = S.liqs[u.id], [lb, cl] = estado(u, l), c = v => `<td class="p-3 text-slate-300">${v}</td>`, x = l ? tot(l) : null;
+    const l = S.liqs[u.id], [lb, cl] = A ? estado(u, l) : ['', ''], c = v => `<td class="p-3 text-slate-300">${v}</td>`, x = l ? tot(l) : null;
     return `<tr onclick="detalle('${esc(u.id)}')" class="hover:bg-slate-900/60 cursor-pointer">
       <td class="p-3"><div class="font-bold ${t === 'depto' ? 'text-blue-400' : 'text-indigo-400'}">${esc(uname(u))}</div><div class="text-[10px] text-slate-500">${esc(usub(u))}</div></td>${c(u.m2 + ' m²')}
       <td class="p-3 text-slate-200 max-w-[200px] truncate">${esc(ocup(u))}</td>
-      ${l ? c($f(l.ord)) + c(t === 'depto' ? $f(l.serv || 0) : '—') + c($f(l.ext)) + c($f(l.tasa)) + c($f(l.deudaAnterior || 0)) + c($f(l.recargo || 0)) + `<td class="p-3 font-bold text-white">${$f(x.total)}</td>` + c($f(u.sinEntregar ? x.total : x.saldo)) : '<td class="p-3 text-slate-500" colspan="8">Sin liquidación en este período</td>'}
-      <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-semibold border ${cl}">${lb}</span></td>
+      ${l ? c($f(l.ord)) + c(t === 'depto' ? $f(l.serv || 0) : '—') + c($f(l.ext)) + c($f(l.tasa)) + (A ? c($f(l.deudaAnterior || 0)) + c($f(l.recargo || 0)) : '') + `<td class="p-3 font-bold text-white">${$f(x.total)}</td>` + (A ? c($f(u.sinEntregar ? x.total : x.saldo)) : '') : `<td class="p-3 text-slate-500" colspan="${A ? 8 : 5}">Sin liquidación en este período</td>`}
+      ${A ? `<td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-semibold border ${cl}">${lb}</span></td>` : ''}
       ${A ? `<td class="p-3"><button onclick="event.stopPropagation();waUnidad('${esc(u.id)}')" aria-label="WhatsApp" class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white rounded-lg cursor-pointer"><i class="fa-brands fa-whatsapp"></i></button></td>` : ''}
     </tr>`;
   }).join('') || `<tr><td class="p-6 text-center text-slate-500" colspan="13">Sin resultados</td></tr>`;
   $('pg-' + t).textContent = L.length ? `Mostrando ${s+1}-${Math.min(s+PS, L.length)} de ${L.length}` : '';
 }
 function renderResumen() {
-  const p = per(), L = S.units.map(u => ({ u, l: S.liqs[u.id] })).filter(x => x.l);
+  const p = per(), A = S.isAdmin, box = $('sec-resumen');
+  if (!p.id) { box.innerHTML = '<p class="text-slate-400 text-sm">Todavía no hay períodos cargados.</p>'; return; }
+  const fcard = (n, ico, tone, monto, nro, url) => `<div class="glass p-5 flex flex-col gap-4">
+    <div class="flex items-center gap-3"><span class="w-12 h-12 rounded-xl flex items-center justify-center text-xl ${tone}"><i class="fa-solid ${ico}"></i></span>
+      <div><div class="text-xs text-slate-400">${n} · ${plabel(p.id)}</div><div class="text-3xl font-black text-white tracking-tight">${$f(monto)}</div></div></div>
+    <div class="flex items-center justify-between gap-2 text-xs text-slate-400"><span>Factura N° ${esc(nro || 'S/N')}</span>
+      ${/^https?:\/\//.test(url || '') ? `<a class="btn bg-blue-600 hover:bg-blue-500 text-white !py-1.5" target="_blank" rel="noopener" href="${esc(url)}"><i class="fa-solid fa-file-invoice"></i> Ver factura</a>` : '<span class="text-slate-500">Factura sin enlace</span>'}</div></div>`;
+  const facturas = `<div class="grid grid-cols-1 md:grid-cols-2 gap-4">${fcard('EMSA · energía eléctrica', 'fa-bolt', 'bg-amber-400/15 text-amber-300', p.emsa, p.nroEmsa, p.urlEmsa)}${fcard('SAMSA · agua', 'fa-droplet', 'bg-sky-400/15 text-sky-300', p.samsa, p.nroSamsa, p.urlSamsa)}</div>`;
+  if (!A) { box.innerHTML = facturas; return; }
+  const L = S.units.map(u => ({ u, l: S.liqs[u.id] })).filter(x => x.l);
   const sum = (a, f) => r2(a.reduce((n, x) => n + f(x), 0));
   const cobr = L.filter(x => !x.u.sinEntregar), fidL = L.filter(x => x.u.sinEntregar);
   const total = sum(cobr, x => tot(x.l).total), pagado = sum(cobr, x => tot(x.l).pagado);
@@ -458,48 +546,51 @@ function renderResumen() {
   const ufs = S.units.filter(u => u.tipo === 'depto'), m2t = ufs.reduce((a, u) => a + u.m2, 0), m2e = ufs.filter(u => !u.sinEntregar).reduce((a, u) => a + u.m2, 0);
   const pPre = m2t ? m2e / m2t * 100 : 0, pFid = m2t ? 100 - pPre : 0, serv = r2((p.emsa || 0) + (p.samsa || 0));
   const fidCosto = sum(fidL.filter(x => x.u.tipo === 'depto'), x => x.l.ord + (x.l.serv || 0) + x.l.ext + x.l.tasa);
-  const card = (t, v, sub, cl = 'text-white') => `<div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-5"><span class="text-xs text-slate-400">${t}</span><div class="text-xl font-black ${cl} mt-1">${v}</div><span class="text-xs text-slate-400">${sub}</span></div>`;
-  $('sec-resumen').innerHTML = !p.id ? '<p class="text-slate-400 text-sm">Todavía no hay períodos cargados.</p>' : `
+  const card = (t, v, sub, cl = 'text-white') => `<div class="glass p-5"><span class="text-xs text-slate-400">${t}</span><div class="text-xl font-black ${cl} mt-1">${v}</div><span class="text-xs text-slate-400">${sub}</span></div>`;
+  box.innerHTML = facturas + `
+    <div class="flex items-center gap-2 text-[11px] text-amber-300/90"><i class="fa-solid fa-eye-slash"></i> Lo que sigue lo ve solo la administración.</div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      ${card('<i class="fa-solid fa-bolt text-amber-400"></i> EMSA (energía)', $f(p.emsa), 'Factura N° ' + esc(p.nroEmsa || 'S/N'))}
-      ${card('<i class="fa-solid fa-droplet text-blue-400"></i> SAMSA (agua)', $f(p.samsa), 'Factura N° ' + esc(p.nroSamsa || 'S/N'))}
       ${card('Gastos ordinarios del mes', $f(p.presupuestoOrd), 'Se reparte por m² totales entre todas las UF', 'text-emerald-400')}
+      ${card('EMSA + SAMSA', $f(serv), 'Se reparte por m² entre todas las UF')}
+      ${card('Tasa municipal', $f((p.tasaUF || 0) + (p.tasaCoch || 0)), `UF ${$f(p.tasaUF || 0)} · cocheras ${$f(p.tasaCoch || 0)}`)}
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       ${card('A cobrar (unidades entregadas)', $f(total), 'Incluye saldo anterior y mora')}
       ${card('Cobrado', $f(pagado), total ? (pagado / total * 100).toFixed(1) + '% del total' : '', 'text-emerald-400')}
       ${card('Saldo pendiente', $f(r2(total - pagado)), '', 'text-amber-400')}
     </div>
-    <div class="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-5 text-sm space-y-2">
+    <div class="bg-indigo-950/40 backdrop-blur border border-indigo-500/30 rounded-2xl p-5 text-sm space-y-2">
       <div><b class="text-indigo-300">Reparto entre pre-consorcio y fideicomiso</b> <span class="text-xs text-slate-400">(se calcula solo, por m² totales de las UF)</span></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-        <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3">Pre-consorcio: propietarios de ${ufs.filter(u => !u.sinEntregar).length} unidades entregadas<br><b class="text-base text-white">${pct(pPre)}</b> · ${m2e.toLocaleString('es-AR', { maximumFractionDigits: 2 })} de ${m2t.toLocaleString('es-AR', { maximumFractionDigits: 2 })} m²<br>EMSA + SAMSA: <b>${$f(serv * pPre / 100)}</b></div>
-        <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3">Fideicomiso: ${ufs.filter(u => u.sinEntregar).length} unidades sin entregar y Amenities<br><b class="text-base text-white">${pct(pFid)}</b> · ${(m2t - m2e).toLocaleString('es-AR', { maximumFractionDigits: 2 })} m²<br>EMSA + SAMSA: <b>${$f(serv * pFid / 100)}</b> · Total del período a su cargo: <b>${$f(fidCosto)}</b></div>
+        <div class="bg-slate-950/50 border border-white/10 rounded-xl p-3">Pre-consorcio: propietarios de ${ufs.filter(u => !u.sinEntregar).length} unidades entregadas<br><b class="text-base text-white">${pct(pPre)}</b> · ${m2e.toLocaleString('es-AR', { maximumFractionDigits: 2 })} de ${m2t.toLocaleString('es-AR', { maximumFractionDigits: 2 })} m²<br>EMSA + SAMSA: <b>${$f(serv * pPre / 100)}</b></div>
+        <div class="bg-slate-950/50 border border-white/10 rounded-xl p-3">Fideicomiso: ${ufs.filter(u => u.sinEntregar).length} unidades sin entregar y Amenities<br><b class="text-base text-white">${pct(pFid)}</b> · ${(m2t - m2e).toLocaleString('es-AR', { maximumFractionDigits: 2 })} m²<br>EMSA + SAMSA: <b>${$f(serv * pFid / 100)}</b> · Total del período a su cargo: <b>${$f(fidCosto)}</b></div>
       </div>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-      ${[['EMSA', p.urlEmsa], ['SAMSA', p.urlSamsa]].map(([n, u]) => `<div class="bg-slate-900 border border-slate-800 rounded-xl p-4">Factura ${n}: ${/^https?:\/\//.test(u || '') ? `<a class="text-blue-400 underline" target="_blank" rel="noopener" href="${esc(u)}">ver factura</a>` : '<span class="text-slate-500">sin enlace</span>'}</div>`).join('')}
     </div>`;
 }
 function renderAll() {
   const p = per(), A = S.isAdmin;
   $('aviso').textContent = S.gen.aviso || 'Sin avisos.';
   $('b-banco').textContent = BANCO.banco; $('b-cbu').textContent = BANCO.cbu; $('b-alias').textContent = BANCO.alias; $('b-cuit').textContent = BANCO.cuit;
-  $('h-venc').textContent = fdate(p.vencimiento);
+  $('h-venc').textContent = fdate(p.vencimiento); $('hero-venc').textContent = fdate(p.vencimiento); $('hero-per').textContent = plabel(S.pid);
+  aplicarFondo();
   $('sel-periodo').innerHTML = S.periodos.map(x => `<option value="${esc(x.id)}" ${x.id === S.pid ? 'selected' : ''}>${plabel(x.id)}</option>`).join('') || '<option>—</option>';
   $('mora-info').textContent = p.id ? `Pagos después del vencimiento: +${p.recargo1}% el mes siguiente si se paga dentro del mes del vencimiento, +${p.recargo2}% si se paga en el mes posterior.` : '';
+  $('lbl-resumen').textContent = A ? 'Resumen y facturas' : 'Facturas EMSA / SAMSA';
   $('n-depto').textContent = S.units.filter(u => u.tipo === 'depto').length;
   $('n-cochera').textContent = S.units.filter(u => u.tipo === 'cochera').length;
   $('role').textContent = A ? 'Administrador' : 'Residente';
-  $('role').className = 'px-3 py-1.5 rounded-lg text-xs ' + (A ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-300');
+  $('role').className = 'px-3 py-1.5 rounded-full text-xs ' + (A ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-300');
   $('btn-admin').innerHTML = S.user ? '<i class="fa-solid fa-gear"></i> Gestión' : '<i class="fa-solid fa-lock"></i> Ingresar';
   $('btn-out').classList.toggle('hidden', !S.user);
-  renderTabla('depto'); renderTabla('cochera'); renderResumen(); tab(S.tab);
+  if (S.tab === 'balance' && !A) S.tab = 'depto';
+  renderTabla('depto'); renderTabla('cochera'); renderResumen(); renderBalance(); tab(S.tab);
 }
 function tab(t) {
+  if (t === 'balance' && !S.isAdmin) t = 'depto';
   S.tab = t;
-  ['depto','cochera','resumen'].forEach(x => $('sec-' + x).classList.toggle('hidden', x !== t));
-  document.querySelectorAll('#tabs button').forEach(b => b.className = 'pb-3 text-sm shrink-0 cursor-pointer border-b-2 ' + (b.dataset.t === t ? 'border-blue-500 text-blue-400 font-bold' : 'border-transparent text-slate-400 hover:text-slate-200'));
+  ['depto','cochera','resumen','balance'].forEach(x => $('sec-' + x).classList.toggle('hidden', x !== t));
+  $('tab-balance').classList.toggle('hidden', !S.isAdmin);
+  document.querySelectorAll('#tabs button').forEach(b => { b.classList.toggle('on', b.dataset.t === t); b.setAttribute('aria-current', b.dataset.t === t ? 'page' : 'false'); });
 }
 function buscar(t, v) { S.q[t] = v; S.page[t] = 1; renderTabla(t); }
 function pagina(t, d) { S.page[t] = Math.max(1, S.page[t] + d); renderTabla(t); }
@@ -516,14 +607,15 @@ function detalle(uid) {
   if (!l) h += '<p class="text-slate-400">Sin liquidación para este período.</p>';
   else {
     const t = tot(l);
-    h += `<div class="bg-slate-950 p-3 rounded-xl border border-slate-800">${row('Ordinarias', l.ord)}${u.tipo === 'depto' ? row('EMSA / SAMSA', l.serv || 0) : ''}${row('Extraordinarias', l.ext)}${row('Tasa municipal', l.tasa)}${row('Saldo anterior', l.deudaAnterior || 0)}${row('Recargo por mora', l.recargo || 0)}</div>
-      <div class="bg-blue-950/40 border border-blue-500/30 p-3 rounded-xl flex justify-between"><b class="text-blue-200">Total ${plabel(S.pid)}</b><b class="text-base">${$f(t.total)}</b></div>`;
+    h += `<div class="bg-slate-950 p-3 rounded-xl border border-slate-800">${row('Ordinarias', l.ord)}${u.tipo === 'depto' ? row('EMSA / SAMSA', l.serv || 0) : ''}${row('Extraordinarias', l.ext)}${row('Tasa municipal', l.tasa)}${A ? row('Saldo anterior', l.deudaAnterior || 0) + row('Recargo por mora', l.recargo || 0) : ''}</div>
+      <div class="bg-blue-950/40 border border-blue-500/30 p-3 rounded-xl flex justify-between"><b class="text-blue-200">${A ? 'Total' : 'Expensa'} ${plabel(S.pid)}</b><b class="text-base">${$f(t.total)}</b></div>`;
     if (u.sinEntregar) h += `<div class="bg-indigo-950/30 border border-indigo-500/30 p-3 rounded-xl">Unidad sin entregar: estas expensas están a cargo del fideicomiso.<br>Importe a cargo del fideicomiso: <b>${$f(t.total)}</b></div>`;
+    else if (!A) h += '<p class="text-[11px] text-slate-400">El saldo anterior, los recargos y los pagos de tu unidad te los informa la administración.</p>';
     else {
       h += `<div class="bg-slate-950 p-3 rounded-xl border border-slate-800">${row('Pagado', t.pagado, 'text-emerald-400')}${row('Saldo', t.saldo, t.saldo > 0.005 ? 'text-amber-400' : '')}`;
       (l.pagos || []).forEach((g, i) => h += `<div class="flex justify-between text-[11px] text-slate-400 border-t border-slate-800 pt-1 mt-1"><span>${fdate(g.fecha)} ${esc(g.nota || '')}</span><span>${$f(g.monto)} ${A ? `<button onclick="quitarPago(${i})" aria-label="Quitar pago" class="text-rose-400 ml-2 cursor-pointer"><i class="fa-solid fa-trash"></i></button>` : ''}</span></div>`);
       h += '</div>';
-      if (A) h += `<div class="sec"><h4 class="text-xs font-bold text-emerald-400">Registrar pago</h4><div class="grid grid-cols-3 gap-2"><div><label class="lbl" for="p-monto">Monto</label><input id="p-monto" type="number" step="0.01" value="${Math.max(0, t.saldo)}" class="inp"></div><div><label class="lbl" for="p-fecha">Fecha</label><input id="p-fecha" type="date" value="${hoy()}" class="inp"></div><div><label class="lbl" for="p-nota">Nota</label><input id="p-nota" class="inp"></div></div><button onclick="registrarPago()" class="btn bg-emerald-600 text-white w-full">Registrar pago</button></div>`;
+      if (A) h += `<div class="sec"><h4 class="text-xs font-bold text-emerald-400">Registrar pago</h4><div class="grid grid-cols-3 gap-2"><div><label class="lbl" for="p-monto">Monto</label><input id="p-monto" type="number" step="0.01" value="${Math.max(0, t.saldo)}" class="inp"></div><div><label class="lbl" for="p-fecha">Fecha</label><input id="p-fecha" type="date" value="${hoy()}" class="inp"></div><div><label class="lbl" for="p-nota">Nota</label><input id="p-nota" class="inp"></div></div><button onclick="registrarPago()" class="btn bg-emerald-600 text-white w-full">Registrar pago</button><label class="flex items-start gap-2 text-[11px] text-slate-400 cursor-pointer"><input type="checkbox" ${l.debe ? 'checked' : ''} onchange="marcarDebe(this.checked)" class="mt-0.5"> <span>Contar como “Debe” en el balance aunque tenga pagos (igual que cuando en el libro se escribe “Debe” a mano). Lo cobrado se suma igual, pero como mora y vencidas.</span></label></div>`;
     }
   }
   $('m-body').innerHTML = h;
@@ -534,13 +626,17 @@ async function registrarPago() {
   const l = S.liqs[S.sel], monto = parseFloat($('p-monto').value), fecha = $('p-fecha').value;
   if (!l || !(monto > 0) || !fecha) return toast('Completá monto y fecha.', 'error');
   const pagos = [...(l.pagos || []), { fecha, monto: r2(monto), nota: $('p-nota').value.trim() }];
-  await updateDoc(doc(db, 'periodos', S.pid, 'liq', S.sel), { pagos });
+  await setDoc(doc(db, 'periodos', S.pid, 'cuenta', S.sel), { pagos }, { merge: true });
   l.pagos = pagos; renderAll(); detalle(S.sel); toast('Pago registrado.');
+}
+async function marcarDebe(v) {
+  const l = S.liqs[S.sel]; if (!l) return;
+  await setDoc(doc(db, 'periodos', S.pid, 'cuenta', S.sel), { debe: !!v }, { merge: true }); l.debe = !!v; renderAll(); toast(v ? 'Marcada como “Debe” en el balance.' : 'Vuelve a contarse como pagada.');
 }
 async function quitarPago(i) {
   const l = S.liqs[S.sel]; if (!l || !(await confirmar('Se saca este pago del registro de la unidad.', { titulo: '¿Quitar este pago?', boton: 'Quitar pago', peligro: true }))) return;
   const pagos = l.pagos.filter((_, k) => k !== i);
-  await updateDoc(doc(db, 'periodos', S.pid, 'liq', S.sel), { pagos });
+  await setDoc(doc(db, 'periodos', S.pid, 'cuenta', S.sel), { pagos }, { merge: true });
   l.pagos = pagos; renderAll(); detalle(S.sel);
 }
 
@@ -563,13 +659,14 @@ function descargarPDF() {
   d.text('Concepto', 18, y + 6); d.text('Importe', 165, y + 6); d.setFont('helvetica', 'normal'); y += 14;
   const items = [[u.tipo === 'depto' ? 'Expensas ordinarias (prorrateo por m²)' : 'Expensas ordinarias cochera', l.ord]];
   if (u.tipo === 'depto') items.push([`Servicios EMSA N° ${p.nroEmsa || 'S/N'} y SAMSA N° ${p.nroSamsa || 'S/N'} (prorrateo por m²)`, l.serv || 0]);
-  items.push(['Expensas extraordinarias', l.ext], ['Tasa municipal', l.tasa], ['Saldo anterior', l.deudaAnterior || 0], ['Recargo por mora', l.recargo || 0]);
+  items.push(['Expensas extraordinarias', l.ext], ['Tasa municipal', l.tasa]); if (S.isAdmin) items.push(['Saldo anterior', l.deudaAnterior || 0], ['Recargo por mora', l.recargo || 0]);
   items.forEach(([k, v]) => { const lines = d.splitTextToSize(k, 130); d.text(lines, 18, y); d.text($f(v), 165, y); y += 6 * lines.length + 2; });
   y += 2; d.setFillColor(239, 246, 255); d.rect(14, y, 182, 12, 'F'); d.setFont('helvetica', 'bold'); d.setFontSize(11); d.setTextColor(30, 58, 138);
-  d.text('TOTAL A PAGAR:', 18, y + 8); d.text($f(t.total), 160, y + 8); y += 20;
+  d.text(S.isAdmin ? 'TOTAL A PAGAR:' : 'EXPENSA DEL MES:', 18, y + 8); d.text($f(t.total), 160, y + 8); y += 20;
   d.setTextColor(30, 41, 59); d.setFontSize(10);
   if (u.sinEntregar) { d.text('Unidad sin entregar: expensas a cargo del fideicomiso.', 14, y); y += 10; }
-  else { d.text(`Pagado: ${$f(t.pagado)}      Saldo: ${$f(t.saldo)}`, 14, y); y += 10; }
+  else if (S.isAdmin) { d.text(`Pagado: ${$f(t.pagado)}      Saldo: ${$f(t.saldo)}`, 14, y); y += 10; }
+  else { d.text(d.splitTextToSize('El saldo anterior, los recargos y los pagos los informa la administración.', 182), 14, y); y += 10; }
   d.text(d.splitTextToSize(`Pago fuera de término: +${p.recargo1}% el mes siguiente (si se paga dentro del mes) / +${p.recargo2}% (si se paga el mes posterior).`, 182), 14, y); y += 14;
   d.text('DATOS BANCARIOS', 14, y); d.setFont('helvetica', 'normal'); d.setFontSize(9);
   [`Banco: ${BANCO.banco}`, `CBU: ${BANCO.cbu}`, `Alias: ${BANCO.alias}`, `CUIT: ${BANCO.cuit}`, 'Enviar comprobante indicando UF o cochera.'].forEach((s, i) => d.text(s, 14, y + 6 + i * 6));
@@ -661,7 +758,7 @@ async function importarTelefonos(input) {
 /* ---------- Administración ---------- */
 function prefillAdmin() {
   const p = S.periodos[0] || {}, m = nextMonth(p.id), set = (id, v) => $(id).value = v ?? '';
-  $('c-aviso').value = S.gen.aviso || '';
+  $('c-aviso').value = S.gen.aviso || ''; $('c-fondo').value = S.gen.fondoUrl || '';
   set('g-mes', m); set('g-venc', m + '-10');
   ['g-nroemsa','g-emsa','g-nrosamsa','g-samsa','g-urlemsa','g-urlsamsa'].forEach(i => set(i, ''));
   const cs = S.units.filter(u => u.tipo === 'cochera'), m2c = cs.reduce((a, u) => a + u.m2, 0), vis = S.pid === p.id;
@@ -704,7 +801,7 @@ async function generarPeriodo() {
     const pv = prevL[u.id];
     if (u.sinEntregar) { l.fid = true; l.pagos = []; }                       // a cargo del fideicomiso: no arrastra saldo ni mora
     else if (pv && !pv.fid) { l.deudaAnterior = tot(pv).saldo; l.recargo = calcMora(pv, pc); }
-    ops.push(b => b.set(doc(db, 'periodos', mes, 'liq', u.id), l));
+    ops.push(...opsLiq(mes, u.id, l));
   });
   ops.push(b => b.set(doc(db, 'periodos', mes), c));
   ops.push(b => b.set(doc(db, 'config', 'general'), { periodoActual: mes }, { merge: true }));
@@ -740,7 +837,7 @@ async function guardarUnidad() {
   if (l && $('e-ord').value !== '') {
     Object.assign(l, { ord: num('e-ord'), serv: num('e-serv'), ext: num('e-ext'), tasa: num('e-tasa'), deudaAnterior: num('e-deuda'), recargo: num('e-rec') });
     if (u.sinEntregar) { l.fid = true; l.pagos = []; } else delete l.fid;
-    ops.push(b => b.set(doc(db, 'periodos', S.pid, 'liq', u.id), l));
+    ops.push(...opsLiq(S.pid, u.id, l));
   }
   await commit(ops); renderAll(); poblarEdit(); $('e-unit').value = u.id; cargarEdit(); toast('Cambios guardados. Si cambiaste m² o el estado de entrega, recalculá el período.');
 }
@@ -762,22 +859,404 @@ async function borrarUnidad() {
   await commit([b => b.delete(doc(db, 'unidades', u.id)), b => b.delete(doc(db, 'privado', u.id))]);
   S.units = S.units.filter(x => x.id !== u.id); delete S.priv[u.id]; renderAll(); poblarEdit(); toast('Unidad eliminada.');
 }
+// Mueve pagos, saldo anterior y recargos de los períodos ya cargados a la zona privada (solo hace falta una vez).
+async function protegerDatos() {
+  if (!(await confirmar('Se mueven los pagos, saldos anteriores y recargos de todos los períodos a una zona que solo lee el administrador. No se pierde ningún dato.', { titulo: '¿Proteger los datos de cobranza?', boton: 'Proteger ahora' }))) return;
+  const ops = []; let n = 0;
+  for (const p of S.periodos) {
+    const docs = (await getDocs(collection(db, 'periodos', p.id, 'liq'))).docs;
+    for (const d of docs) {
+      const l = d.data(); if (!PRIV_KEYS.some(k => k in l)) continue;
+      const [pub, pri] = splitLiq(l); n++;
+      ops.push(b => b.set(doc(db, 'periodos', p.id, 'cuenta', d.id), clean(pri), { merge: true }), b => b.set(doc(db, 'periodos', p.id, 'liq', d.id), clean(pub)));
+    }
+  }
+  if (!ops.length) return toast('Todo ya estaba protegido.');
+  await commit(ops); await cargar(); toast(`${n} liquidaciones protegidas.`);
+}
 // Borra el período que está seleccionado (liquidaciones y pagos incluidos). Sirve para sacar períodos de prueba.
 async function eliminarPeriodo() {
   const id = S.pid; if (!id) return toast('No hay período seleccionado.', 'error');
   if (!(await confirmar(`Se borran todas las liquidaciones y pagos de ${plabel(id)}. Esta acción no se puede deshacer.`, { titulo: `¿Eliminar el período ${plabel(id)}?`, boton: 'Eliminar período', peligro: true }))) return;
-  const liq = await leerLiqs(id), ops = Object.keys(liq).map(k => b => b.delete(doc(db, 'periodos', id, 'liq', k)));
+  const liq = await leerLiqs(id), ops = Object.keys(liq).flatMap(k => [b => b.delete(doc(db, 'periodos', id, 'liq', k)), b => b.delete(doc(db, 'periodos', id, 'cuenta', k))]);
   const resto = S.periodos.map(x => x.id).filter(x => x !== id).sort().pop() || null;
   ops.push(b => b.delete(doc(db, 'periodos', id)), b => b.delete(doc(db, 'privado', 'envios_' + id)), b => b.set(doc(db, 'config', 'general'), { periodoActual: resto }, { merge: true }));
   await commit(ops); S.pid = resto; await cargar(); closeModal('m-admin'); toast(`Período ${plabel(id)} eliminado.`);
 }
 
+/* ---------- Fondo del encabezado (ilustración propia o foto del edificio) ---------- */
+const rng = seed => () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+function skylineSVG() {
+  const R = rng(11), f = n => n.toFixed(1);
+  let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 560">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#060a16"/><stop offset=".45" stop-color="#14224a"/><stop offset=".78" stop-color="#4a3f6b"/><stop offset="1" stop-color="#d9825f"/></linearGradient>
+    <radialGradient id="glow" cx="1020" cy="560" r="640" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#ffb870" stop-opacity=".75"/><stop offset="1" stop-color="#ffb870" stop-opacity="0"/></radialGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2c3f6e"/><stop offset=".55" stop-color="#1a2a52"/><stop offset="1" stop-color="#0f1a38"/></linearGradient>
+    <radialGradient id="moon" cx=".5" cy=".5" r=".5"><stop offset=".35" stop-color="#f7f0da" stop-opacity=".95"/><stop offset="1" stop-color="#f7f0da" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1600" height="560" fill="url(#sky)"/><rect width="1600" height="560" fill="url(#glow)"/>
+  <circle cx="330" cy="120" r="70" fill="url(#moon)"/><circle cx="330" cy="120" r="22" fill="#f7f0da"/>`;
+  for (let i = 0; i < 110; i++) s += `<circle cx="${f(R() * 1600)}" cy="${f(R() * 300)}" r="${f(R() * 1.3 + .3)}" fill="#fff" opacity="${f(R() * .7 + .2)}"/>`;
+  const cluster = (x0, x1, hmin, hmax, fill, op) => {
+    for (let x = x0; x < x1;) {
+      const w = 40 + R() * 70, h = hmin + R() * (hmax - hmin);
+      s += `<rect x="${f(x)}" y="${f(560 - h)}" width="${f(w)}" height="${f(h)}" fill="${fill}" opacity="${op}"/>`;
+      for (let wy = 560 - h + 10; wy < 545; wy += 16) for (let wx = x + 6; wx < x + w - 8; wx += 12) if (R() < .18) s += `<rect x="${f(wx)}" y="${f(wy)}" width="5" height="7" fill="#ffd98a" opacity="${f(R() * .5 + .25)}"/>`;
+      x += w + 4 + R() * 10;
+    }
+  };
+  cluster(-20, 880, 110, 300, '#0d1631', .92);
+  cluster(1180, 1640, 130, 330, '#0d1631', .92);
+  // Torre principal
+  const X = 925, W = 190, T = 100, B = 560, cols = 7, rows = 33, cw = W / cols, ch = (B - T) / rows;
+  s += `<rect x="${X - 14}" y="${T + 36}" width="${W + 28}" height="${B - T - 36}" fill="#0b1430" opacity=".8"/>
+  <rect x="${X}" y="${T}" width="${W}" height="${B - T}" fill="url(#glass)"/>
+  <rect x="${X + 26}" y="${T - 34}" width="${W - 52}" height="36" fill="url(#glass)"/>
+  <rect x="${X + 52}" y="${T - 58}" width="${W - 104}" height="26" fill="#1a2a52"/>
+  <line x1="${X + W / 2}" y1="${T - 120}" x2="${X + W / 2}" y2="${T - 58}" stroke="#8fa0c8" stroke-width="2"/>
+  <circle cx="${X + W / 2}" cy="${T - 122}" r="4" fill="#ff5a5a"><animate attributeName="opacity" values="1;.15;1" dur="2.4s" repeatCount="indefinite"/></circle>`;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const lit = R() < .42, x = X + c * cw + 6, y = T + r * ch + 3;
+    s += `<rect x="${f(x)}" y="${f(y)}" width="${f(cw - 12)}" height="${f(ch - 6)}" rx="1" fill="${lit ? '#ffd98a' : '#1d2d57'}" opacity="${lit ? f(R() * .35 + .6) : '.85'}"/>`;
+  }
+  for (let r = 4; r < rows; r += 6) s += `<rect x="${X - 4}" y="${f(T + r * ch - 3)}" width="${W + 8}" height="3" fill="#0b1430"/>`;
+  s += `<rect x="${X + W - 10}" y="${T}" width="10" height="${B - T}" fill="#fff" opacity=".05"/>`;
+  // Arboleda
+  for (let i = 0; i < 22; i++) { const cx = i * 78 + R() * 40 - 20, rr = 30 + R() * 34; s += `<ellipse cx="${f(cx)}" cy="${f(560 - rr * .35)}" rx="${f(rr * 1.2)}" ry="${f(rr)}" fill="#08101f"/>`; }
+  s += `<rect y="540" width="1600" height="20" fill="#070d1b"/></svg>`;
+  return s;
+}
+let fondoAplicado = null;
+function aplicarFondo() {
+  const url = /^https?:\/\//.test(S.gen.fondoUrl || '') ? S.gen.fondoUrl : '';
+  if (fondoAplicado === url) return; fondoAplicado = url;
+  const art = $('hero-art');
+  art.style.backgroundImage = `url("data:image/svg+xml;utf8,${encodeURIComponent(skylineSVG())}")`;
+  if (url) { const im = new Image(); im.onload = () => { if (fondoAplicado === url) art.style.backgroundImage = `url("${url.replace(/"/g, '%22')}")`; }; im.src = url; }
+}
+async function guardarFondo() {
+  const v = $('c-fondo').value.trim();
+  if (v && !/^https?:\/\//.test(v)) return toast('El enlace de la foto debe empezar con https://', 'error');
+  await setDoc(doc(db, 'config', 'general'), { fondoUrl: v }, { merge: true });
+  S.gen.fondoUrl = v; aplicarFondo(); toast(v ? 'Foto del edificio aplicada.' : 'Se volvió a la ilustración por defecto.');
+}
+
+/* ---------- Balance y control de gastos (solo administración) ---------- */
+const RUBROS = {
+  serv: ['Servicios EMSA / SAMSA', 'fa-bolt', '#e3c27a'],
+  pers: ['Personal: portería y limpieza', 'fa-user-gear', '#7cc4ff'],
+  mant: ['Mantenimiento y reparaciones', 'fa-screwdriver-wrench', '#6ee7b7'],
+  adm: ['Administración y gestión', 'fa-briefcase', '#c4b5fd'],
+  banc: ['Bancarios e impuestos', 'fa-landmark', '#fda4af'],
+  tasa: ['Tasa municipal (TGI)', 'fa-city', '#fdba74'],
+  ins: ['Insumos y limpieza', 'fa-spray-can-sparkles', '#5eead4'],
+  tel: ['Telefonía e internet', 'fa-phone', '#93c5fd'],
+  seg: ['Seguridad y seguros', 'fa-shield-halved', '#f9a8d4'],
+  otro: ['Otros', 'fa-ellipsis', '#94a3b8']
+};
+// Conceptos habituales del libro; al elegir uno se completa el rubro.
+const CONCEPTOS = [
+  ['Pago servicios SAMSA', 'serv'], ['Pago servicios EMSA', 'serv'], ['Débitos del banco por comisiones (incluye IVA)', 'banc'],
+  ['Servicios de portería / limpieza / mantenimiento - Antonio', 'pers'], ['Servicios de portería / limpieza / mantenimiento - Daniel', 'pers'], ['Servicios de portería / limpieza / mantenimiento - Alberto', 'pers'],
+  ['Mantenimiento de ascensores - Gómez Itatí Argentino', 'mant'], ['Logística, gestiones y administración', 'adm'], ['Impuesto s/ créditos Ley 25.413', 'banc'], ['Impuesto s/ débitos Ley 25.413', 'banc'],
+  ['Impuesto sobre los ingresos brutos', 'banc'], ['Pago tasa general de inmuebles - Municipalidad de Posadas', 'tasa'], ['Perfumantes, desodorantes e insumos de limpieza para portería', 'ins'],
+  ['Línea telefónica: portero / internet', 'tel'], ['Elementos para fumigación', 'ins'], ['Cinta de peligro para demarcar obras en fachada', 'ins'], ['Mantenimiento de bombas de agua (mano de obra y materiales)', 'mant'],
+  ['Artefactos de luminaria y luces de emergencia (pasillos y escaleras)', 'mant'], ['Pilas para perfumantes de portería', 'ins'], ['Cinta aisladora para portería', 'ins'],
+  ['Nuevos controles para cocheras PA y PB', 'mant'], ['Trabajos en sala de tanques', 'mant']
+];
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const balDoc = pid => { const b = S.priv['balance_' + pid]; return { gastos: b?.gastos || [], otros: b?.otros || [] }; };
+const balCfg = () => ({ saldoInicial: 0, desde: '', ...(S.priv.balance_config || {}) });
+const sumM = a => r2(a.reduce((n, x) => n + (+x.monto || 0), 0));
+const compacto = n => Math.abs(n) >= 1e6 ? (n / 1e6).toLocaleString('es-AR', { maximumFractionDigits: 2 }) + ' M' : Math.abs(n) >= 1e3 ? (n / 1e3).toLocaleString('es-AR', { maximumFractionDigits: 0 }) + ' mil' : String(Math.round(n));
+async function saveBal(pid, b) { await setDoc(doc(db, 'privado', 'balance_' + pid), clean(b)); S.priv['balance_' + pid] = clean(b); }
+
+// Igual que la hoja "Balance" del libro: solo cuentan las unidades que registraron un pago ("Pagado").
+// Sus conceptos del mes se suman por rubro y lo cobrado por encima de eso (deuda anterior + recargos) va a "mora y expensas vencidas".
+function ingresosDe(liqs) {
+  const r = { ordUF: 0, ordUC: 0, tasaUF: 0, tasaUC: 0, serv: 0, extUF: 0, extUC: 0, cobUF: 0, cobUC: 0, pend: 0, fidFact: 0, nPagan: 0 };
+  S.units.forEach(u => {
+    const l = liqs[u.id]; if (!l) return; const d = u.tipo === 'depto';
+    if (u.sinEntregar) { r.fidFact += l.ord + (l.serv || 0) + l.ext + l.tasa; return; }
+    const t = tot(l); r.pend += Math.max(0, t.saldo);
+    if (!(l.pagos || []).length) return;
+    r.nPagan++; r[d ? 'cobUF' : 'cobUC'] += t.pagado;
+    if (l.debe) return;   // marcada "Debe" a mano: lo cobrado cuenta, pero sus conceptos no
+    r[d ? 'ordUF' : 'ordUC'] += l.ord; r[d ? 'tasaUF' : 'tasaUC'] += l.tasa; r.serv += l.serv || 0; r[d ? 'extUF' : 'extUC'] += l.ext;
+  });
+  Object.keys(r).forEach(k => r[k] = r2(r[k]));
+  r.fact = r2(r.ordUF + r.ordUC + r.tasaUF + r.tasaUC + r.serv + r.extUF + r.extUC);       // Ingreso por expensas UF y UC
+  r.moraUF = r2(r.cobUF - (r.ordUF + r.tasaUF + r.serv + r.extUF));                         // Intereses por mora UF + exp. vencida
+  r.moraUC = r2(r.cobUC - (r.ordUC + r.tasaUC + r.extUC));                                  // Intereses por mora UC + exp. vencida
+  r.cobrado = r2(r.cobUF + r.cobUC);
+  r.gastosComunes = r2(r.ordUF + r.ordUC + r.tasaUF + r.tasaUC + r.serv); r.extra = r2(r.extUF + r.extUC);
+  return r;
+}
+const ingFor = pid => pid === S.pid ? ingresosDe(S.liqs) : (S.hist[pid] || null);
+function balanceDe(pid) {
+  const ing = ingFor(pid), b = balDoc(pid);
+  const gOrd = sumM(b.gastos.filter(g => g.tipo !== 'ext')), gExt = sumM(b.gastos.filter(g => g.tipo === 'ext')), otros = sumM(b.otros), gast = r2(gOrd + gExt);
+  const ingTot = ing ? r2(ing.cobrado + otros) : null;   // Total expensas + otros ingresos
+  return { ing, b, gOrd, gExt, gast, otros, ingTot, res: ing ? r2(ingTot - gast) : null };
+}
+// Saldo en caja al cierre del período: saldo inicial + resultado de caja de cada mes desde la fecha de inicio.
+function saldoCaja(pid) {
+  const c = balCfg(); let s = +c.saldoInicial || 0;
+  for (const id of S.periodos.map(p => p.id).filter(id => id <= pid && (!c.desde || id >= c.desde)).sort()) { const x = balanceDe(id); if (x.res == null) return null; s += x.res; }
+  return r2(s);
+}
+
+function donut(items, total, centro) {
+  let off = 25;
+  const arcs = items.filter(i => i.v > 0).map(i => { const p = i.v / total * 100, a = `<circle r="15.9155" cx="21" cy="21" fill="none" stroke="${i.c}" stroke-width="5" stroke-dasharray="${p.toFixed(3)} ${(100 - p).toFixed(3)}" stroke-dashoffset="${off.toFixed(3)}"><title>${esc(i.n)}: ${$f(i.v)} (${p.toFixed(1)}%)</title></circle>`; off -= p; return a; }).join('');
+  return `<svg viewBox="0 0 42 42" class="w-44 h-44 shrink-0" role="img" aria-label="Distribución de gastos por rubro"><circle r="15.9155" cx="21" cy="21" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="5"/>${arcs}
+    <text x="21" y="20" text-anchor="middle" fill="#8693b0" font-size="2.6">Gastos</text><text x="21" y="24.4" text-anchor="middle" fill="#fff" font-size="4" font-weight="800">${centro}</text></svg>`;
+}
+function barras(rows) {
+  const W = 760, H = 230, pb = 28, pt = 16, max = Math.max(1, ...rows.flatMap(r => [r.a, r.b])), bw = Math.min(W / rows.length, 110), x0 = (W - bw * rows.length) / 2, hh = H - pb - pt;
+  const g = rows.map((r, i) => {
+    const x = x0 + i * bw, h1 = Math.max(0, r.a / max * hh), h2 = Math.max(0, r.b / max * hh);
+    return `<rect x="${x + bw * .14}" y="${H - pb - h1}" width="${bw * .33}" height="${h1}" rx="3" fill="#34d399"><title>${r.l} · Ingresos: ${$f(r.a)}</title></rect>
+      <rect x="${x + bw * .53}" y="${H - pb - h2}" width="${bw * .33}" height="${h2}" rx="3" fill="#fb7185"><title>${r.l} · Gastos: ${$f(r.b)}</title></rect>
+      <text x="${x + bw / 2}" y="${H - 9}" text-anchor="middle" font-size="10" fill="#8693b0">${r.l}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" class="w-full" role="img" aria-label="Ingresos y gastos por período"><line x1="0" x2="${W}" y1="${H - pb}" y2="${H - pb}" stroke="rgba(255,255,255,.12)"/>${g}</svg>`;
+}
+function animarKPIs(root) {
+  const quieto = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  root.querySelectorAll('[data-count]').forEach(el => {
+    const to = +el.dataset.count, key = el.dataset.k;
+    if (quieto || S.kpi[key] === to) { el.textContent = $f(to); S.kpi[key] = to; return; }
+    S.kpi[key] = to; const t0 = performance.now();
+    const step = t => { const k = Math.min(1, (t - t0) / 700); el.textContent = $f(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+
+function renderBalance() {
+  const box = $('sec-balance'); if (!S.isAdmin) { box.innerHTML = ''; return; }
+  if (!S.pid) { box.innerHTML = '<p class="text-slate-400 text-sm">Primero generá un período para poder llevar su balance.</p>'; return; }
+  const x = balanceDe(S.pid), ing = x.ing, b = x.b, cfg = balCfg(), saldo = saldoCaja(S.pid);
+  const kpi = (k, t, v, sub, tone, ico) => `<div class="glass p-4 relative overflow-hidden"><i class="fa-solid ${ico} absolute -right-2 -bottom-3 text-6xl opacity-[.07]"></i><span class="text-[11px] uppercase tracking-wider text-slate-400">${t}</span>
+    <div class="text-[17px] sm:text-2xl whitespace-nowrap font-black mt-1 ${tone}" data-k="${k}" data-count="${v}">${$f(v)}</div><span class="text-[11px] text-slate-400">${sub}</span></div>`;
+  const tono = v => v >= 0 ? 'text-emerald-400' : 'text-rose-400';
+  const filas = [['Expensas comunes · unidades funcionales', ing.ordUF], ['Expensas comunes · cocheras', ing.ordUC], ['Tasa municipal · unidades funcionales', ing.tasaUF], ['Tasa municipal · cocheras', ing.tasaUC], ['EMSA + SAMSA prorrateados', ing.serv], ['Extraordinarias · unidades funcionales', ing.extUF], ['Extraordinarias · cocheras', ing.extUC]];
+  // Gastos por rubro
+  const porRubro = Object.keys(RUBROS).map(k => ({ k, n: RUBROS[k][0], c: RUBROS[k][2], v: sumM(b.gastos.filter(g => (g.rubro || 'otro') === k)) })).filter(r => r.v > 0).sort((a, c) => c.v - a.v);
+  const ejec = (real, rec) => rec > 0 ? Math.round(real / rec * 100) : 0;
+  const barra = (t, real, rec) => { const p = ejec(real, rec), cl = p > 100 ? 'bg-rose-500' : p > 85 ? 'bg-amber-400' : 'bg-emerald-500'; return `<div class="space-y-1.5"><div class="flex justify-between text-xs"><span class="text-slate-300">${t}</span><b class="${p > 100 ? 'text-rose-400' : 'text-slate-200'}">${p}%</b></div>
+    <div class="h-2.5 rounded-full bg-white/5 overflow-hidden"><div class="h-full rounded-full ${cl}" style="width:${Math.min(100, p)}%"></div></div>
+    <div class="flex justify-between text-[11px] text-slate-400"><span>Gastado ${$f(real)}</span><span>Cobrado ${$f(rec)}</span></div></div>`; };
+  const q = S.bf.q.toLowerCase();
+  const G = b.gastos.filter(g => (!S.bf.rubro || (g.rubro || 'otro') === S.bf.rubro) && (!q || (g.concepto + ' ' + (g.comp || '')).toLowerCase().includes(q))).sort((a, c) => (c.fecha || '').localeCompare(a.fecha || ''));
+  const hist = S.periodos.every(p => ingFor(p.id));
+  const evo = [...S.periodos].sort((a, c) => a.id.localeCompare(c.id)).map(p => ({ id: p.id, x: balanceDe(p.id), s: saldoCaja(p.id) }));
+  box.innerHTML = `
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-3">
+    <div><h2 class="font-display text-2xl font-bold text-white">Balance y control de gastos</h2><p class="text-xs text-slate-400">Período <b class="text-blue-400">${plabel(S.pid)}</b> · Solo visible para la administración</p></div>
+    <div class="flex flex-wrap gap-2">
+      <button onclick="abrirGasto()" class="btn bg-blue-600 hover:bg-blue-500 text-white"><i class="fa-solid fa-plus"></i> Registrar gasto</button>
+      <button onclick="abrirOtro()" class="btn bg-emerald-600 hover:bg-emerald-500 text-white"><i class="fa-solid fa-coins"></i> Otro ingreso</button>
+      <button onclick="importarServicios()" class="btn glass-btn"><i class="fa-solid fa-bolt"></i> Traer EMSA/SAMSA</button>
+      <button onclick="copiarMesAnterior()" class="btn glass-btn"><i class="fa-solid fa-copy"></i> Copiar mes anterior</button>
+      <button onclick="balancePDF()" class="btn glass-btn"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+      <button onclick="gastosCSV()" class="btn glass-btn"><i class="fa-solid fa-file-csv"></i> CSV</button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 xl:grid-cols-5 gap-3">
+    ${kpi('i1', 'Total ingresos', x.ingTot, 'Expensas cobradas + otros ingresos', 'text-emerald-400', 'fa-arrow-trend-up')}
+    ${kpi('i3', 'Gastos', x.gast, `${b.gastos.length} movimientos`, 'text-rose-400', 'fa-receipt')}
+    ${kpi('i4', 'Ingresos menos egresos', x.res, 'Resultado del mes, como el libro', tono(x.res), 'fa-scale-balanced')}
+    ${saldo == null ? `<div class="glass p-4 flex flex-col justify-between"><span class="text-[11px] uppercase tracking-wider text-slate-400">Saldo en caja</span><button onclick="cargarEvolucion()" class="btn bg-blue-600 hover:bg-blue-500 text-white mt-2">Calcular</button><span class="text-[11px] text-slate-400 mt-1">Necesita leer todos los períodos</span></div>`
+      : kpi('i5', 'Saldo en caja', saldo, cfg.desde ? `Acumulado desde ${plabel(cfg.desde)}` : 'Acumulado de todos los períodos', saldo >= 0 ? 'text-blue-400' : 'text-rose-400', 'fa-vault')}
+    ${kpi('i6', 'Pendiente de cobro', ing.pend, `${ing.nPagan} unidades con pago registrado`, 'text-amber-300', 'fa-hourglass-half')}
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div class="glass p-5 space-y-3">
+      <h3 class="text-sm font-bold text-blue-400"><i class="fa-solid fa-arrow-down-long"></i> Ingresos por expensas</h3>
+      <div class="text-xs divide-y divide-white/5">
+        ${filas.map(([n, v]) => `<div class="flex justify-between py-1.5"><span class="text-slate-300">${n}</span><b class="text-slate-100">${$f(v)}</b></div>`).join('')}
+        <div class="flex justify-between py-2"><span class="font-bold text-white">Ingreso por expensas UF y UC</span><b class="text-white">${$f(ing.fact)}</b></div>
+        <div class="flex justify-between py-1.5"><span class="text-slate-300">Intereses por mora UF + expensa vencida del mes en curso</span><b>${$f(ing.moraUF)}</b></div>
+        <div class="flex justify-between py-1.5"><span class="text-slate-300">Intereses por mora UC + expensa vencida del mes en curso</span><b>${$f(ing.moraUC)}</b></div>
+        ${b.otros.map(o => `<div class="flex justify-between items-center py-1.5 gap-2"><span class="text-slate-300 truncate">${esc(o.concepto)}</span><span class="flex items-center gap-2 shrink-0"><b>${$f(o.monto)}</b><button onclick="abrirOtro('${o.id}')" aria-label="Editar" class="text-slate-500 hover:text-blue-400 cursor-pointer"><i class="fa-solid fa-pen"></i></button><button onclick="borrarOtro('${o.id}')" aria-label="Quitar" class="text-slate-500 hover:text-rose-400 cursor-pointer"><i class="fa-solid fa-trash"></i></button></span></div>`).join('')}
+        <div class="flex justify-between py-2"><span class="font-bold text-white">Total expensas + otros ingresos</span><b class="text-emerald-400">${$f(x.ingTot)}</b></div>
+      </div>
+      <p class="text-[11px] text-slate-400">Como en el libro, solo se cuentan las unidades que ya registraron un pago. Unidades sin entregar (a cargo del fideicomiso): <span class="text-indigo-300">${$f(ing.fidFact)}</span>, no se cuentan como ingreso.</p>
+    </div>
+
+    <div class="glass p-5 space-y-3">
+      <h3 class="text-sm font-bold text-blue-400"><i class="fa-solid fa-chart-pie"></i> Gastos por rubro</h3>
+      ${porRubro.length ? `<div class="flex flex-col sm:flex-row items-center gap-5">${donut(porRubro, x.gast, compacto(x.gast))}
+        <div class="w-full text-xs space-y-1.5">${porRubro.map(r => `<div class="flex items-center gap-2"><span class="w-2.5 h-2.5 rounded-sm shrink-0" style="background:${r.c}"></span><span class="flex-1 text-slate-300 truncate">${r.n}</span><b class="text-slate-100">${$f(r.v)}</b><span class="w-10 text-right text-slate-500">${(r.v / x.gast * 100).toFixed(0)}%</span></div>`).join('')}</div></div>`
+      : '<p class="text-xs text-slate-400 py-8 text-center">Todavía no hay gastos cargados en este período.<br>Usá “Traer EMSA/SAMSA” o “Registrar gasto”.</p>'}
+    </div>
+  </div>
+
+  <div class="glass p-5 space-y-4">
+    <h3 class="text-sm font-bold text-blue-400"><i class="fa-solid fa-gauge-high"></i> Control presupuestario del período</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      ${barra('Gastos comunes vs. expensas comunes cobradas (ordinarias, tasa y servicios)', x.gOrd, ing.gastosComunes)}
+      ${barra('Gastos extraordinarios vs. extraordinarias cobradas', x.gExt, ing.extra)}
+    </div>
+  </div>
+
+  <div class="glass overflow-hidden">
+    <div class="p-4 flex flex-col md:flex-row gap-3 justify-between md:items-center border-b border-white/5">
+      <h3 class="text-sm font-bold text-blue-400"><i class="fa-solid fa-list-check"></i> Detalle de gastos <span class="text-slate-500 font-normal">(${G.length}${G.length !== b.gastos.length ? ' de ' + b.gastos.length : ''})</span></h3>
+      <div class="flex gap-2">
+        <select aria-label="Filtrar por rubro" onchange="S.bf.rubro=this.value;renderBalance()" class="inp !w-auto"><option value="">Todos los rubros</option>${Object.entries(RUBROS).map(([k, r]) => `<option value="${k}" ${S.bf.rubro === k ? 'selected' : ''}>${r[0]}</option>`).join('')}</select>
+        <input aria-label="Buscar gasto" placeholder="Buscar…" value="${esc(S.bf.q)}" oninput="S.bf.q=this.value;clearTimeout(S.bt);S.bt=setTimeout(()=>{renderBalance();const e=$('bq');e&&(e.focus(),e.setSelectionRange(1e3,1e3))},250)" id="bq" class="inp !w-40">
+      </div>
+    </div>
+    <div class="overflow-x-auto"><table class="w-full text-left text-xs">
+      <thead class="bg-white/[.03] text-slate-400"><tr><th class="p-3">Fecha</th><th class="p-3">Rubro</th><th class="p-3">Concepto</th><th class="p-3">Comprobante</th><th class="p-3">Tipo</th><th class="p-3 text-right">Importe</th><th class="p-3"></th></tr></thead>
+      <tbody class="divide-y divide-white/5">${G.map(g => { const r = RUBROS[g.rubro || 'otro'] || RUBROS.otro; return `<tr class="hover:bg-white/[.03]">
+        <td class="p-3 text-slate-400 whitespace-nowrap">${fdate(g.fecha)}</td>
+        <td class="p-3 whitespace-nowrap"><span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full border border-white/10 text-[10px]" style="color:${r[2]}"><i class="fa-solid ${r[1]}"></i>${r[0]}</span></td>
+        <td class="p-3 text-slate-200 min-w-[220px]">${esc(g.concepto)}</td><td class="p-3 text-slate-400">${esc(g.comp || '—')}</td>
+        <td class="p-3"><span class="text-[10px] ${g.tipo === 'ext' ? 'text-amber-300' : 'text-slate-400'}">${g.tipo === 'ext' ? 'Extraordinario' : 'Común'}</span></td>
+        <td class="p-3 text-right font-bold text-white whitespace-nowrap">${$f(g.monto)}</td>
+        <td class="p-3 whitespace-nowrap text-right"><button onclick="abrirGasto('${g.id}')" aria-label="Editar gasto" class="px-2 text-slate-500 hover:text-blue-400 cursor-pointer"><i class="fa-solid fa-pen"></i></button><button onclick="borrarGasto('${g.id}')" aria-label="Eliminar gasto" class="px-2 text-slate-500 hover:text-rose-400 cursor-pointer"><i class="fa-solid fa-trash"></i></button></td></tr>`; }).join('')
+        || '<tr><td colspan="7" class="p-8 text-center text-slate-500">Sin gastos para mostrar.</td></tr>'}</tbody>
+      ${G.length ? `<tfoot><tr class="bg-white/[.03]"><td colspan="5" class="p-3 font-bold text-slate-300">Total ${G.length !== b.gastos.length ? 'filtrado' : 'del período'}</td><td class="p-3 text-right font-black text-white">${$f(sumM(G))}</td><td></td></tr></tfoot>` : ''}
+    </table></div>
+  </div>
+
+  <div class="glass p-5 space-y-4">
+    <div class="flex flex-col md:flex-row justify-between gap-3 md:items-center">
+      <h3 class="text-sm font-bold text-blue-400"><i class="fa-solid fa-chart-column"></i> Evolución y saldo en caja</h3>
+      ${hist ? '' : `<button onclick="cargarEvolucion()" class="btn bg-blue-600 hover:bg-blue-500 text-white"><i class="fa-solid fa-rotate"></i> Cargar todos los períodos</button>`}
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end text-xs">
+      <div><label class="lbl" for="bc-saldo">Saldo inicial de caja ($)</label><input id="bc-saldo" type="number" step="0.01" value="${cfg.saldoInicial || ''}" class="inp" placeholder="Ej.: 6749203.70"></div>
+      <div><label class="lbl" for="bc-desde">Se cuenta desde el mes</label><input id="bc-desde" type="month" value="${esc(cfg.desde || '')}" class="inp"></div>
+      <button onclick="guardarCajaCfg()" class="btn glass-btn">Guardar saldo inicial</button>
+    </div>
+    ${hist ? `${barras(evo.map(e => ({ l: plabel(e.id), a: e.x.ingTot, b: e.x.gast })))}
+      <div class="flex gap-4 text-[11px] text-slate-400"><span><i class="fa-solid fa-square text-emerald-400"></i> Ingresos en caja</span><span><i class="fa-solid fa-square text-rose-400"></i> Gastos</span></div>
+      <div class="overflow-x-auto"><table class="w-full text-xs text-left whitespace-nowrap"><thead class="text-slate-400"><tr><th class="py-2 pr-3">Período</th><th class="pr-3 text-right">Ingreso por expensas</th><th class="pr-3 text-right">Mora y vencidas</th><th class="pr-3 text-right">Otros ingresos</th><th class="pr-3 text-right">Total ingresos</th><th class="pr-3 text-right">Gastos</th><th class="pr-3 text-right">Ingresos − egresos</th><th class="text-right">Saldo en caja</th></tr></thead>
+      <tbody class="divide-y divide-white/5">${[...evo].reverse().map(e => `<tr><td class="py-2 pr-3 font-bold text-slate-200">${plabel(e.id)}</td><td class="pr-3 text-right">${$f(e.x.ing.fact)}</td><td class="pr-3 text-right">${$f(r2(e.x.ing.moraUF + e.x.ing.moraUC))}</td><td class="pr-3 text-right">${$f(e.x.otros)}</td><td class="pr-3 text-right font-semibold text-slate-100">${$f(e.x.ingTot)}</td><td class="pr-3 text-right">${$f(e.x.gast)}</td><td class="pr-3 text-right ${tono(e.x.res)}">${$f(e.x.res)}</td><td class="text-right font-bold ${e.s != null && e.s < 0 ? 'text-rose-400' : 'text-blue-400'}">${e.s == null ? '—' : $f(e.s)}</td></tr>`).join('')}</tbody></table></div>`
+    : '<p class="text-xs text-slate-400">Cargá todos los períodos para ver la evolución mensual y el saldo en caja acumulado (lee las liquidaciones una sola vez por sesión).</p>'}
+  </div>`;
+  animarKPIs(box);
+}
+
+async function cargarEvolucion() {
+  await Promise.all(S.periodos.filter(p => p.id !== S.pid).map(async p => { S.hist[p.id] = ingresosDe(await leerLiqs(p.id)); }));
+  renderBalance(); toast('Períodos cargados.');
+}
+async function guardarCajaCfg() {
+  const c = { saldoInicial: r2(parseFloat($('bc-saldo').value) || 0), desde: $('bc-desde').value || '' };
+  await setDoc(doc(db, 'privado', 'balance_config'), c); S.priv.balance_config = c; renderBalance(); toast('Saldo inicial guardado.');
+}
+function abrirGasto(id) {
+  if (!S.pid) return toast('Primero generá un período.', 'error');
+  const g = id ? balDoc(S.pid).gastos.find(x => x.id === id) : null; S.gedit = g ? g.id : null;
+  $('mg-title').textContent = g ? 'Editar gasto' : 'Registrar gasto';
+  $('mg-fecha').value = g?.fecha || (hoy().slice(0, 7) === S.pid ? hoy() : S.pid + '-01');
+  $('mg-tipo').value = g?.tipo || 'ord'; $('mg-rubro').value = g?.rubro || 'otro';
+  $('mg-concepto').value = g?.concepto || ''; $('mg-comp').value = g?.comp || ''; $('mg-monto').value = g?.monto ?? '';
+  openModal('m-gasto'); $('mg-concepto').focus();
+}
+function conceptoElegido() { const c = CONCEPTOS.find(x => x[0] === $('mg-concepto').value); if (c) $('mg-rubro').value = c[1]; }
+async function guardarGasto() {
+  const g = { id: S.gedit || uid(), fecha: $('mg-fecha').value || hoy(), tipo: $('mg-tipo').value, rubro: $('mg-rubro').value, concepto: $('mg-concepto').value.trim(), comp: $('mg-comp').value.trim(), monto: r2(parseFloat($('mg-monto').value)) };
+  if (!g.concepto) return toast('Falta el concepto del gasto.', 'error');
+  if (!(g.monto > 0)) return toast('El importe debe ser mayor a cero.', 'error');
+  const b = balDoc(S.pid), i = b.gastos.findIndex(x => x.id === g.id);
+  if (i >= 0) { g.src = b.gastos[i].src; b.gastos[i] = g; } else b.gastos.push(g);
+  await saveBal(S.pid, b); closeModal('m-gasto'); renderBalance(); toast(i >= 0 ? 'Gasto actualizado.' : 'Gasto registrado.');
+}
+async function borrarGasto(id) {
+  const b = balDoc(S.pid), g = b.gastos.find(x => x.id === id); if (!g) return;
+  if (!(await confirmar(`${g.concepto}\n${$f(g.monto)}`, { titulo: '¿Eliminar este gasto?', boton: 'Eliminar', peligro: true }))) return;
+  b.gastos = b.gastos.filter(x => x.id !== id); await saveBal(S.pid, b); renderBalance(); toast('Gasto eliminado.');
+}
+function abrirOtro(id) {
+  const o = id ? balDoc(S.pid).otros.find(x => x.id === id) : null; S.oedit = o ? o.id : null;
+  $('mo-title').textContent = o ? 'Editar ingreso' : 'Registrar otro ingreso';
+  $('mo-concepto').value = o?.concepto || ''; $('mo-monto').value = o?.monto ?? ''; openModal('m-otro'); $('mo-concepto').focus();
+}
+async function guardarOtro() {
+  const o = { id: S.oedit || uid(), concepto: $('mo-concepto').value.trim(), monto: r2(parseFloat($('mo-monto').value)) };
+  if (!o.concepto) return toast('Falta el concepto.', 'error'); if (!(o.monto > 0)) return toast('El importe debe ser mayor a cero.', 'error');
+  const b = balDoc(S.pid), i = b.otros.findIndex(x => x.id === o.id); if (i >= 0) b.otros[i] = o; else b.otros.push(o);
+  await saveBal(S.pid, b); closeModal('m-otro'); renderBalance(); toast('Ingreso guardado.');
+}
+async function borrarOtro(id) {
+  const b = balDoc(S.pid), o = b.otros.find(x => x.id === id); if (!o) return;
+  if (!(await confirmar(`${o.concepto}\n${$f(o.monto)}`, { titulo: '¿Quitar este ingreso?', boton: 'Quitar', peligro: true }))) return;
+  b.otros = b.otros.filter(x => x.id !== id); await saveBal(S.pid, b); renderBalance(); toast('Ingreso quitado.');
+}
+// Crea los gastos de EMSA y SAMSA con los importes de las facturas cargadas en el período (se pueden editar después).
+async function importarServicios() {
+  const p = per(), b = balDoc(S.pid); let n = 0;
+  [['samsa', 'Pago servicios SAMSA', p.samsa, p.nroSamsa], ['emsa', 'Pago servicios EMSA', p.emsa, p.nroEmsa]].forEach(([src, c, m, nro]) => {
+    if (!(m > 0) || b.gastos.some(g => g.src === src)) return;
+    b.gastos.push({ id: uid(), fecha: S.pid + '-01', tipo: 'ord', rubro: 'serv', concepto: c, comp: nro ? 'Fc. ' + nro : '', monto: r2(m), src }); n++;
+  });
+  if (!n) return toast('EMSA y SAMSA ya están cargados, o el período no tiene importes.', 'error');
+  await saveBal(S.pid, b); renderBalance(); toast(`${n} gasto${n > 1 ? 's' : ''} de servicios cargado${n > 1 ? 's' : ''}.`);
+}
+// Copia los gastos comunes del mes anterior (sin los servicios) para editar solo los importes que cambian.
+async function copiarMesAnterior() {
+  const prev = S.periodos.map(p => p.id).filter(id => id < S.pid).sort().pop();
+  if (!prev) return toast('No hay un mes anterior.', 'error');
+  const pb = balDoc(prev).gastos.filter(g => g.tipo !== 'ext' && !g.src);
+  if (!pb.length) return toast(`${plabel(prev)} no tiene gastos para copiar.`, 'error');
+  const b = balDoc(S.pid), nuevos = pb.filter(g => !b.gastos.some(x => x.concepto === g.concepto));
+  if (!nuevos.length) return toast('Esos gastos ya están cargados en este período.', 'error');
+  if (!(await confirmar(`Se copian ${nuevos.length} gastos comunes de ${plabel(prev)} a ${plabel(S.pid)} con los mismos importes. Después editás los que cambien.`, { titulo: '¿Copiar gastos del mes anterior?', boton: 'Copiar gastos' }))) return;
+  nuevos.forEach(g => b.gastos.push({ ...g, id: uid(), fecha: S.pid + '-' + String(Math.min(28, +(g.fecha || '').slice(8, 10) || 1)).padStart(2, '0') }));
+  await saveBal(S.pid, b); renderBalance(); toast(`${nuevos.length} gastos copiados.`);
+}
+function descargar(nombre, tipo, contenido) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([contenido], { type: tipo })); a.download = nombre; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+function gastosCSV() {
+  const num = n => String(n).replace('.', ','), cel = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const filas = [['Período', 'Fecha', 'Tipo', 'Rubro', 'Concepto', 'Comprobante', 'Importe']];
+  [...S.periodos].sort((a, c) => a.id.localeCompare(c.id)).forEach(p => balDoc(p.id).gastos.forEach(g => filas.push([plabel(p.id), fdate(g.fecha), g.tipo === 'ext' ? 'Extraordinario' : 'Común', (RUBROS[g.rubro] || RUBROS.otro)[0], g.concepto, g.comp || '', num(g.monto)])));
+  if (filas.length === 1) return toast('Todavía no hay gastos cargados.', 'error');
+  descargar('Gastos_Torre_Aymara.csv', 'text/csv;charset=utf-8', '﻿' + filas.map(f => f.map((v, i) => i === 6 ? v : cel(v)).join(';')).join('\r\n'));
+  toast('CSV descargado (abre directo en Excel).');
+}
+function balancePDF() {
+  if (!S.pid) return; const x = balanceDe(S.pid), ing = x.ing, { jsPDF } = window.jspdf, d = new jsPDF(); let y = 0;
+  const nueva = h => { if (y + h > 282) { d.addPage(); y = 18; } };
+  const linea = (t, v, o = {}) => { nueva(7); d.setFont('helvetica', o.b ? 'bold' : 'normal'); d.setFontSize(o.s || 9.5); d.setTextColor(...(o.c || [30, 41, 59]));
+    const L = d.splitTextToSize(String(t), 130); d.text(L, 18 + (o.i || 0), y); if (v != null) d.text($f(v), 196, y, { align: 'right' }); y += 5.2 * L.length + 1.2; };
+  const titulo = t => { nueva(14); y += 3; d.setFillColor(241, 245, 249); d.rect(14, y - 5, 182, 8, 'F'); d.setFont('helvetica', 'bold'); d.setFontSize(10); d.setTextColor(15, 23, 42); d.text(t, 18, y + .6); y += 9; };
+  d.setFillColor(11, 17, 33); d.rect(0, 0, 210, 38, 'F'); d.setTextColor(255); d.setFont('helvetica', 'bold'); d.setFontSize(18); d.text('EDIFICIO TORRE AYMARÁ', 14, 16);
+  d.setFont('helvetica', 'normal'); d.setFontSize(10); d.text('Beethoven 1650 • Posadas, Misiones', 14, 23); d.text(`BALANCE DEL PERÍODO ${plabel(S.pid)}`, 14, 31); y = 50;
+  titulo('INGRESO POR EXPENSAS');
+  [['Expensas comunes · unidades funcionales', ing.ordUF], ['Expensas comunes · cocheras', ing.ordUC], ['Tasa municipal · unidades funcionales', ing.tasaUF], ['Tasa municipal · cocheras', ing.tasaUC], ['EMSA y SAMSA prorrateados', ing.serv], ['Extraordinarias · unidades funcionales', ing.extUF], ['Extraordinarias · cocheras', ing.extUC]].forEach(([k, v]) => linea(k, v, { i: 3 }));
+  linea('Ingreso por expensas UF y UC', ing.fact, { b: 1 });
+  titulo('OTROS INGRESOS'); linea('Intereses por mora UF + expensa vencida del mes en curso', ing.moraUF, { i: 3 }); linea('Intereses por mora UC + expensa vencida del mes en curso', ing.moraUC, { i: 3 }); x.b.otros.forEach(o => linea(o.concepto, o.monto, { i: 3 })); linea('Total otros ingresos', r2(ing.moraUF + ing.moraUC + x.otros), { b: 1 });
+  linea('TOTAL EXPENSAS + OTROS INGRESOS', x.ingTot, { b: 1, s: 11, c: [6, 95, 70] });
+  [['ord', 'GASTOS DE EXPENSAS COMUNES'], ['ext', 'GASTOS DE EXPENSAS EXTRAORDINARIAS']].forEach(([t, tt]) => {
+    const G = x.b.gastos.filter(g => (g.tipo === 'ext') === (t === 'ext')); if (!G.length) return; titulo(tt);
+    Object.keys(RUBROS).forEach(k => { const R = G.filter(g => (g.rubro || 'otro') === k); if (!R.length) return;
+      linea(RUBROS[k][0], sumM(R), { b: 1, i: 3, c: [71, 85, 105] }); R.forEach(g => linea(g.concepto + (g.comp ? ` (${g.comp})` : ''), g.monto, { i: 8, s: 8.8 })); });
+    linea('Total ' + tt.toLowerCase().replace('gastos de ', ''), sumM(G), { b: 1 });
+  });
+  titulo('RESULTADO'); linea('TOTAL GASTOS', x.gast, { b: 1, s: 11, c: [159, 18, 57] }); linea('TOTAL INGRESOS MENOS EGRESOS', x.res, { b: 1, s: 11, c: x.res >= 0 ? [6, 95, 70] : [159, 18, 57] });
+  const sc = saldoCaja(S.pid); if (sc != null) linea('Saldo en caja al cierre', sc, { b: 1, c: [30, 58, 138] });
+  d.save(`Balance_Torre_Aymara_${plabel(S.pid)}.pdf`);
+}
+
 /* ---------- Inicio ---------- */
 Object.assign(window, Object.fromEntries(Object.entries({
-  cambiarPeriodo, login, salir, adminBtn, tab, buscar, pagina, detalle, registrarPago, quitarPago, descargarPDF, waUnidad, abrirCola, colaModo, colaSiguiente, colaReiniciar, copiarGrupo, importarTelefonos,
-  guardarAviso, generarPeriodo, poblarEdit, cargarEdit, guardarUnidad, agregarUnidad, borrarUnidad, eliminarPeriodo, closeModal
+  cambiarPeriodo, login, salir, adminBtn, tab, buscar, pagina, detalle, registrarPago, quitarPago, marcarDebe, descargarPDF, waUnidad, abrirCola, colaModo, colaSiguiente, colaReiniciar, copiarGrupo, importarTelefonos,
+  guardarAviso, guardarFondo, protegerDatos, generarPeriodo, renderBalance, cargarEvolucion, guardarCajaCfg, abrirGasto, conceptoElegido, guardarGasto, borrarGasto, abrirOtro, guardarOtro, borrarOtro, importarServicios, copiarMesAnterior, gastosCSV, balancePDF, poblarEdit, cargarEdit, guardarUnidad, agregarUnidad, borrarUnidad, eliminarPeriodo, closeModal
 }).map(([k, f]) => [k, safe(f)])));
-shell('depto'); shell('cochera'); tab('depto');
+$('mg-rubro').innerHTML = Object.entries(RUBROS).map(([k, r]) => `<option value="${k}">${r[0]}</option>`).join('');
+$('dl-conceptos').innerHTML = CONCEPTOS.map(c => `<option value="${esc(c[0])}">`).join('');
+shell('depto'); shell('cochera'); aplicarFondo(); tab('depto');
 document.addEventListener('DOMContentLoaded', () => {});
 cargar();
 </script>
