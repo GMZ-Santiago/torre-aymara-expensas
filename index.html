@@ -109,13 +109,19 @@
 
 <!-- Cola WhatsApp -->
 <div id="m-cola" class="modal"><div class="box max-w-sm">
-  <h3 class="font-bold"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Envío por WhatsApp (uno por clic)</h3>
-  <p class="text-xs text-slate-400">Un mensaje por teléfono: si un propietario tiene varias unidades, se agrupan.</p>
+  <h3 class="font-bold"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Enviar expensas por WhatsApp</h3>
+  <p class="text-xs text-slate-400">Se abre un chat por contacto con el mensaje listo; vos apretás enviar. Cada teléfono recibe un solo mensaje con todas sus unidades. Los contactos ya enviados quedan marcados en este período.</p>
+  <div class="flex gap-4 text-xs text-slate-300">
+    <label class="flex items-center gap-1.5"><input type="radio" name="cola-modo" value="todos" checked onchange="colaModo()"> A todos</label>
+    <label class="flex items-center gap-1.5"><input type="radio" name="cola-modo" value="deudores" onchange="colaModo()"> Solo a quienes deben</label>
+  </div>
   <div id="cola-info" class="text-sm bg-slate-950 border border-slate-800 rounded-xl p-3"></div>
+  <p id="cola-sin" class="text-[11px] text-amber-400/90"></p>
   <div class="flex gap-2">
     <button onclick="closeModal('m-cola')" class="btn bg-slate-800 text-slate-300 w-1/2">Cerrar</button>
     <button id="cola-btn" onclick="colaSiguiente()" class="btn bg-emerald-600 text-white w-1/2">Abrir y seguir</button>
   </div>
+  <button onclick="colaReiniciar()" class="text-[11px] text-slate-500 underline cursor-pointer">Reiniciar los envíos de este período</button>
 </div></div>
 
 <!-- Panel admin -->
@@ -133,7 +139,7 @@
 
   <div class="sec">
     <h4 class="text-xs font-bold text-blue-400">Generar o recalcular un período</h4>
-    <p class="text-[11px] text-slate-400">Igual que el libro de Excel: cada UF paga su porcentaje de m² totales (propios + comunes) sobre el presupuesto ordinario y sobre EMSA + SAMSA. La tasa municipal de las UF se reparte por m². Las cocheras pagan un importe fijo y la tasa por m². Se traslada el saldo anterior y se suma la mora sobre el total del período anterior. Si el período ya existe, se conservan los pagos.</p>
+    <p class="text-[11px] text-slate-400">Igual que el libro de Excel: cada UF paga su porcentaje de m² totales (propios + comunes) sobre el presupuesto ordinario y sobre EMSA + SAMSA. La tasa municipal de las UF se reparte por m². Las cocheras reparten por m² su propio total de ordinarias y de tasa municipal. Se traslada el saldo anterior y se suma la mora sobre el total del período anterior. Si el período ya existe, se conservan los pagos.</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div><label class="lbl" for="g-mes">Mes del período</label><input id="g-mes" type="month" class="inp"></div>
       <div><label class="lbl" for="g-venc">Fecha de vencimiento</label><input id="g-venc" type="date" class="inp"></div>
@@ -145,9 +151,8 @@
       <div><label class="lbl" for="g-urlemsa">Enlace web factura EMSA</label><input id="g-urlemsa" placeholder="https://..." class="inp"></div>
       <div><label class="lbl" for="g-urlsamsa">Enlace web factura SAMSA</label><input id="g-urlsamsa" placeholder="https://..." class="inp"></div>
       <div><label class="lbl" for="g-tasa">Tasa municipal total de las UF ($)</label><input id="g-tasa" type="number" step="0.01" class="inp"></div>
-      <div><label class="lbl" for="g-tasam2">Tasa municipal por m² de cochera ($)</label><input id="g-tasam2" type="number" step="0.01" class="inp"></div>
-      <div><label class="lbl" for="g-m2c">Ordinarias por m² de cochera ($, solo cocheras sin importe fijo)</label><input id="g-m2c" type="number" step="0.01" class="inp"></div>
-      <div></div>
+      <div><label class="lbl" for="g-tasam2">Tasa municipal total de las cocheras ($)</label><input id="g-tasam2" type="number" step="0.01" class="inp"></div>
+      <div class="sm:col-span-2"><label class="lbl" for="g-m2c">Ordinarias totales de las cocheras ($)</label><input id="g-m2c" type="number" step="0.01" class="inp"></div>
       <div><label class="lbl" for="g-extuf">Extraordinarias UF (fijo $)</label><input id="g-extuf" type="number" step="0.01" class="inp"></div>
       <div><label class="lbl" for="g-extuc">Extraordinarias cochera (fijo $)</label><input id="g-extuc" type="number" step="0.01" class="inp"></div>
       <div><label class="lbl" for="g-r1">Recargo si paga tarde dentro del mes (%)</label><input id="g-r1" type="number" step="0.01" class="inp"></div>
@@ -156,7 +161,8 @@
     <p class="text-[11px] text-slate-400">El reparto entre pre-consorcio y fideicomiso no se carga: se calcula solo con los m² de las unidades entregadas y sin entregar.</p>
     <div class="flex flex-col sm:flex-row gap-2">
       <button onclick="generarPeriodo()" class="btn bg-blue-600 hover:bg-blue-500 text-white flex-1">Generar / recalcular período</button>
-      <button onclick="abrirCola()" class="btn bg-emerald-600 hover:bg-emerald-500 text-white flex-1"><i class="fa-brands fa-whatsapp"></i> Enviar deudas por WhatsApp</button>
+      <button onclick="abrirCola()" class="btn bg-emerald-600 hover:bg-emerald-500 text-white flex-1"><i class="fa-brands fa-whatsapp"></i> Enviar por WhatsApp</button>
+      <button onclick="copiarGrupo()" class="btn bg-slate-800 hover:bg-slate-700 text-slate-200 flex-1"><i class="fa-regular fa-copy"></i> Copiar mensaje del grupo</button>
     </div>
   </div>
 
@@ -170,9 +176,8 @@
       <div><label class="lbl" for="e-num">N° de UF / N° de UC</label><input id="e-num" type="number" class="inp"></div>
       <div><label class="lbl" for="e-nro">N° de cochera (ej: 1 C, solo UC)</label><input id="e-nro" class="inp"></div>
       <div><label class="lbl" for="e-m2">Superficie total (m²)</label><input id="e-m2" type="number" step="0.01" class="inp"></div>
-      <div><label class="lbl" for="e-ordfijo">Ordinarias fijas de cochera ($, opcional)</label><input id="e-ordfijo" type="number" step="0.01" class="inp"></div>
       <div><label class="lbl" for="e-ocup">Propietario / ocupante</label><input id="e-ocup" class="inp"></div>
-      <div><label class="lbl" for="e-tel">WhatsApp (ej: 3764123456)</label><input id="e-tel" class="inp"></div>
+      <div><label class="lbl" for="e-tel">WhatsApp (varios separados por coma; nombre opcional entre paréntesis)</label><input id="e-tel" class="inp"></div>
       <label class="sm:col-span-2 flex items-center gap-2 text-xs text-slate-300"><input id="e-sin" type="checkbox"> Sin entregar (expensas a cargo del fideicomiso)</label>
       <div><label class="lbl" for="e-ord">Ordinarias ($)</label><input id="e-ord" type="number" step="0.01" class="inp"></div>
       <div><label class="lbl" for="e-serv">EMSA / SAMSA ($)</label><input id="e-serv" type="number" step="0.01" class="inp"></div>
@@ -197,10 +202,16 @@
       <div><label class="lbl" for="n-nro">N° de cochera (ej: 73 C)</label><input id="n-nro" class="inp"></div>
       <div><label class="lbl" for="n-m2">Superficie total (m²)</label><input id="n-m2" type="number" step="0.01" class="inp"></div>
       <div><label class="lbl" for="n-ocup">Propietario</label><input id="n-ocup" class="inp"></div>
-      <div><label class="lbl" for="n-tel">WhatsApp</label><input id="n-tel" class="inp"></div>
+      <div><label class="lbl" for="n-tel">WhatsApp (varios separados por coma)</label><input id="n-tel" class="inp"></div>
       <label class="flex items-end gap-2 text-xs text-slate-300 pb-2"><input id="n-sin" type="checkbox"> Sin entregar</label>
     </div>
     <button onclick="agregarUnidad()" class="btn bg-emerald-600 hover:bg-emerald-500 text-white w-full">Agregar unidad (luego recalculá el período)</button>
+  </div>
+
+  <div class="sec">
+    <h4 class="text-xs font-bold text-emerald-400">Cargar teléfonos desde el Excel de contactos</h4>
+    <p class="text-[11px] text-slate-400">Elegí el archivo telefonos.json. Carga los contactos de propietarios e inquilinos por piso y letra. No lo subas al sitio: se usa desde tu computadora.</p>
+    <input id="f-tel" type="file" accept=".json,application/json" onchange="importarTelefonos(this)" class="w-full text-[11px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer">
   </div>
 
   <div class="sec">
@@ -284,7 +295,22 @@ const clean = o => JSON.parse(JSON.stringify(o));
 const pct = n => (+n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
 const per = () => S.periodos.find(p => p.id === S.pid) || {};
 const ocup = u => u.ocupante ?? S.priv[u.id]?.ocupante ?? '';
-const telOk = t => { const d = String(t || '').replace(/\D/g, ''); return d && d !== '3764000000' ? d : ''; };
+const telOk = t => { const d = String(t || '').replace(/\D/g, ''); return d.length >= 10 && d !== '3764000000' ? d : ''; };
+const parseTels = txt => [...String(txt || '').matchAll(/(\d{10,13})\s*(?:\(([^)]*)\))?/g)].map(m => ({ tel: m[1], nombre: (m[2] || '').trim() }));
+const fmtTels = L => (L || []).map(x => x.tel + (x.nombre ? ` (${x.nombre})` : '')).join(', ');
+// Teléfonos de una unidad (solo admin: viven en 'privado'). Acepta el formato nuevo (lista) y el viejo (un solo número).
+function telsPropios(u) {
+  const o = S.priv[u.id];
+  if (Array.isArray(o?.telefonos)) return o.telefonos.map(x => ({ ...x, tel: telOk(x.tel) })).filter(x => x.tel);
+  const t = telOk(o?.telefono || u.telefono); return t ? [{ tel: t }] : [];
+}
+// Una cochera sin teléfono propio usa el del departamento al que está asignada.
+function tels(u) {
+  const L = telsPropios(u); if (L.length || u.tipo !== 'cochera' || !u.ufVinculada) return L;
+  const m = String(u.ufVinculada).match(/^(\d+)\s*([A-Za-z])/);
+  const uf = m && S.units.find(x => x.tipo === 'depto' && String(x.piso) === m[1] && x.letra === m[2].toUpperCase());
+  return uf ? telsPropios(uf) : [];
+}
 
 function toast(msg, type = 'success') {
   const t = document.createElement('div');
@@ -552,36 +578,85 @@ function descargarPDF() {
 
 /* ---------- WhatsApp ---------- */
 function waUrl(tel, items) {
-  const p = per(), total = items.reduce((a, i) => a + i.t.saldo, 0), nombre = ocup(items[0].u) || 'propietario';
-  const lin = items.map(i => `• *${ufull(i.u)}*: ${$f(i.t.saldo)}` + (i.l.recargo ? ` (incluye mora ${$f(i.l.recargo)})` : '')).join('\n');
-  const msg = `🏢 *TORRE AYMARÁ (Posadas)*\nHola *${nombre}*, el detalle de expensas del período *${plabel(S.pid)}*:\n\n${lin}\n\n💰 *TOTAL: ${$f(total)}*\n📅 *Vencimiento:* ${fdate(p.vencimiento)}\n` +
-    `ℹ️ Pagos posteriores al vencimiento: +${p.recargo1}% el mes siguiente (dentro del mes) o +${p.recargo2}% (mes posterior).\n` +
-    (p.urlEmsa ? `\n🔗 Factura EMSA: ${p.urlEmsa}` : '') + (p.urlSamsa ? `\n🔗 Factura SAMSA: ${p.urlSamsa}` : '') +
+  const p = per(), total = r2(items.reduce((a, i) => a + Math.max(0, i.t.saldo), 0));
+  const lin = items.map(i => {
+    const x = i.t.saldo > 0.005 ? `*${$f(i.t.saldo)}*` : '*al día* ✅';
+    const det = [i.l.deudaAnterior > 0.005 ? `saldo anterior ${$f(i.l.deudaAnterior)}` : '', i.l.recargo > 0.005 ? `mora ${$f(i.l.recargo)}` : ''].filter(Boolean).join(' y ');
+    return `• *${ufull(i.u)}*: ${x}` + (det && i.t.saldo > 0.005 ? ` (incluye ${det})` : '');
+  }).join('\n');
+  const msg = `🏢 *TORRE AYMARÁ (Posadas)*\nHola, te informamos el detalle de expensas del período *${plabel(S.pid)}*:\n\n${lin}\n\n` +
+    (total > 0 ? `💰 *TOTAL A PAGAR: ${$f(total)}*\n` : '') + `📅 *Vencimiento:* ${fdate(p.vencimiento)}\n` +
+    `ℹ️ Pagos posteriores al vencimiento: +${p.recargo1}% el mes siguiente (dentro del mes) o +${p.recargo2}% (mes posterior).` +
+    ([p.urlEmsa && `🔗 Factura EMSA: ${p.urlEmsa}`, p.urlSamsa && `🔗 Factura SAMSA: ${p.urlSamsa}`].filter(Boolean).map(x => '\n' + x).join('')) +
     `\n\n🏦 *Datos bancarios*\n- Banco: ${BANCO.banco}\n- CBU: ${BANCO.cbu}\n- Alias: ${BANCO.alias}\n- CUIT: ${BANCO.cuit}\n\nPor favor enviar el comprobante indicando la unidad. ¡Gracias!`;
-  return `https://wa.me/${tel ? '549' + tel : ''}?text=${encodeURIComponent(msg)}`;
+  const n = tel ? (/^54/.test(tel) && tel.length >= 12 ? tel : '549' + tel) : '';
+  return `https://wa.me/${n}?text=${encodeURIComponent(msg)}`;
 }
 function waUnidad(uid = S.sel) {
   const u = S.units.find(x => x.id === uid), l = S.liqs[uid]; if (!u || !l) return toast('Sin liquidación.', 'error');
-  window.open(waUrl(telOk(S.priv[uid]?.telefono), [{ u, l, t: tot(l) }]), '_blank');
+  window.open(waUrl(tels(u)[0]?.tel || '', [{ u, l, t: tot(l) }]), '_blank');
 }
-function abrirCola() {
-  const g = new Map();
+// Cola de envío: un mensaje por teléfono (agrupa las unidades de cada contacto). Los ya enviados se guardan por período.
+const envios = () => S.priv['envios_' + S.pid] || {};
+function armarCola() {
+  const solo = document.querySelector('input[name="cola-modo"]:checked')?.value === 'deudores';
+  const g = new Map(), sinTel = [];
   S.units.forEach(u => {
     const l = S.liqs[u.id]; if (u.sinEntregar || !l) return;
-    const t = tot(l), tel = telOk(S.priv[u.id]?.telefono); if (t.saldo <= 0.005 || !tel) return;
-    if (!g.has(tel)) g.set(tel, []); g.get(tel).push({ u, l, t });
+    const t = tot(l); if (solo && t.saldo <= 0.005) return;
+    const L = tels(u); if (!L.length) { sinTel.push(uname(u)); return; }
+    L.forEach(x => { if (!g.has(x.tel)) g.set(x.tel, []); g.get(x.tel).push({ u, l, t }); });
   });
-  S.cola = [...g.entries()]; S.ci = 0;
-  if (!S.cola.length) return toast('No hay deudores con teléfono cargado.', 'error');
-  openModal('m-cola'); renderCola();
+  S.colaAll = [...g.entries()]; S.cola = S.colaAll.filter(([tel]) => !envios()[tel]);
+  const fin = !S.cola.length; $('cola-btn').classList.toggle('hidden', fin);
+  $('cola-info').innerHTML = !S.colaAll.length ? 'No hay contactos con teléfono para enviar.' : fin ? 'Listo: todos los contactos ya recibieron el mensaje de este período.' :
+    `<b>Pendientes: ${S.cola.length} de ${S.colaAll.length}</b><br><span class="text-xs text-slate-400">Siguiente: ${S.cola[0][1].map(i => esc(uname(i.u))).join(', ')}</span>`;
+  $('cola-sin').textContent = sinTel.length ? `Sin teléfono (${sinTel.length}): ${sinTel.slice(0, 15).join(', ')}${sinTel.length > 15 ? '…' : ''}` : '';
 }
-function renderCola() {
-  const fin = S.ci >= S.cola.length; $('cola-btn').classList.toggle('hidden', fin);
-  if (fin) { $('cola-info').textContent = 'Listo: se recorrieron todos los contactos.'; return; }
-  const [, it] = S.cola[S.ci];
-  $('cola-info').innerHTML = `<b>${S.ci + 1}/${S.cola.length}</b> · ${esc(ocup(it[0].u))}<br><span class="text-xs text-slate-400">${it.map(i => esc(ufull(i.u))).join(', ')}</span>`;
+function abrirCola() { if (!S.pid) return toast('No hay período seleccionado.', 'error'); openModal('m-cola'); armarCola(); }
+function colaModo() { armarCola(); }
+async function colaSiguiente() {
+  if (!S.cola.length) return;
+  const [tel, it] = S.cola[0]; window.open(waUrl(tel, it), '_blank');
+  const map = { ...envios(), [tel]: hoy() }; S.priv['envios_' + S.pid] = map;
+  armarCola(); await setDoc(doc(db, 'privado', 'envios_' + S.pid), map);
 }
-function colaSiguiente() { const [tel, it] = S.cola[S.ci]; window.open(waUrl(tel, it), '_blank'); S.ci++; renderCola(); }
+async function colaReiniciar() {
+  if (!(await confirmar('Se vuelven a mostrar todos los contactos como pendientes, para enviar de nuevo.', { titulo: '¿Reiniciar los envíos?', boton: 'Reiniciar', peligro: true }))) return;
+  S.priv['envios_' + S.pid] = {}; armarCola(); await setDoc(doc(db, 'privado', 'envios_' + S.pid), {});
+}
+// Mensaje general para pegar en un grupo (sin importes individuales).
+function mensajeGrupo() {
+  const p = per(), url = /^https?:$/.test(location.protocol) ? location.origin + location.pathname : '';
+  return `🏢 *TORRE AYMARÁ (Posadas)*\nYa están cargadas las expensas del período *${plabel(S.pid)}*.\n\n📅 *Vencimiento:* ${fdate(p.vencimiento)}\n` +
+    (url ? `🔎 Consultá el importe de tu unidad (UF o cochera) y descargá tu liquidación en: ${url}\n` : '') +
+    `ℹ️ Pagos posteriores al vencimiento: +${p.recargo1}% el mes siguiente (dentro del mes) o +${p.recargo2}% (mes posterior).` +
+    ([p.urlEmsa && `🔗 Factura EMSA: ${p.urlEmsa}`, p.urlSamsa && `🔗 Factura SAMSA: ${p.urlSamsa}`].filter(Boolean).map(x => '\n' + x).join('')) +
+    `\n\n🏦 *Datos bancarios*\n- Banco: ${BANCO.banco}\n- CBU: ${BANCO.cbu}\n- Alias: ${BANCO.alias}\n- CUIT: ${BANCO.cuit}\n\nPor favor enviar el comprobante indicando UF o cochera. ¡Gracias!`;
+}
+async function copiarGrupo() {
+  if (!S.pid) return toast('No hay período seleccionado.', 'error');
+  const t = mensajeGrupo();
+  try { await navigator.clipboard.writeText(t); }
+  catch (e) { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); }
+  toast('Mensaje copiado. Pegalo en el grupo de WhatsApp.');
+}
+async function importarTelefonos(input) {
+  const file = input.files[0]; if (!file) return;
+  let P; try { P = JSON.parse(await file.text()); } catch (e) { input.value = ''; return toast('El archivo no es un JSON válido.', 'error'); }
+  if (!Array.isArray(P.deptos)) { input.value = ''; return toast('Formato no reconocido. Usá telefonos.json.', 'error'); }
+  const lote = [], sin = []; let c = 0;
+  P.deptos.forEach(e => {
+    const u = S.units.find(x => x.tipo === 'depto' && String(x.piso) === String(e.piso) && x.letra === e.letra);
+    if (!u) return sin.push(`${e.piso}° ${e.letra}`);
+    const L = (e.telefonos || []).map(x => ({ tel: telOk(x.tel), nombre: x.nombre || '', rol: x.rol || '' })).filter(x => x.tel);
+    if (L.length) { lote.push({ id: u.id, L }); c += L.length; }
+  });
+  if (!lote.length) { input.value = ''; return toast('No se encontró ninguna unidad para cargar.', 'error'); }
+  if (!(await confirmar(`Se cargan ${c} contactos de ${lote.length} unidades. Reemplaza los teléfonos que esas unidades tengan hoy. Las demás unidades no se tocan.` + (sin.length ? `\n\nNo están en el padrón: ${sin.join(', ')}.` : ''), { titulo: '¿Cargar los teléfonos?', boton: 'Cargar teléfonos' }))) { input.value = ''; return; }
+  await commit(lote.map(o => b => b.set(doc(db, 'privado', o.id), { telefonos: o.L })));
+  input.value = ''; await cargarPrivados(); renderAll(); poblarEdit(); toast(`Teléfonos cargados: ${c} contactos en ${lote.length} unidades.`);
+}
 
 /* ---------- Administración ---------- */
 function prefillAdmin() {
@@ -589,8 +664,11 @@ function prefillAdmin() {
   $('c-aviso').value = S.gen.aviso || '';
   set('g-mes', m); set('g-venc', m + '-10');
   ['g-nroemsa','g-emsa','g-nrosamsa','g-samsa','g-urlemsa','g-urlsamsa'].forEach(i => set(i, ''));
-  set('g-pres', p.presupuestoOrd ?? 10000000); set('g-tasa', p.tasaUF ?? ''); set('g-tasam2', p.tasaM2Coch ?? 124.86);
-  set('g-m2c', p.valorM2Coch ?? 278.05); set('g-extuf', p.extUF ?? 25000); set('g-extuc', p.extUC ?? 6000);
+  const cs = S.units.filter(u => u.tipo === 'cochera'), m2c = cs.reduce((a, u) => a + u.m2, 0), vis = S.pid === p.id;
+  const totC = campo => vis && cs.some(u => S.liqs[u.id]) ? r2(cs.reduce((a, u) => a + (S.liqs[u.id]?.[campo] || 0), 0)) : '';
+  set('g-pres', p.presupuestoOrd ?? 10000000); set('g-tasa', p.tasaUF ?? '');
+  set('g-tasam2', p.tasaCoch ?? (p.tasaM2Coch != null ? r2(m2c * p.tasaM2Coch) : totC('tasa')));
+  set('g-m2c', p.ordCoch ?? (p.valorM2Coch != null ? r2(m2c * p.valorM2Coch) : totC('ord'))); set('g-extuf', p.extUF ?? 25000); set('g-extuc', p.extUC ?? 6000);
   set('g-r1', p.recargo1 ?? 5); set('g-r2', p.recargo2 ?? 10);
   poblarEdit();
 }
@@ -600,10 +678,10 @@ async function guardarAviso() {
 }
 async function generarPeriodo() {
   const n = id => $(id).value === '' ? null : parseFloat($(id).value), mes = $('g-mes').value, venc = $('g-venc').value;
-  const c = { vencimiento: venc, emsa: n('g-emsa'), samsa: n('g-samsa'), presupuestoOrd: n('g-pres'), tasaUF: n('g-tasa'), tasaM2Coch: n('g-tasam2'),
-    extUF: n('g-extuf'), extUC: n('g-extuc'), valorM2Coch: n('g-m2c'), recargo1: n('g-r1'), recargo2: n('g-r2'),
+  const c = { vencimiento: venc, emsa: n('g-emsa'), samsa: n('g-samsa'), presupuestoOrd: n('g-pres'), tasaUF: n('g-tasa'), tasaCoch: n('g-tasam2'),
+    extUF: n('g-extuf'), extUC: n('g-extuc'), ordCoch: n('g-m2c'), recargo1: n('g-r1'), recargo2: n('g-r2'),
     nroEmsa: $('g-nroemsa').value.trim(), nroSamsa: $('g-nrosamsa').value.trim(), urlEmsa: $('g-urlemsa').value.trim(), urlSamsa: $('g-urlsamsa').value.trim() };
-  const req = ['emsa','samsa','presupuestoOrd','tasaUF','tasaM2Coch','extUF','extUC','valorM2Coch','recargo1','recargo2'];
+  const req = ['emsa','samsa','presupuestoOrd','tasaUF','tasaCoch','extUF','extUC','ordCoch','recargo1','recargo2'];
   if (!mes || !venc || req.some(k => c[k] === null || isNaN(c[k]) || c[k] < 0)) return toast('Completá el mes, el vencimiento y todos los importes.', 'error');
   if (!S.units.length) return toast('No hay unidades cargadas.', 'error');
   const existe = S.periodos.some(x => x.id === mes);
@@ -611,14 +689,17 @@ async function generarPeriodo() {
 
   const prevId = S.periodos.map(x => x.id).filter(i => i < mes).sort().pop(), pc = S.periodos.find(x => x.id === prevId);
   const prevL = prevId ? await leerLiqs(prevId) : {}, curL = existe ? await leerLiqs(mes) : {};
-  // Las UF (entregadas o no, con Amenities) se reparten por m² totales. Las cocheras: importe fijo y tasa por m².
+  // Las UF (entregadas o no, con Amenities) se reparten por m² totales. Las cocheras reparten por m² su propio total.
   const ufs = S.units.filter(u => u.tipo === 'depto'), w = ufs.map(u => u.m2), idx = {};
   ufs.forEach((u, i) => idx[u.id] = i);
+  const cos = S.units.filter(u => u.tipo === 'cochera'), wc = cos.map(u => u.m2), idc = {};
+  cos.forEach((u, i) => idc[u.id] = i);
+  const ordC = prorratear(wc, c.ordCoch), tasC = prorratear(wc, c.tasaCoch);
   const ordUF = prorratear(w, c.presupuestoOrd), srvUF = prorratear(w, r2(c.emsa + c.samsa)), tasUF = prorratear(w, c.tasaUF), ops = [];
   S.units.forEach(u => {
     const i = idx[u.id];
     const l = u.tipo === 'depto' ? { ord: ordUF[i], serv: srvUF[i], ext: c.extUF, tasa: tasUF[i] }
-      : { ord: u.ordFijo ?? r2(u.m2 * c.valorM2Coch), serv: 0, ext: c.extUC, tasa: r2(u.m2 * c.tasaM2Coch) };
+      : { ord: ordC[idc[u.id]], serv: 0, ext: c.extUC, tasa: tasC[idc[u.id]] };
     Object.assign(l, { deudaAnterior: 0, recargo: 0, pagos: curL[u.id]?.pagos || [] });
     const pv = prevL[u.id];
     if (u.sinEntregar) { l.fid = true; l.pagos = []; }                       // a cargo del fideicomiso: no arrastra saldo ni mora
@@ -629,6 +710,7 @@ async function generarPeriodo() {
   ops.push(b => b.set(doc(db, 'config', 'general'), { periodoActual: mes }, { merge: true }));
   await commit(ops);
   S.pid = mes; await cargar(); closeModal('m-admin'); toast(`Período ${plabel(mes)} ${existe ? 'recalculado' : 'generado'}.`);
+  if (!existe && await confirmar(`Se generó la liquidación de ${plabel(mes)}. ¿Querés enviar ahora las expensas por WhatsApp?`, { titulo: 'Período generado', boton: 'Ir a enviar' })) abrirCola();
 }
 function poblarEdit() {
   const t = $('e-tipo').value;
@@ -639,8 +721,8 @@ function cargarEdit() {
   const u = S.units.find(x => x.id === $('e-unit').value), set = (i, v) => $(i).value = v ?? '';
   if (!u) return;
   const l = S.liqs[u.id], pv = S.priv[u.id] || {}, dep = u.tipo === 'depto';
-  set('e-piso', u.piso); set('e-letra', dep ? u.letra : ''); set('e-num', dep ? u.uf : u.uc); set('e-nro', dep ? '' : u.nro); set('e-ordfijo', dep ? '' : u.ordFijo);
-  set('e-m2', u.m2); set('e-ocup', ocup(u)); set('e-tel', pv.telefono); $('e-sin').checked = !!u.sinEntregar;
+  set('e-piso', u.piso); set('e-letra', dep ? u.letra : ''); set('e-num', dep ? u.uf : u.uc); set('e-nro', dep ? '' : u.nro);
+  set('e-m2', u.m2); set('e-ocup', ocup(u)); set('e-tel', fmtTels(telsPropios(u))); $('e-sin').checked = !!u.sinEntregar;
   set('e-ord', l?.ord); set('e-serv', l?.serv); set('e-ext', l?.ext); set('e-tasa', l?.tasa); set('e-deuda', l?.deudaAnterior); set('e-rec', l?.recargo);
 }
 async function guardarUnidad() {
@@ -649,8 +731,8 @@ async function guardarUnidad() {
   if (!(m2 > 0) || !piso || isNaN(numero) || (dep && !$('e-letra').value.trim())) return toast('Completá piso, letra (UF), número y superficie.', 'error');
   Object.assign(u, { piso: dep && !isNaN(+piso) ? +piso : piso, m2, sinEntregar: $('e-sin').checked, ocupante: $('e-ocup').value.trim() });
   if (dep) Object.assign(u, { letra: $('e-letra').value.trim().toUpperCase(), uf: numero });
-  else Object.assign(u, { uc: numero, nro: $('e-nro').value.trim(), ordFijo: $('e-ordfijo').value === '' ? null : parseFloat($('e-ordfijo').value) });
-  S.priv[u.id] = { telefono: $('e-tel').value.trim() };
+  else Object.assign(u, { uc: numero, nro: $('e-nro').value.trim() });
+  S.priv[u.id] = { telefonos: parseTels($('e-tel').value) };
   const num = i => parseFloat($(i).value) || 0, { id, ...resto } = u, ops = [
     b => b.set(doc(db, 'unidades', u.id), clean(resto)),
     b => b.set(doc(db, 'privado', u.id), S.priv[u.id])];
@@ -669,7 +751,7 @@ async function agregarUnidad() {
   const id = `${tipo}_${Date.now().toString(36)}`, orden = Math.max(0, ...S.units.filter(x => x.tipo === tipo).map(x => x.orden || 0)) + 1;
   const base = { tipo, m2, orden, sinEntregar: $('n-sin').checked, ocupante: $('n-ocup').value.trim() };
   const u = dep ? { ...base, piso: isNaN(+piso) ? piso : +piso, letra, uf: numero } : { ...base, piso, uc: numero, nro: $('n-nro').value.trim() };
-  const pv = { telefono: $('n-tel').value.trim() };
+  const pv = { telefonos: parseTels($('n-tel').value) };
   await commit([b => b.set(doc(db, 'unidades', id), clean(u)), b => b.set(doc(db, 'privado', id), pv)]);
   S.units.push({ id, ...u }); S.units.sort(porNumero); S.priv[id] = pv; renderAll(); poblarEdit();
   ['n-piso','n-letra','n-num','n-nro','n-m2','n-ocup','n-tel'].forEach(i => $(i).value = ''); toast(`${uname(u)} agregada. Recalculá el período para incluirla en la liquidación.`);
@@ -686,13 +768,13 @@ async function eliminarPeriodo() {
   if (!(await confirmar(`Se borran todas las liquidaciones y pagos de ${plabel(id)}. Esta acción no se puede deshacer.`, { titulo: `¿Eliminar el período ${plabel(id)}?`, boton: 'Eliminar período', peligro: true }))) return;
   const liq = await leerLiqs(id), ops = Object.keys(liq).map(k => b => b.delete(doc(db, 'periodos', id, 'liq', k)));
   const resto = S.periodos.map(x => x.id).filter(x => x !== id).sort().pop() || null;
-  ops.push(b => b.delete(doc(db, 'periodos', id)), b => b.set(doc(db, 'config', 'general'), { periodoActual: resto }, { merge: true }));
+  ops.push(b => b.delete(doc(db, 'periodos', id)), b => b.delete(doc(db, 'privado', 'envios_' + id)), b => b.set(doc(db, 'config', 'general'), { periodoActual: resto }, { merge: true }));
   await commit(ops); S.pid = resto; await cargar(); closeModal('m-admin'); toast(`Período ${plabel(id)} eliminado.`);
 }
 
 /* ---------- Inicio ---------- */
 Object.assign(window, Object.fromEntries(Object.entries({
-  cambiarPeriodo, login, salir, adminBtn, tab, buscar, pagina, detalle, registrarPago, quitarPago, descargarPDF, waUnidad, abrirCola, colaSiguiente,
+  cambiarPeriodo, login, salir, adminBtn, tab, buscar, pagina, detalle, registrarPago, quitarPago, descargarPDF, waUnidad, abrirCola, colaModo, colaSiguiente, colaReiniciar, copiarGrupo, importarTelefonos,
   guardarAviso, generarPeriodo, poblarEdit, cargarEdit, guardarUnidad, agregarUnidad, borrarUnidad, eliminarPeriodo, closeModal
 }).map(([k, f]) => [k, safe(f)])));
 shell('depto'); shell('cochera'); tab('depto');
