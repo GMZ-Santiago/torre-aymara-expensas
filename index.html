@@ -1,1334 +1,703 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Expensas | Edificio Torre Aymará - Posadas</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script>
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    </script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Expensas | Edificio Torre Aymará - Posadas</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style type="text/tailwindcss">
+@layer components {
+  .inp { @apply w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500; }
+  .lbl { @apply block text-[11px] text-slate-400 mb-1; }
+  .btn { @apply px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-colors inline-flex items-center justify-center gap-1.5; }
+  .card { @apply bg-slate-950/60 border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl; }
+  .sec { @apply bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-3; }
+  .modal { @apply fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50; }
+  .box { @apply bg-slate-900 border border-slate-800 rounded-2xl w-full p-5 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto; }
+}
+</style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans antialiased selection:bg-blue-500 selection:text-white min-h-screen flex flex-col justify-between">
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between">
 
-    <div id="toast-container" class="fixed bottom-5 right-5 z-50 space-y-2 px-4 sm:px-0"></div>
+<div id="toasts" class="fixed bottom-5 right-5 z-[60] space-y-2 px-4"></div>
 
-    <header class="relative bg-slate-950 border-b border-slate-800 shadow-2xl overflow-hidden">
-        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#3b82f6_1px,transparent_1px)] [background-size:16px_16px]"></div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 relative z-10 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-start">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/20 shrink-0">
-                        <i class="fa-solid fa-building-columns text-white text-lg sm:text-xl"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white flex items-center gap-2">
-                            Torre Aymará
-                        </h1>
-                        <p class="text-[11px] sm:text-xs text-slate-400 flex items-center gap-1.5 mt-0.5">
-                            <i class="fa-solid fa-location-dot text-blue-500"></i> Beethoven 1650 • Posadas, Misiones
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-3 bg-slate-900/80 p-2 rounded-xl border border-slate-800 backdrop-blur-md">
-                <div id="role-badge-container" class="px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 bg-slate-800 text-slate-300">
-                    <span id="role-dot" class="w-2 h-2 rounded-full bg-slate-400"></span>
-                    <span id="role-text">Residente</span>
-                </div>
-                <button onclick="handleAdminAction()" id="admin-btn" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-sm shadow-blue-600/30 flex items-center gap-1.5 cursor-pointer">
-                    <i class="fa-solid fa-lock" id="admin-btn-icon"></i> <span id="admin-btn-text">Admin</span>
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 w-full space-y-6 flex-grow">
-
-        <section class="bg-gradient-to-r from-blue-950/40 via-slate-950/80 to-slate-950 border border-blue-500/30 rounded-2xl p-4 sm:p-5 shadow-xl flex items-start gap-3.5">
-            <div class="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
-                <i class="fa-solid fa-bullhorn"></i>
-            </div>
-            <div class="space-y-1 flex-grow">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-blue-400">Cartelera y Avisos de la Administración</h2>
-                    <span class="text-[10px] text-slate-400"><i class="fa-regular fa-clock mr-1"></i> Actualizado</span>
-                </div>
-                <p id="admin-aviso-text" class="text-xs sm:text-sm text-slate-200">
-                    Estimados propietarios: Recuerden que el vencimiento de las expensas opera el día 10 de cada mes. Por favor enviar comprobante indicando UF o Cochera.
-                </p>
-            </div>
-        </section>
-
-        <section class="bg-slate-950/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl pointer-events-none"></div>
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                <div>
-                    <h2 class="text-xs sm:text-sm font-bold uppercase tracking-wider text-blue-400 flex items-center gap-2">
-                        <i class="fa-solid fa-wallet"></i> Coordenadas Bancarias Oficiales
-                    </h2>
-                    <p class="text-[11px] sm:text-xs text-slate-400 mt-0.5">Enviar comprobante indicando UF o Cochera a administración.</p>
-                </div>
-                <div class="text-xs font-medium bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-slate-300 flex items-center gap-2 shrink-0">
-                    <i class="fa-regular fa-calendar-days text-blue-400"></i> Venc.: <strong id="header-vencimiento" class="text-white">10/12/2026</strong>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs sm:text-sm">
-                <div class="bg-slate-900/90 border border-slate-800/80 p-3 rounded-xl">
-                    <span class="text-[11px] text-slate-400 block font-medium">Banco Titular</span>
-                    <span class="font-bold text-white mt-0.5 block">Galicia (Fideicomiso Aymara)</span>
-                </div>
-                <div class="bg-slate-900/90 border border-slate-800/80 p-3 rounded-xl">
-                    <span class="text-[11px] text-slate-400 block font-medium">CBU</span>
-                    <span class="font-mono font-bold text-blue-400 mt-0.5 block tracking-wide">0070070220000012166808</span>
-                </div>
-                <div class="bg-slate-900/90 border border-slate-800/80 p-3 rounded-xl">
-                    <span class="text-[11px] text-slate-400 block font-medium">Alias CBU</span>
-                    <span class="font-mono font-bold text-emerald-400 mt-0.5 block tracking-wide">EDI.TORRE.AYMARA</span>
-                </div>
-                <div class="bg-slate-900/90 border border-slate-800/80 p-3 rounded-xl">
-                    <span class="text-[11px] text-slate-400 block font-medium">CUIT</span>
-                    <span class="font-mono font-bold text-white mt-0.5 block">30-71253281-1</span>
-                </div>
-            </div>
-
-            <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-between gap-3 text-xs text-slate-400">
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-                    <span><i class="fa-solid fa-phone text-blue-400 mr-1"></i> Rosana Biale: <strong class="text-slate-200">3764 581128</strong></span>
-                    <span><i class="fa-solid fa-phone text-blue-400 mr-1"></i> Alfredo Gómez: <strong class="text-slate-200">3772 521831</strong></span>
-                </div>
-                <span class="text-amber-400/90 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Periodo: <strong id="header-periodo" class="text-white">DIC-26</strong></span>
-            </div>
-        </section>
-
-        <div class="flex border-b border-slate-800 gap-4 sm:gap-8 overflow-x-auto">
-            <button onclick="switchTab('deptos')" id="tab-btn-deptos" class="pb-3 text-xs sm:text-sm font-bold border-b-2 border-blue-500 text-blue-400 transition-colors flex items-center gap-2 cursor-pointer shrink-0">
-                <i class="fa-solid fa-house"></i> Unidades Funcionales (<span id="count-uf-lbl">111</span>)
-            </button>
-            <button onclick="switchTab('cocheras')" id="tab-btn-cocheras" class="pb-3 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2 cursor-pointer shrink-0">
-                <i class="fa-solid fa-car"></i> Cocheras (<span id="count-coch-lbl">72</span> UCs)
-            </button>
-            <button onclick="switchTab('gastos')" id="tab-btn-gastos" class="pb-3 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2 cursor-pointer shrink-0">
-                <i class="fa-solid fa-chart-pie"></i> Servicios y Facturas (EMSA/SAMSA)
-            </button>
-        </div>
-
-        <div id="section-deptos" class="space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div class="text-xs text-slate-400">
-                    Padrón oficial de UF. <span class="text-blue-400 font-medium">Tocá cualquier fila para ver el detalle y descargar PDF.</span>
-                </div>
-                <div class="relative w-full sm:w-72">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
-                    <input type="text" id="search-input" placeholder="Buscar UF o Propietario..." oninput="filterTable()" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-                </div>
-            </div>
-
-            <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden backdrop-blur-xl">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs whitespace-nowrap sm:whitespace-normal">
-                        <thead>
-                            <tr class="bg-slate-900/90 text-slate-400 uppercase tracking-wider border-b border-slate-800 font-bold">
-                                <th class="p-3.5">Piso / UF</th>
-                                <th class="p-3.5">Superficie</th>
-                                <th class="p-3.5">Propietario / Ocupante</th>
-                                <th class="p-3.5">Ordinarias</th>
-                                <th class="p-3.5">Extraordinarias</th>
-                                <th class="p-3.5">Tasa Municipal</th>
-                                <th class="p-3.5 font-bold text-slate-200">Total a Pagar</th>
-                                <th class="p-3.5 text-center">Estado</th>
-                                <th class="p-3.5 text-center admin-col-header hidden">WhatsApp Admin</th>
-                            </tr>
-                        </thead>
-                        <tbody id="deptos-tbody" class="divide-y divide-slate-800/60"></tbody>
-                    </table>
-                </div>
-                <div class="p-3.5 bg-slate-900/50 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs">
-                    <span id="deptos-pagination-info" class="text-slate-400">Mostrando 1-10 de UF</span>
-                    <div class="flex gap-2">
-                        <button onclick="changePage('deptos', -1)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg cursor-pointer">Anterior</button>
-                        <button onclick="changePage('deptos', 1)" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg cursor-pointer font-semibold">Siguiente</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="section-cocheras" class="hidden space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                <div class="text-xs text-slate-400">
-                    Padrón de Cocheras (UCs). <span class="text-blue-400 font-medium">Tocá cualquier cochera para ver detalles y PDF.</span>
-                </div>
-                <div class="relative w-full sm:w-72">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-500 text-xs"></i>
-                    <input type="text" id="search-coch-input" placeholder="Buscar UC o Propietario..." oninput="filterCochTable()" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-                </div>
-            </div>
-
-            <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl shadow-xl overflow-hidden backdrop-blur-xl">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs whitespace-nowrap sm:whitespace-normal">
-                        <thead>
-                            <tr class="bg-slate-900/90 text-slate-400 uppercase tracking-wider border-b border-slate-800 font-bold">
-                                <th class="p-3.5">UC / Cochera</th>
-                                <th class="p-3.5">Superficie</th>
-                                <th class="p-3.5">Propietario / Titular</th>
-                                <th class="p-3.5">Ordinarias</th>
-                                <th class="p-3.5">Extraordinarias</th>
-                                <th class="p-3.5">Tasa Municipal</th>
-                                <th class="p-3.5 font-bold text-slate-200">Total Cochera</th>
-                                <th class="p-3.5 text-center">Estado</th>
-                                <th class="p-3.5 text-center admin-col-header hidden">WhatsApp Admin</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cocheras-tbody" class="divide-y divide-slate-800/60"></tbody>
-                    </table>
-                </div>
-                <div class="p-3.5 bg-slate-900/50 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs">
-                    <span id="cocheras-pagination-info" class="text-slate-400">Mostrando 1-10 de UC</span>
-                    <div class="flex gap-2">
-                        <button onclick="changePage('cocheras', -1)" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg cursor-pointer">Anterior</button>
-                        <button onclick="changePage('cocheras', 1)" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg cursor-pointer font-semibold">Siguiente</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="section-gastos" class="hidden space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-slate-950/60 border border-slate-800/80 p-5 rounded-2xl">
-                    <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-2 mb-2">
-                        <i class="fa-solid fa-bolt"></i> EMSA (Energía)
-                    </span>
-                    <span id="stat-emsa" class="text-xl sm:text-2xl font-black text-white">$ 1.736.866,81</span>
-                    <span id="factura-emsa-nro" class="text-xs text-slate-400 block mt-1">Factura N°: S/N</span>
-                </div>
-                <div class="bg-slate-950/60 border border-slate-800/80 p-5 rounded-2xl">
-                    <span class="text-xs font-semibold text-blue-400 uppercase tracking-wider flex items-center gap-2 mb-2">
-                        <i class="fa-solid fa-droplet"></i> SAMSA (Agua)
-                    </span>
-                    <span id="stat-samsa" class="text-xl sm:text-2xl font-black text-white">$ 5.988.940,99</span>
-                    <span id="factura-samsa-nro" class="text-xs text-slate-400 block mt-1">Factura N°: S/N</span>
-                </div>
-                <div class="bg-gradient-to-br from-blue-900/40 to-slate-950 border border-blue-500/30 p-5 rounded-2xl">
-                    <span class="text-xs font-semibold text-emerald-400 uppercase tracking-wider flex items-center gap-2 mb-2">
-                        <i class="fa-solid fa-file-invoice-dollar"></i> Total Servicios
-                    </span>
-                    <span id="stat-total-servicios" class="text-xl sm:text-2xl font-black text-white">$ 7.725.807,80</span>
-                    <span class="text-xs text-slate-300 block mt-1">Fondo Fiduciario Torre Aymará</span>
-                </div>
-            </div>
-
-            <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl space-y-4">
-                <div class="flex justify-between items-center">
-                    <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-file-invoice"></i> Comprobantes y Facturas del Periodo Actual (<span id="factura-periodo-lbl">DIC-26</span>)
-                    </h3>
-                    <span class="text-[11px] text-emerald-400"><i class="fa-solid fa-check-circle mr-1"></i> Conectado a Firebase Firestore</span>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                        <span class="text-amber-400 font-bold block"><i class="fa-solid fa-bolt mr-1"></i> EMSA Energía Eléctrica</span>
-                        <div class="flex justify-between text-slate-300 pt-1">
-                            <span>N° Factura: <strong id="lbl-nro-emsa" class="text-white">--</strong></span>
-                            <span>Importe: <strong id="lbl-imp-emsa" class="text-white">$ 1.736.866,81</strong></span>
-                        </div>
-                    </div>
-                    <div class="bg-slate-900/90 p-3.5 rounded-xl border border-slate-800 space-y-1">
-                        <span class="text-blue-400 font-bold block"><i class="fa-solid fa-droplet mr-1"></i> SAMSA Agua Potable</span>
-                        <div class="flex justify-between text-slate-300 pt-1">
-                            <span>N° Factura: <strong id="lbl-nro-samsa" class="text-white">--</strong></span>
-                            <span>Importe: <strong id="lbl-imp-samsa" class="text-white">$ 5.988.940,99</strong></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <div id="detail-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <div>
-                    <span id="modal-subtitle" class="text-[11px] font-semibold text-blue-400 uppercase tracking-wider">Unidad</span>
-                    <h3 id="modal-title" class="text-base sm:text-lg font-bold text-white">Detalle de Expensas</h3>
-                </div>
-                <button onclick="closeModal('detail-modal')" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div id="modal-body" class="space-y-3 text-xs"></div>
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3 border-t border-slate-800">
-                <div id="admin-status-toggle-container" class="w-full sm:w-auto"></div>
-                <div class="flex flex-wrap gap-2 w-full sm:w-auto justify-end">
-                    <button onclick="downloadUnitPDF()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-medium transition-colors cursor-pointer flex items-center gap-1.5 text-xs">
-                        <i class="fa-solid fa-file-pdf"></i> Descargar PDF
-                    </button>
-                    <button id="modal-whatsapp-btn" onclick="sendModalWhatsApp()" class="hidden px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-medium transition-colors cursor-pointer items-center gap-1.5 text-xs">
-                        <i class="fa-brands fa-whatsapp"></i> WhatsApp
-                    </button>
-                    <button onclick="closeModal('detail-modal')" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl font-medium transition-colors cursor-pointer text-xs">Cerrar</button>
-                </div>
-            </div>
-        </div>
+<header class="bg-slate-950 border-b border-slate-800 shadow-2xl">
+  <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+    <div class="flex items-center gap-3">
+      <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center"><i class="fa-solid fa-building-columns text-white text-lg"></i></div>
+      <div>
+        <h1 class="text-xl font-black text-white">Torre Aymará</h1>
+        <p class="text-xs text-slate-400"><i class="fa-solid fa-location-dot text-blue-500"></i> Beethoven 1650 • Posadas, Misiones</p>
+      </div>
     </div>
-
-    <div id="pin-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-sm w-full p-5 sm:p-6 shadow-2xl space-y-4">
-            <div class="text-center space-y-1">
-                <div class="w-12 h-12 rounded-full bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto mb-3">
-                    <i class="fa-solid fa-shield-halved text-lg"></i>
-                </div>
-                <h3 class="text-base font-bold text-white">Acceso Restringido</h3>
-                <p class="text-xs text-slate-400">PIN de administración:</p>
-            </div>
-            <input type="password" id="pin-input" placeholder="••••" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-center text-lg tracking-widest text-white focus:outline-none focus:border-blue-500" maxlength="4">
-            <div class="flex gap-2">
-                <button onclick="closeModal('pin-modal')" class="w-1/2 py-2.5 bg-slate-800 text-slate-300 rounded-xl text-xs font-medium cursor-pointer">Cancelar</button>
-                <button onclick="verifyPin()" class="w-1/2 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-semibold cursor-pointer">Ingresar</button>
-            </div>
-        </div>
+    <div class="flex items-center gap-2 bg-slate-900/80 p-2 rounded-xl border border-slate-800">
+      <span id="role" class="px-3 py-1.5 rounded-lg text-xs bg-slate-800 text-slate-300">Residente</span>
+      <button id="btn-admin" onclick="adminBtn()" class="btn bg-blue-600 hover:bg-blue-500 text-white"><i class="fa-solid fa-lock"></i> Ingresar</button>
+      <button id="btn-out" onclick="salir()" class="btn bg-slate-800 hover:bg-slate-700 text-slate-200 hidden">Salir</button>
     </div>
+  </div>
+</header>
 
-    <div id="admin-panel-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm hidden flex items-center justify-center p-3 sm:p-4 z-50">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-gears text-blue-400"></i> Panel de Gestión en la Nube
-                </h3>
-                <button onclick="closeModal('admin-panel-modal')" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
-            </div>
+<main class="max-w-7xl mx-auto px-4 py-6 w-full space-y-5 flex-grow">
+  <div id="err" class="hidden bg-rose-950/60 border border-rose-500/40 text-rose-200 rounded-xl p-3 text-xs"></div>
 
-            <div class="bg-slate-950 p-3.5 sm:p-4 rounded-xl border border-slate-800 space-y-3">
-                <h4 class="text-xs font-bold text-emerald-400 uppercase tracking-wider"><i class="fa-solid fa-calendar-days mr-1"></i> Configuración General y Avisos</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Periodo (Ej: DIC-26)</label>
-                        <input type="text" id="config-periodo" value="DIC-26" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Fecha Vencimiento</label>
-                        <input type="text" id="config-vencimiento" value="10/12/2026" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[11px] text-slate-400 mb-1">Mensaje en Cartelera Virtual</label>
-                    <textarea id="config-aviso" rows="2" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 resize-none">Estimados propietarios: Recuerden que el vencimiento de las expensas opera el día 10 de cada mes. Por favor enviar comprobante indicando UF o Cochera.</textarea>
-                </div>
-            </div>
-            
-            <div class="bg-slate-950 p-3.5 sm:p-4 rounded-xl border border-slate-800 space-y-3">
-                <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider"><i class="fa-solid fa-link mr-1"></i> Enlaces Web de las Facturas (PDF) para WhatsApp</h4>
-                <div class="space-y-3 pt-1">
-                    <div>
-                        <label class="block text-[10px] text-amber-400 mb-1 font-semibold">Enlace Web Factura EMSA</label>
-                        <input type="text" id="input-url-emsa" placeholder="https://..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-blue-400 mb-1 font-semibold">Enlace Web Factura SAMSA</label>
-                        <input type="text" id="input-url-samsa" placeholder="https://..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                    </div>
-                </div>
-            </div>
+  <section class="bg-blue-950/30 border border-blue-500/30 rounded-2xl p-4 flex gap-3">
+    <i class="fa-solid fa-bullhorn text-blue-400 mt-1"></i>
+    <div><h2 class="text-xs font-bold text-blue-400">Avisos de la administración</h2><p id="aviso" class="text-sm text-slate-200 mt-1"></p></div>
+  </section>
 
-            <div class="bg-slate-950 p-3.5 sm:p-4 rounded-xl border border-slate-800 space-y-3">
-                <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider"><i class="fa-solid fa-file-pdf mr-1"></i> Importar Facturas Oficiales (PDF) y Prorratear</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-2">
-                        <span class="text-[11px] font-bold text-amber-400 block"><i class="fa-solid fa-bolt mr-1"></i> Factura EMSA (PDF)</span>
-                        <input type="file" id="pdf-emsa-file" accept=".pdf" onchange="leerFacturaPDF(this, 'emsa')" class="w-full text-[10px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-600 file:text-white hover:file:bg-amber-500 cursor-pointer">
-                        <div class="text-[10px] text-slate-400">N°: <span id="preview-nro-emsa" class="text-white font-mono">A.0005.01701276</span></div>
-                    </div>
-                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 space-y-2">
-                        <span class="text-[11px] font-bold text-blue-400 block"><i class="fa-solid fa-droplet mr-1"></i> Factura SAMSA (PDF)</span>
-                        <input type="file" id="pdf-samsa-file" accept=".pdf" onchange="leerFacturaPDF(this, 'samsa')" class="w-full text-[10px] text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-500 cursor-pointer">
-                        <div class="text-[10px] text-slate-400">N°: <span id="preview-nro-samsa" class="text-white font-mono">A004-00369509</span></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Importe EMSA ($)</label>
-                        <input type="number" id="bulk-emsa" value="1736866.81" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Importe SAMSA ($)</label>
-                        <input type="number" id="bulk-samsa" value="5988940.99" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Extraordinarias UF (Fijo $)</label>
-                        <input type="number" id="bulk-ext-uf" value="25000.00" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Extraordinarias UC / Cochera (Fijo $)</label>
-                        <input type="number" id="bulk-ext-uc" value="6000.00" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
-                    </div>
-                </div>
-
-                <div class="pt-2">
-                    <label class="block text-[11px] text-slate-400 mb-1">Total Tasa Municipal a Prorratear ($)</label>
-                    <input type="number" id="bulk-tasa-total" value="1178491.59" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
-                </div>
-
-                <div class="flex flex-col sm:flex-row gap-2 pt-2">
-                    <button onclick="applyGlobalBulkServices()" class="flex-1 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold cursor-pointer">Aplicar Prorrateo y Extraordinarias (UF y UC)</button>
-                    <button onclick="sendBulkWhatsAppBroadcast()" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5">
-                        <i class="fa-brands fa-whatsapp"></i> Envío Masivo WhatsApp
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-slate-950 p-3.5 sm:p-4 rounded-xl border border-slate-800 space-y-3">
-                <h4 class="text-xs font-bold text-indigo-400 uppercase tracking-wider"><i class="fa-solid fa-pen-to-square mr-1"></i> Edición, Teléfono y Eliminación de Unidades</h4>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Tipo</label>
-                        <select id="edit-type" onchange="populateAdminUnitSelect()" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                            <option value="depto">Unidad Funcional (UF)</option>
-                            <option value="cochera">Cochera (UC)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[11px] text-slate-400 mb-1">Seleccionar UF / UC</label>
-                        <select id="edit-unit-select" onchange="loadUnitDataToAdminForm()" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200"></select>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Propietario / Ocupante</label>
-                        <input type="text" id="edit-ocupante" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">WhatsApp (Ej: 3764123456)</label>
-                        <input type="text" id="edit-telefono" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" placeholder="3764...">
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[10px] text-slate-400 mb-1">Ordinarias ($)</label>
-                    <input type="number" id="edit-ord" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
-                </div>
-                <div class="flex gap-2 pt-1">
-                    <button onclick="saveIndividualUnitEdit()" class="flex-1 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold cursor-pointer">Guardar Cambios</button>
-                    <button onclick="deleteUnitByAdmin()" class="px-4 py-2 bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 rounded-lg text-xs font-semibold transition-colors cursor-pointer" title="Eliminar esta unidad del edificio">
-                        <i class="fa-solid fa-trash"></i> Eliminar
-                    </button>
-                </div>
-            </div>
-
-            <div class="bg-slate-950 p-3.5 sm:p-4 rounded-xl border border-slate-800 space-y-3">
-                <h4 class="text-xs font-bold text-blue-400 uppercase tracking-wider"><i class="fa-solid fa-plus-circle mr-1"></i> Agregar Nueva Unidad (UF o Cochera)</h4>
-                <p class="text-[10px] text-slate-400">Permite registrar nuevas unidades que vayan siendo terminadas o entregadas en el edificio.</p>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Tipo</label>
-                        <select id="new-unit-type" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                            <option value="depto">Unidad Funcional (UF)</option>
-                            <option value="cochera">Cochera (UC)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Identificador (Ej: 19° A o UC 73)</label>
-                        <input type="text" id="new-unit-name" placeholder="Ej: 19° A" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Superficie (m²)</label>
-                        <input type="number" id="new-unit-m2" placeholder="70.00" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200" step="0.01">
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">Propietario / Ocupante</label>
-                        <input type="text" id="new-unit-ocupante" placeholder="Nombre y Apellido" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-slate-400 mb-1">WhatsApp (Ej: 3764123456)</label>
-                        <input type="text" id="new-unit-tel" placeholder="3764..." class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-xs text-slate-200">
-                    </div>
-                </div>
-                <button onclick="addNewUnitByAdmin()" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold cursor-pointer flex items-center justify-center gap-1.5">
-                    <i class="fa-solid fa-plus"></i> Registrar y Guardar Nueva Unidad en la Nube
-                </button>
-            </div>
-
-            <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
-                <button onclick="closeModal('admin-panel-modal')" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-medium cursor-pointer">Cerrar</button>
-            </div>
-        </div>
+  <section class="card space-y-4">
+    <div class="flex flex-col sm:flex-row justify-between gap-3">
+      <div>
+        <h2 class="text-sm font-bold text-blue-400"><i class="fa-solid fa-wallet"></i> Datos bancarios oficiales</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Enviar comprobante indicando UF o cochera.</p>
+      </div>
+      <div class="flex flex-wrap items-center gap-2 text-xs">
+        <label for="sel-periodo" class="text-slate-400">Período</label>
+        <select id="sel-periodo" onchange="cambiarPeriodo(this.value)" class="inp !w-auto"></select>
+        <span class="bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg">Vence: <strong id="h-venc" class="text-white">—</strong></span>
+      </div>
     </div>
-
-    <footer class="border-t border-slate-800/80 bg-slate-950 py-6 text-center text-xs text-slate-500 px-4">
-        <p>Edificio Torre Aymará • Sistema Integral en la Nube con Firebase y Vercel</p>
-    </footer>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyD26xo3g7jONLQEBxOnxTyj0rt3sH0MiDw",
-            authDomain: "torre-aymara-app.firebaseapp.com",
-            projectId: "torre-aymara-app",
-            storageBucket: "torre-aymara-app.firebasestorage.app",
-            messagingSenderId: "702123606766",
-            appId: "1:702123606766:web:5eda7a16b5308678f0e9ff"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        window.db = db;
-        window.collection = collection;
-        window.getDocs = getDocs;
-        window.doc = doc;
-        window.setDoc = setDoc;
-        window.updateDoc = updateDoc;
-        window.deleteDoc = deleteDoc;
-
-        window.cargarDatosDesdeFirebase();
-    </script>
-
-    <script>
-        let isAdmin = false;
-        let selectedId = null;
-        let selectedType = 'depto';
-
-        let deptosPage = 1;
-        let cocherasPage = 1;
-        const pageSize = 10;
-
-        let globalPeriodo = "DIC-26";
-        let globalVencimiento = "10/12/2026";
-        let currentEmsa = 1736866.81;
-        let currentSamsa = 5988940.99;
-        let nroFacturaEmsa = "A.0005.01701276";
-        let nroFacturaSamsa = "A004-00369509";
-        
-        let urlFacturaEmsa = "";
-        let urlFacturaSamsa = "";
-
-        let deptosData = [];
-        let cocherasData = [];
-
-        const defaultDeptos = [
-            { id: 1, uf: "4° B", m2: 70.81, ocupante: "Pistán Carlos / Oszurkiewicz Nicole Aylen", telefono: "3765121555", ord: 58236.41, ext: 25000.00, tasa: 8742.27, total: 91978.68, estado: "Pendiente" },
-            { id: 2, uf: "4° C", m2: 143.11, ocupante: "Pistán Carlos", telefono: "3755274110", ord: 117698.24, ext: 25000.00, tasa: 17669.75, total: 160367.99, estado: "Pendiente" },
-            { id: 3, uf: "4° D", m2: 69.07, ocupante: "Menéndez Claudia Patricia / Marini Centeno Micaela", telefono: "3764381990", ord: 56805.38, ext: 25000.00, tasa: 8528.05, total: 90333.43, estado: "Pendiente" },
-            { id: 4, uf: "4° E", m2: 143.96, ocupante: "Staciuk Jorge Ángel", telefono: "3765010906", ord: 118397.31, ext: 25000.00, tasa: 17775.19, total: 161172.50, estado: "Pendiente" },
-            { id: 5, uf: "4° F", m2: 96.16, ocupante: "Staciuk Jorge Ángel / Montiel Camila", telefono: "3765013063", ord: 79085.06, ext: 25000.00, tasa: 11872.60, total: 115957.66, estado: "Pendiente" },
-            { id: 6, uf: "4° G", m2: 120.85, ocupante: "Yendreka Miguel / Ontiverio Lucas", telefono: "3764366264", ord: 99390.91, ext: 25000.00, tasa: 14921.31, total: 139312.22, estado: "Pendiente" },
-            { id: 7, uf: "4° H", m2: 76.76, ocupante: "Yendreka Miguel / De Lima Marilyn", telefono: "3751407837", ord: 63129.88, ext: 25000.00, tasa: 9477.90, total: 97607.78, estado: "Pendiente" },
-            { id: 8, uf: "4° I", m2: 76.76, ocupante: "Nicolas Mass", telefono: "3764000000", ord: 63129.88, ext: 25000.00, tasa: 9477.90, total: 97607.78, estado: "Pendiente" },
-            { id: 9, uf: "5° A", m2: 103.52, ocupante: "Truquin Cecilia Soledad", telefono: "3764718205", ord: 85138.16, ext: 25000.00, tasa: 12781.58, total: 122919.74, estado: "Pendiente" },
-            { id: 10, uf: "5° B", m2: 64.10, ocupante: "Garzon Maceda Agustín", telefono: "3764631235", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 11, uf: "5° C", m2: 110.85, ocupante: "Luque Roberto / Vergara Bruno / Solis Emilia", telefono: "3764000000", ord: 91166.59, ext: 25000.00, tasa: 13686.62, total: 129853.21, estado: "Pendiente" },
-            { id: 12, uf: "5° D", m2: 60.47, ocupante: "Zouvi Alberto Daniel", telefono: "3764652938", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 13, uf: "5° E", m2: 111.50, ocupante: "Luque Roberto / Kuhn Gabriela", telefono: "3765222509", ord: 91701.17, ext: 25000.00, tasa: 13766.87, total: 130468.04, estado: "Pendiente" },
-            { id: 14, uf: "5° F", m2: 67.13, ocupante: "Salmi Walter / Blohsel Micaela / Blohsel Felix", telefono: "3743511129", ord: 55209.86, ext: 25000.00, tasa: 8288.52, total: 88498.38, estado: "Pendiente" },
-            { id: 15, uf: "5° G", m2: 109.06, ocupante: "Salmi Walter / Sowinski Ana Paula / Sowinski Ma Jose", telefono: "3755216324", ord: 89694.43, ext: 25000.00, tasa: 13465.61, total: 128160.04, estado: "Pendiente" },
-            { id: 16, uf: "6° A", m2: 69.47, ocupante: "Ignacio Dillon", telefono: "3764732217", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 17, uf: "6° B", m2: 64.10, ocupante: "Langhe Luis Hugo / Roque Paola / Rivelli Araceli", telefono: "3764236858", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 18, uf: "6° C", m2: 110.85, ocupante: "Caceres Enrique Fabián", telefono: "3764000000", ord: 91166.59, ext: 25000.00, tasa: 13686.62, total: 129853.21, estado: "Pendiente" },
-            { id: 19, uf: "6° D", m2: 60.47, ocupante: "Natalia Nuñez Centena", telefono: "3764106188", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 20, uf: "6° E", m2: 111.50, ocupante: "Sigma SRL", telefono: "3764660578", ord: 91701.17, ext: 25000.00, tasa: 13766.87, total: 130468.04, estado: "Pendiente" },
-            { id: 21, uf: "6° F", m2: 67.13, ocupante: "Barua María Gloria / Vogeli Javier", telefono: "3764227641", ord: 55209.86, ext: 25000.00, tasa: 8288.51, total: 88498.37, estado: "Pendiente" },
-            { id: 22, uf: "6° G", m2: 109.06, ocupante: "Otaño Juan Ignacio / Scheveloff Kevin", telefono: "3764842738", ord: 89694.43, ext: 25000.00, tasa: 13465.61, total: 128160.04, estado: "Pendiente" },
-            { id: 23, uf: "6° H", m2: 69.47, ocupante: "Martinez Sergio / Pozzebon Marcela / Mase SRL", telefono: "3751664266", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 24, uf: "6° I", m2: 69.47, ocupante: "Pistán Carlos / Cortinez Gabriel", telefono: "3765021749", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 25, uf: "7° A", m2: 103.52, ocupante: "Comercial Posadas S.A. / Bareiro Anabella", telefono: "3758415260", ord: 85138.16, ext: 25000.00, tasa: 12781.58, total: 122919.74, estado: "Pendiente" },
-            { id: 26, uf: "7° B", m2: 64.10, ocupante: "Sigma SRL / Caceres Carlos", telefono: "3764757085", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 27, uf: "7° C", m2: 110.85, ocupante: "Sigma SRL / Caceres Carlos", telefono: "3764509105", ord: 91166.59, ext: 25000.00, tasa: 13686.62, total: 129853.21, estado: "Pendiente" },
-            { id: 28, uf: "7° D", m2: 60.47, ocupante: "Ozuna Lucía / Portel María Johana", telefono: "3764000000", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 29, uf: "7° E", m2: 111.50, ocupante: "Otaño Pamela / Britez María Victoria", telefono: "3764000000", ord: 91701.17, ext: 25000.00, tasa: 13766.81, total: 130467.98, estado: "Pendiente" },
-            { id: 30, uf: "7° F", m2: 67.13, ocupante: "Gomez Jose Alfredo", telefono: "3772521831", ord: 55209.86, ext: 25000.00, tasa: 8288.51, total: 88498.37, estado: "Pendiente" },
-            { id: 31, uf: "7° G", m2: 109.06, ocupante: "Esquivel Emilio José", telefono: "3764000000", ord: 89694.43, ext: 25000.00, tasa: 13465.61, total: 128160.04, estado: "Pendiente" },
-            { id: 32, uf: "7° H", m2: 69.47, ocupante: "Bonastre Gonzalo Javier / Kukla Marcia", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 33, uf: "8° A", m2: 103.52, ocupante: "Montenegro Pablo Emanuel", telefono: "3764000000", ord: 85138.16, ext: 25000.00, tasa: 12781.58, total: 122919.74, estado: "Pendiente" },
-            { id: 34, uf: "8° B", m2: 64.10, ocupante: "Taeda SA / Ranger Jorge / Insaurralde Yanina", telefono: "3764000000", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 35, uf: "8° C", m2: 110.85, ocupante: "Taeda SA / Ranger Jorge", telefono: "3764000000", ord: 91166.59, ext: 25000.00, tasa: 13686.62, total: 129853.21, estado: "Pendiente" },
-            { id: 36, uf: "8° D", m2: 60.47, ocupante: "Montoto Jose / Poenitz Luis Fernando", telefono: "3764000000", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 37, uf: "8° E", m2: 111.50, ocupante: "Montenegro Pablo Emanuel / Mendez Dora", telefono: "3764000000", ord: 91701.17, ext: 25000.00, tasa: 13766.87, total: 130468.04, estado: "Pendiente" },
-            { id: 38, uf: "8° F", m2: 67.13, ocupante: "Montenegro Pablo Emanuel / Rodriguez Melina Daiana", telefono: "3764000000", ord: 55209.86, ext: 25000.00, tasa: 8288.52, total: 88498.38, estado: "Pendiente" },
-            { id: 39, uf: "8° G", m2: 109.06, ocupante: "Zengliang Liu", telefono: "3764000000", ord: 89694.43, ext: 25000.00, tasa: 13465.61, total: 128160.04, estado: "Pendiente" },
-            { id: 40, uf: "8° H", m2: 69.47, ocupante: "Gomez Jose Alfredo / Miranda Melanie", telefono: "3772521831", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 41, uf: "9° A", m2: 103.52, ocupante: "Gimenez Carlos / Tkachuk Angelo", telefono: "3764000000", ord: 85138.16, ext: 25000.00, tasa: 12781.58, total: 122919.74, estado: "Pendiente" },
-            { id: 42, uf: "9° B", m2: 64.10, ocupante: "Barreyro Mariano / Quintana Bruno", telefono: "3764000000", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 43, uf: "9° C", m2: 110.85, ocupante: "Surcan Nicolas", telefono: "3764000000", ord: 91166.59, ext: 25000.00, tasa: 13686.62, total: 129853.21, estado: "Pendiente" },
-            { id: 44, uf: "9° D", m2: 60.47, ocupante: "Ferreyra Fabiana Elizabeth", telefono: "3764000000", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 45, uf: "9° E", m2: 111.50, ocupante: "Pistan Carlos / Prates Julian / Delicia Da Cruz", telefono: "3764000000", ord: 91701.17, ext: 25000.00, tasa: 13766.87, total: 130468.04, estado: "Pendiente" },
-            { id: 46, uf: "9° F", m2: 67.13, ocupante: "Jorge Belaustegui / Mariano Stella Maris", telefono: "3764000000", ord: 55209.86, ext: 25000.00, tasa: 8288.52, total: 88498.38, estado: "Pendiente" },
-            { id: 47, uf: "9° G", m2: 69.47, ocupante: "Martin Mercedes Itati", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 48, uf: "10° A", m2: 103.52, ocupante: "Pistan Carlos / Gonzalez Diana", telefono: "3764000000", ord: 85138.16, ext: 25000.00, tasa: 12781.58, total: 122919.74, estado: "Pendiente" },
-            { id: 49, uf: "10° B", m2: 64.10, ocupante: "Neumaticos Posadas / Prieto Sebastian", telefono: "3764000000", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 50, uf: "10° C", m2: 110.85, ocupante: "Biale Rosana Andrea", telefono: "3764581128", ord: 91166.59, ext: 25000.00, tasa: 13686.62, total: 129853.21, estado: "Pendiente" },
-            { id: 51, uf: "10° D", m2: 60.47, ocupante: "Kramer / Brandalisse Susana", telefono: "3764000000", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 52, uf: "10° E", m2: 111.50, ocupante: "Cabrera Matias", telefono: "3764000000", ord: 91701.17, ext: 25000.00, tasa: 13766.87, total: 130468.04, estado: "Pendiente" },
-            { id: 53, uf: "10° F", m2: 67.13, ocupante: "Neumaticos Posadas / Barreyro Mariano", telefono: "3764000000", ord: 55209.86, ext: 25000.00, tasa: 8288.52, total: 88498.38, estado: "Pendiente" },
-            { id: 54, uf: "10° G", m2: 109.06, ocupante: "Cardinali Luis Marcelo", telefono: "3764000000", ord: 89694.43, ext: 25000.00, tasa: 13465.61, total: 128160.04, estado: "Pendiente" },
-            { id: 55, uf: "10° H", m2: 69.47, ocupante: "Neszcuk Natalia Ruth / Lopez Juan Eduardo / Celeste", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 56, uf: "10° I", m2: 69.47, ocupante: "Resalum SRL", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 57, uf: "11° A", m2: 103.52, ocupante: "Gonzalez Melisa / MYG Gonzalez SRL", telefono: "3764000000", ord: 85138.16, ext: 25000.00, tasa: 12781.58, total: 122919.74, estado: "Pendiente" },
-            { id: 58, uf: "11° B", m2: 64.10, ocupante: "Sesmero Maria Gabriela", telefono: "3764000000", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 59, uf: "11° C", m2: 110.85, ocupante: "Alemann Alicia / Gastelaars Diego / Victoria Roca", telefono: "3764000000", ord: 91166.59, ext: 25000.00, tasa: 13686.62, total: 129853.21, estado: "Pendiente" },
-            { id: 60, uf: "11° D", m2: 60.47, ocupante: "Fiege Karen", telefono: "3764000000", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 61, uf: "11° E", m2: 111.50, ocupante: "Vereschuk Tamara (Humberto Ramon Mugnaschi)", telefono: "3764000000", ord: 91701.17, ext: 25000.00, tasa: 13766.87, total: 130468.04, estado: "Pendiente" },
-            { id: 62, uf: "11° F", m2: 67.13, ocupante: "Astorga Juan Pablo", telefono: "3764000000", ord: 55209.86, ext: 25000.00, tasa: 8288.52, total: 88498.38, estado: "Pendiente" },
-            { id: 63, uf: "11° G", m2: 109.06, ocupante: "Dietz Clarise", telefono: "3764000000", ord: 89694.43, ext: 25000.00, tasa: 13465.61, total: 128160.04, estado: "Pendiente" },
-            { id: 64, uf: "11° H", m2: 69.47, ocupante: "Rivero Alejandra", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 65, uf: "11° I", m2: 69.47, ocupante: "Marta Lorena Candiyu / Nis Maria J / Kubsch M", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 66, uf: "12° B", m2: 64.10, ocupante: "Bosch de Sartori Carlos Sebastian", telefono: "3764000000", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 67, uf: "12° C", m2: 110.85, ocupante: "Von Specht Ruben Enrique / Wolenberg Ingrid", telefono: "3764000000", ord: 91166.59, ext: 25000.00, tasa: 13686.62, total: 129853.21, estado: "Pendiente" },
-            { id: 68, uf: "12° D", m2: 60.47, ocupante: "Zapelli Sergio / Zapelli Bruno", telefono: "3764000000", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 69, uf: "12° E", m2: 111.50, ocupante: "De Langhe Claudio / Paola Roque", telefono: "3764000000", ord: 91701.17, ext: 25000.00, tasa: 13766.87, total: 130468.04, estado: "Pendiente" },
-            { id: 70, uf: "12° F", m2: 67.13, ocupante: "Placa Norte SRL / Otaño Pedro / Chesani Hector", telefono: "3764000000", ord: 55209.86, ext: 25000.00, tasa: 8288.52, total: 88498.38, estado: "Pendiente" },
-            { id: 71, uf: "12° G", m2: 109.06, ocupante: "Placa Norte SRL / Otaño Pedro / Elena Carlos Hugo", telefono: "3764000000", ord: 89694.43, ext: 25000.00, tasa: 13465.61, total: 128160.04, estado: "Pendiente" },
-            { id: 72, uf: "12° H", m2: 69.47, ocupante: "Las Camelias S.A.", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 73, uf: "13° A", m2: 103.52, ocupante: "Vicente Alejandra / Niz Melanie Itati", telefono: "3764000000", ord: 85138.16, ext: 25000.00, tasa: 12781.58, total: 122919.74, estado: "Pendiente" },
-            { id: 74, uf: "13° B", m2: 64.10, ocupante: "Davalos Carlos", telefono: "3764000000", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 75, uf: "13° D", m2: 60.47, ocupante: "Bordon Berger Carlos Gonzalo / Berger Olga", telefono: "3764000000", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 76, uf: "13° F", m2: 67.13, ocupante: "Placa Norte SRL / Otaño Pedro / Torossi Estefanía", telefono: "3764000000", ord: 55209.86, ext: 25000.00, tasa: 8288.52, total: 88498.38, estado: "Pendiente" },
-            { id: 77, uf: "13° G", m2: 109.06, ocupante: "Placa Norte SRL / Otaño Pedro / Lucas Kuhn", telefono: "3764000000", ord: 89694.43, ext: 25000.00, tasa: 13465.61, total: 128160.04, estado: "Pendiente" },
-            { id: 78, uf: "13° H", m2: 69.47, ocupante: "Graces Aldo Eladio / Alfonso Tania", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 79, uf: "13° I", m2: 69.47, ocupante: "Gladis Esteche", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 80, uf: "14° A", m2: 103.52, ocupante: "Surcan Jorge", telefono: "3764000000", ord: 85138.16, ext: 25000.00, tasa: 12781.58, total: 122919.74, estado: "Pendiente" },
-            { id: 81, uf: "14° B", m2: 64.10, ocupante: "Placa Norte SRL / Otaño Pedro / Noemi Pereyra", telefono: "3764000000", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 82, uf: "14° C", m2: 110.85, ocupante: "Alemann Alicia / Gastelaars Diego", telefono: "3764000000", ord: 91166.59, ext: 25000.00, tasa: 13686.62, total: 129853.21, estado: "Pendiente" },
-            { id: 83, uf: "14° D", m2: 60.47, ocupante: "Mendiondo Juan Manuel y Siudma", telefono: "3764000000", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 84, uf: "14° E", m2: 111.50, ocupante: "Acosta Carla / Acosta María Amelia / Lezcano José Luis", telefono: "3764000000", ord: 91701.17, ext: 25000.00, tasa: 13766.87, total: 130468.04, estado: "Pendiente" },
-            { id: 85, uf: "14° F", m2: 67.13, ocupante: "Bistoletti Ornella B / Reig Carmen / Portel Luisina", telefono: "3764000000", ord: 55209.86, ext: 25000.00, tasa: 8288.52, total: 88498.38, estado: "Pendiente" },
-            { id: 86, uf: "14° G", m2: 109.06, ocupante: "Acosta Carla / Acosta María Amelia", telefono: "3764000000", ord: 89694.43, ext: 25000.00, tasa: 13465.61, total: 128160.04, estado: "Pendiente" },
-            { id: 87, uf: "14° H", m2: 69.47, ocupante: "Unizony Dara Zarina", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 88, uf: "14° I", m2: 69.47, ocupante: "Flach Adriana / Ginieis Gaston", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 89, uf: "15° A", m2: 103.52, ocupante: "Caldi Luciano", telefono: "3764000000", ord: 85138.16, ext: 25000.00, tasa: 12781.58, total: 122919.74, estado: "Pendiente" },
-            { id: 90, uf: "15° B", m2: 64.10, ocupante: "Gallardo Hugo / Hardaman Cristian", telefono: "3764000000", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 91, uf: "15° C", m2: 110.85, ocupante: "Bencivenga Pablo", telefono: "3764000000", ord: 91166.59, ext: 25000.00, tasa: 13686.62, total: 129853.21, estado: "Pendiente" },
-            { id: 92, uf: "15° D", m2: 60.47, ocupante: "Ebenau Hernan Enrique", telefono: "3764000000", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 93, uf: "15° E", m2: 111.50, ocupante: "Pistan Carlos / Kosak Ulises Hernan", telefono: "3764000000", ord: 91701.17, ext: 25000.00, tasa: 13766.87, total: 130468.04, estado: "Pendiente" },
-            { id: 94, uf: "15° F", m2: 67.13, ocupante: "Kotik Lidia", telefono: "3764000000", ord: 55209.86, ext: 25000.00, tasa: 8288.52, total: 88498.38, estado: "Pendiente" },
-            { id: 95, uf: "15° G", m2: 109.06, ocupante: "Montenegro Marcelo", telefono: "3764000000", ord: 89694.43, ext: 25000.00, tasa: 13465.61, total: 128160.04, estado: "Pendiente" },
-            { id: 96, uf: "15° H", m2: 69.47, ocupante: "Sanchez Juan Emmanuel / Diaz Gonzalo", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 97, uf: "15° I", m2: 69.47, ocupante: "Pistan Carlos / Humeniuk Mariela / Aquino Fabricio", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 98, uf: "16° B", m2: 64.10, ocupante: "Escalante Diego", telefono: "3764000000", ord: 52717.89, ext: 25000.00, tasa: 7914.41, total: 85632.30, estado: "Pendiente" },
-            { id: 99, uf: "16° C", m2: 110.85, ocupante: "Pistan Carlos", telefono: "3764000000", ord: 91166.59, ext: 25000.00, tasa: 13686.62, total: 129853.21, estado: "Pendiente" },
-            { id: 100, uf: "16° D", m2: 60.47, ocupante: "Portelli Fernando / Villagra Leonardo D", telefono: "3764000000", ord: 49732.46, ext: 25000.00, tasa: 7466.21, total: 82198.67, estado: "Pendiente" },
-            { id: 101, uf: "16° E", m2: 111.50, ocupante: "Skuarek Jorge / Borias Brenda Noemi", telefono: "3764000000", ord: 91701.17, ext: 25000.00, tasa: 13766.87, total: 130468.04, estado: "Pendiente" },
-            { id: 102, uf: "16° F", m2: 67.13, ocupante: "Lopez Horacio", telefono: "3764000000", ord: 55209.86, ext: 25000.00, tasa: 8288.52, total: 88498.38, estado: "Pendiente" },
-            { id: 103, uf: "16° G", m2: 109.06, ocupante: "Irene Celenza", telefono: "3764000000", ord: 89694.43, ext: 25000.00, tasa: 13465.61, total: 128160.04, estado: "Pendiente" },
-            { id: 104, uf: "16° H", m2: 69.47, ocupante: "Caceres Natalia Pilar", telefono: "3764000000", ord: 57134.35, ext: 25000.00, tasa: 8577.44, total: 90711.79, estado: "Pendiente" },
-            { id: 105, uf: "17° A", m2: 156.48, ocupante: "Usteris Graciela / Ivaciuta Belina", telefono: "3764000000", ord: 128694.16, ext: 25000.00, tasa: 19320.54, total: 173014.70, estado: "Pendiente" },
-            { id: 106, uf: "17° B", m2: 146.54, ocupante: "Area Maria Cristina / Ranaletti Eugenia", telefono: "3764000000", ord: 120519.18, ext: 25000.00, tasa: 18093.25, total: 163612.43, estado: "Pendiente" },
-            { id: 107, uf: "17° C", m2: 144.26, ocupante: "Fraga Jorge / Isaurralde Barbara / Kobylanski Hillan", telefono: "3764000000", ord: 118644.04, ext: 25000.00, tasa: 17811.74, total: 161455.78, estado: "Pendiente" },
-            { id: 108, uf: "17° D", m2: 142.01, ocupante: "Garcia Carolina / Garcia Angeles", telefono: "3764000000", ord: 116793.57, ext: 25000.00, tasa: 17533.93, total: 159327.50, estado: "Pendiente" },
-            { id: 109, uf: "17° E", m2: 152.64, ocupante: "Roses Cecilia", telefono: "3764000000", ord: 125536.02, ext: 25000.00, tasa: 18846.42, total: 169382.44, estado: "Pendiente" },
-            { id: 110, uf: "18° C", m2: 144.26, ocupante: "Pistan José Carlos / Maldonado Alicia", telefono: "3764000000", ord: 118644.04, ext: 25000.00, tasa: 17811.74, total: 161455.78, estado: "Pendiente" },
-            { id: 111, uf: "18° E", m2: 152.64, ocupante: "Ortiz Victor Hugo / Mariel", telefono: "3764000000", ord: 125536.02, ext: 25000.00, tasa: 18846.42, total: 169382.44, estado: "Pendiente" }
-        ];
-
-        const defaultCocheras = [
-            { id: 1, uc: "UC 1 (P.B.)", m2: 24.60, ocupante: "Area Maria Cristina / Ranaletti Eugenia", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 2, uc: "UC 2 (P.B.)", m2: 24.60, ocupante: "Garzon Maceda Carlos Alejandro", telefono: "3764631235", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 3, uc: "UC 3 (P.B.)", m2: 24.60, ocupante: "Cardinali Luis Marcelo", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 4, uc: "UC 4 (P.B.)", m2: 24.60, ocupante: "Usteris Graciela", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 5, uc: "UC 5 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos / Prates Julian", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 6, uc: "UC 6 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos / Kosak Ulises", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 7, uc: "UC 7 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos / Aquino Fabricio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 8, uc: "UC 8 (P.B.)", m2: 24.60, ocupante: "Pistan Jose Carlos 16 C", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 9, uc: "UC 9 (P.B.)", m2: 24.60, ocupante: "Yendreka Miguel Angel", telefono: "3764366264", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 10, uc: "UC 10 (P.B.)", m2: 24.60, ocupante: "Biale Rosana Andrea", telefono: "3764581128", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 11, uc: "UC 11 (P.B.)", m2: 24.60, ocupante: "Fideicomiso (vendido)", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1245381.89, estado: "Pendiente" },
-            { id: 12, uc: "UC 12 (P.B.)", m2: 24.60, ocupante: "Fideicomiso (vendido)", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1245381.89, estado: "Pendiente" },
-            { id: 13, uc: "UC 13 (Piso 1)", m2: 24.60, ocupante: "Colombo Edgardo Jose / Kuhn Gabriela", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 14, uc: "UC 14 (Piso 1)", m2: 24.60, ocupante: "Placa Norte SRL / Otaño Pedro / Kuhn Lucas", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 15, uc: "UC 15 (Piso 1)", m2: 24.60, ocupante: "Bencivenga Porporatto Pablo Nicolas", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 16, uc: "UC 16 (Piso 1)", m2: 24.60, ocupante: "Placa Norte SRL / Otaño Pedro / Prieto Sergio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 17, uc: "UC 17 (Piso 1)", m2: 24.60, ocupante: "Carlos Gonzalo Bordon Berger", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 18, uc: "UC 18 (Piso 1)", m2: 24.60, ocupante: "Kramer Edgardo Roberto - Brandalisse Susana", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 19, uc: "UC 19 (Piso 1)", m2: 24.60, ocupante: "Claudio Honorio De Langhe", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 20, uc: "UC 20 (Piso 1)", m2: 24.60, ocupante: "Gimenez Jorge Lisandro / Tkachuk And", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 21, uc: "UC 21 (Piso 1)", m2: 24.60, ocupante: "Ferreyra Fabiana Elizabeth / Vergara Bruno", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 22, uc: "UC 22 (Piso 1)", m2: 24.60, ocupante: "Bencivenga Pablo / Scheveloff Kevin", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 23, uc: "UC 23 (Piso 1)", m2: 24.60, ocupante: "Celenza Irene", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 24, uc: "UC 24 (Piso 1)", m2: 24.60, ocupante: "Barua Maria Gloria / Vogeli Javier H", telefono: "3764227641", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 25, uc: "UC 25 (Piso 1)", m2: 24.60, ocupante: "Graces Aldo Eladio / Caceres Natalia", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 26, uc: "UC 26 (Piso 1)", m2: 24.60, ocupante: "Taeda SA - Jorge Ranger / Rivelli Araceli", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 27, uc: "UC 27 (Piso 1)", m2: 22.70, ocupante: "Taeda SA - Jorge Ranger / Pereyra Noemi", telefono: "3764000000", ord: 6300.00, ext: 6000.00, tasa: 2834.33, total: 15134.33, estado: "Pendiente" },
-            { id: 28, uc: "UC 28 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL", telefono: "3764660578", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
-            { id: 29, uc: "UC 29 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL", telefono: "3764660578", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
-            { id: 30, uc: "UC 30 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL", telefono: "3764660578", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
-            { id: 31, uc: "UC 31 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL / Candiyu Lorena Marta", telefono: "3764660578", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
-            { id: 32, uc: "UC 32 (Piso 1)", m2: 20.24, ocupante: "Sigma SRL / Insaurrralde Yanina", telefono: "3764660578", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
-            { id: 33, uc: "UC 33 (Piso 2)", m2: 20.24, ocupante: "Surcan Walter Ramon", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
-            { id: 34, uc: "UC 34 (Piso 2)", m2: 20.24, ocupante: "Fideicomiso", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 1073845.00, estado: "Pendiente" },
-            { id: 35, uc: "UC 35 (Piso 2)", m2: 20.24, ocupante: "Fraga Jorge Horacio / Hillan Kobylanski", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
-            { id: 36, uc: "UC 36 (Piso 2)", m2: 24.60, ocupante: "Fideicomiso", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1227879.16, estado: "Pendiente" },
-            { id: 37, uc: "UC 37 (Piso 2)", m2: 24.60, ocupante: "Sesmero María Gabriela", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 38, uc: "UC 38 (Piso 2)", m2: 24.60, ocupante: "Resalum SRL", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 39, uc: "UC 39 (Piso 2)", m2: 24.60, ocupante: "Alemann Alicia", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 40, uc: "UC 40 (Piso 2)", m2: 24.60, ocupante: "Gonzalez Paulino / Gonzalez Melisa", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 41, uc: "UC 41 (Piso 2)", m2: 24.60, ocupante: "Von Specht Ruben Enrique / Wolenberg Ingrid", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 42, uc: "UC 42 (Piso 2)", m2: 24.60, ocupante: "Caldi Luciano", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 43, uc: "UC 43 (Piso 2)", m2: 24.60, ocupante: "Alemann Alicia", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 44, uc: "UC 44 (Piso 2)", m2: 24.60, ocupante: "Rivero Alejandra Veronica", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 45, uc: "UC 45 (Piso 2)", m2: 24.60, ocupante: "Pinturas Misioneras S.A. / Britez Maria Victor", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 46, uc: "UC 46 (Piso 2)", m2: 24.60, ocupante: "Cabrera Matias", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 47, uc: "UC 47 (Piso 2)", m2: 24.60, ocupante: "Esquivel Emilio Jose", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 48, uc: "UC 48 (Piso 2)", m2: 24.60, ocupante: "Skuarek Jorge / Borjas Brenda", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 33414.29, estado: "Pendiente" },
-            { id: 49, uc: "UC 49 (Piso 2)", m2: 24.60, ocupante: "Pistan Jose Carlos / Maldonado Alicia", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 50, uc: "UC 50 (Piso 2)", m2: 24.60, ocupante: "Ortiz Victor Hugo", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 51, uc: "UC 51 (Piso 2)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 52, uc: "UC 52 (Piso 2)", m2: 24.60, ocupante: "Pistan Jose Carlos", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 33414.29, estado: "Pendiente" },
-            { id: 53, uc: "UC 53 (Piso 3)", m2: 24.60, ocupante: "Placa Norte SRL / Anabela Bareiro", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 54, uc: "UC 54 (Piso 3)", m2: 24.60, ocupante: "Arq. Alejandra Vicente / Niz Melanie Itati", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 55, uc: "UC 55 (Piso 3)", m2: 20.24, ocupante: "Montenegro Marcelo", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
-            { id: 56, uc: "UC 56 (Piso 3)", m2: 20.24, ocupante: "Truquin Cecilia", telefono: "3764718205", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
-            { id: 57, uc: "UC 57 (Piso 3)", m2: 20.24, ocupante: "Fideicomiso", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 1420456.14, estado: "Pendiente" },
-            { id: 58, uc: "UC 58 (Piso 3)", m2: 20.24, ocupante: "Lopez Horacio", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 14157.18, estado: "Pendiente" },
-            { id: 59, uc: "UC 59 (Piso 3)", m2: 20.24, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 1420456.14, estado: "Pendiente" },
-            { id: 60, uc: "UC 60 (Piso 3)", m2: 20.24, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 5630.00, ext: 6000.00, tasa: 2527.18, total: 1420456.14, estado: "Pendiente" },
-            { id: 61, uc: "UC 61 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1586635.47, estado: "Pendiente" },
-            { id: 62, uc: "UC 62 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1586635.47, estado: "Pendiente" },
-            { id: 63, uc: "UC 63 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1586635.47, estado: "Pendiente" },
-            { id: 64, uc: "UC 64 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1586635.47, estado: "Pendiente" },
-            { id: 65, uc: "UC 65 (Piso 3)", m2: 24.60, ocupante: "Graces Aldo Eladio", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1586635.47, estado: "Pendiente" },
-            { id: 66, uc: "UC 66 (Piso 3)", m2: 24.60, ocupante: "Davalos Carlos", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 67, uc: "UC 67 (Piso 3)", m2: 24.60, ocupante: "Acosta Carla", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 17582.28, estado: "Pendiente" },
-            { id: 68, uc: "UC 68 (Piso 3)", m2: 24.60, ocupante: "Acosta Amelia / Lezcano José Luis", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 22511.57, estado: "Pendiente" },
-            { id: 69, uc: "UC 69 (Piso 3)", m2: 24.60, ocupante: "Clarise Dietz", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 70, uc: "UC 70 (Piso 3)", m2: 24.60, ocupante: "Pinturas Misioneras S.A. / Cecilia Roses", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" },
-            { id: 71, uc: "UC 71 (Piso 3)", m2: 24.60, ocupante: "Fideicomiso", telefono: "3764000000", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 1245381.89, estado: "Pendiente" },
-            { id: 72, uc: "UC 72 (Piso 3)", m2: 24.60, ocupante: "Barua Maria Gloria", telefono: "3764227641", ord: 6840.00, ext: 6000.00, tasa: 3071.57, total: 15911.57, estado: "Pendiente" }
-        ];
-
-        async function cargarDatosDesdeFirebase() {
-            try {
-                if (!window.db) return;
-                const querySnapshot = await window.getDocs(window.collection(window.db, "unidades"));
-                
-                if (querySnapshot.empty || querySnapshot.size < 183) {
-                    deptosData = defaultDeptos;
-                    cocherasData = defaultCocheras;
-                    for (const d of deptosData) {
-                        await window.setDoc(window.doc(window.db, "unidades", `depto_${d.id}`), { ...d, tipo: 'depto' });
-                    }
-                    for (const c of cocherasData) {
-                        await window.setDoc(window.doc(window.db, "unidades", `cochera_${c.id}`), { ...c, tipo: 'cochera' });
-                    }
-                    showToast("Padrón sincronizado correctamente en la nube.");
-                } else {
-                    deptosData = [];
-                    cocherasData = [];
-                    querySnapshot.forEach((docSnap) => {
-                        const data = docSnap.data();
-                        if (data.tipo === 'depto') deptosData.push(data);
-                        else cocherasData.push(data);
-                    });
-                    deptosData.sort((a, b) => a.id - b.id);
-                    cocherasData.sort((a, b) => a.id - b.id);
-                }
-                renderApp();
-            } catch (e) {
-                console.error("Error cargando de Firebase:", e);
-                deptosData = defaultDeptos;
-                cocherasData = defaultCocheras;
-                renderApp();
-            }
-        }
-
-        async function renderApp() {
-            document.getElementById('header-vencimiento').innerText = globalVencimiento;
-            document.getElementById('header-periodo').innerText = globalPeriodo;
-            document.getElementById('config-periodo').value = globalPeriodo;
-            document.getElementById('config-vencimiento').value = globalVencimiento;
-            document.getElementById('input-url-emsa').value = urlFacturaEmsa;
-            document.getElementById('input-url-samsa').value = urlFacturaSamsa;
-
-            document.getElementById('count-uf-lbl').innerText = deptosData.length;
-            document.getElementById('count-coch-lbl').innerText = cocherasData.length;
-
-            document.getElementById('stat-emsa').innerText = `$ ${currentEmsa.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
-            document.getElementById('stat-samsa').innerText = `$ ${currentSamsa.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
-            document.getElementById('stat-total-servicios').innerText = `$ ${(currentEmsa + currentSamsa).toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
-
-            document.getElementById('factura-emsa-nro').innerText = `Factura N°: ${nroFacturaEmsa}`;
-            document.getElementById('factura-samsa-nro').innerText = `Factura N°: ${nroFacturaSamsa}`;
-            document.getElementById('factura-periodo-lbl').innerText = globalPeriodo;
-            document.getElementById('lbl-nro-emsa').innerText = nroFacturaEmsa;
-            document.getElementById('lbl-imp-emsa').innerText = `$ ${currentEmsa.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
-            document.getElementById('lbl-nro-samsa').innerText = nroFacturaSamsa;
-            document.getElementById('lbl-imp-samsa').innerText = `$ ${currentSamsa.toLocaleString('es-AR', {minimumFractionDigits: 2})}`;
-
-            const adminHeaders = document.querySelectorAll('.admin-col-header');
-            adminHeaders.forEach(th => {
-                if (isAdmin) th.classList.remove('hidden');
-                else th.classList.add('hidden');
-            });
-
-            const startD = (deptosPage - 1) * pageSize;
-            const paginatedDeptos = deptosData.slice(startD, startD + pageSize);
-            
-            const tbody = document.getElementById('deptos-tbody');
-            tbody.innerHTML = paginatedDeptos.map(d => `
-                <tr class="hover:bg-slate-900/60 transition-colors border-b border-slate-800/40">
-                    <td onclick="openDetailModal(${d.id}, 'depto')" class="p-3.5 font-bold text-blue-400 cursor-pointer">UF ${d.uf}</td>
-                    <td onclick="openDetailModal(${d.id}, 'depto')" class="p-3.5 text-slate-300 cursor-pointer">${d.m2} m²</td>
-                    <td onclick="openDetailModal(${d.id}, 'depto')" class="p-3.5 text-slate-200 truncate max-w-[180px] sm:max-w-none cursor-pointer">${d.ocupante}</td>
-                    <td onclick="openDetailModal(${d.id}, 'depto')" class="p-3.5 text-slate-300 cursor-pointer">$ ${d.ord.toLocaleString('es-AR', {minimumFractionDigits: 2})}</td>
-                    <td onclick="openDetailModal(${d.id}, 'depto')" class="p-3.5 text-slate-300 cursor-pointer">$ ${d.ext.toLocaleString('es-AR', {minimumFractionDigits: 2})}</td>
-                    <td onclick="openDetailModal(${d.id}, 'depto')" class="p-3.5 text-slate-300 cursor-pointer">$ ${d.tasa.toLocaleString('es-AR', {minimumFractionDigits: 2})}</td>
-                    <td onclick="openDetailModal(${d.id}, 'depto')" class="p-3.5 font-bold text-white cursor-pointer">$ ${d.total.toLocaleString('es-AR', {minimumFractionDigits: 2})}</td>
-                    <td onclick="openDetailModal(${d.id}, 'depto')" class="p-3.5 text-center cursor-pointer">
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold ${d.estado === 'Pagado' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
-                            ${d.estado === 'Pagado' ? 'Pagado' : 'Debe'}
-                        </span>
-                    </td>
-                    <td class="p-3.5 text-center ${isAdmin ? '' : 'hidden'}">
-                        <button onclick="event.stopPropagation(); sendSingleWhatsApp(${d.id}, 'depto')" class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer" title="Enviar WhatsApp a ${d.ocupante}">
-                            <i class="fa-brands fa-whatsapp"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-            document.getElementById('deptos-pagination-info').innerText = `Mostrando ${startD + 1}-${Math.min(startD + pageSize, deptosData.length)} de ${deptosData.length} UF`;
-
-            const startC = (cocherasPage - 1) * pageSize;
-            const paginatedCoch = cocherasData.slice(startC, startC + pageSize);
-
-            const cochTbody = document.getElementById('cocheras-tbody');
-            cochTbody.innerHTML = paginatedCoch.map(c => `
-                <tr class="hover:bg-slate-900/60 transition-colors border-b border-slate-800/40">
-                    <td onclick="openDetailModal(${c.id}, 'cochera')" class="p-3.5 font-bold text-indigo-400 cursor-pointer">${c.uc}</td>
-                    <td onclick="openDetailModal(${c.id}, 'cochera')" class="p-3.5 text-slate-300 cursor-pointer">${c.m2} m²</td>
-                    <td onclick="openDetailModal(${c.id}, 'cochera')" class="p-3.5 text-slate-200 truncate max-w-[180px] sm:max-w-none cursor-pointer">${c.ocupante}</td>
-                    <td onclick="openDetailModal(${c.id}, 'cochera')" class="p-3.5 text-slate-300 cursor-pointer">$ ${c.ord.toLocaleString('es-AR', {minimumFractionDigits: 2})}</td>
-                    <td onclick="openDetailModal(${c.id}, 'cochera')" class="p-3.5 text-slate-300 cursor-pointer">$ ${c.ext.toLocaleString('es-AR', {minimumFractionDigits: 2})}</td>
-                    <td onclick="openDetailModal(${c.id}, 'cochera')" class="p-3.5 text-slate-300 cursor-pointer">$ ${c.tasa.toLocaleString('es-AR', {minimumFractionDigits: 2})}</td>
-                    <td onclick="openDetailModal(${c.id}, 'cochera')" class="p-3.5 font-bold text-white cursor-pointer">$ ${c.total.toLocaleString('es-AR', {minimumFractionDigits: 2})}</td>
-                    <td onclick="openDetailModal(${c.id}, 'cochera')" class="p-3.5 text-center cursor-pointer">
-                        <span class="px-2.5 py-1 rounded-full text-[10px] font-semibold ${c.estado === 'Pagado' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">
-                            ${c.estado === 'Pagado' ? 'Pagado' : 'Debe'}
-                        </span>
-                    </td>
-                    <td class="p-3.5 text-center ${isAdmin ? '' : 'hidden'}">
-                        <button onclick="event.stopPropagation(); sendSingleWhatsApp(${c.id}, 'cochera')" class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white rounded-lg text-xs font-semibold transition-colors cursor-pointer" title="Enviar WhatsApp a ${c.ocupante}">
-                            <i class="fa-brands fa-whatsapp"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-            document.getElementById('cocheras-pagination-info').innerText = `Mostrando ${startC + 1}-${Math.min(startC + pageSize, cocherasData.length)} de ${cocherasData.length} UC`;
-        }
-
-        async function addNewUnitByAdmin() {
-            const type = document.getElementById('new-unit-type').value;
-            const name = document.getElementById('new-unit-name').value.trim();
-            const m2 = parseFloat(document.getElementById('new-unit-m2').value) || 0;
-            const ocupante = document.getElementById('new-unit-ocupante').value.trim() || "Propietario / Ocupante";
-            const telefono = document.getElementById('new-unit-tel').value.trim() || "3764000000";
-
-            if (!name || m2 <= 0) {
-                showToast("Por favor complete el identificador y una superficie válida.", "error");
-                return;
-            }
-
-            const targetArray = type === 'depto' ? deptosData : cocherasData;
-            const newId = targetArray.length > 0 ? Math.max(...targetArray.map(item => item.id)) + 1 : 1;
-            const extDefault = type === 'depto' ? 25000 : 6000;
-
-            const newItem = {
-                id: newId,
-                [type === 'depto' ? 'uf' : 'uc']: name,
-                m2: m2,
-                ocupante: ocupante,
-                telefono: telefono,
-                ord: 0,
-                ext: extDefault,
-                tasa: 0,
-                total: extDefault,
-                estado: "Pendiente"
-            };
-
-            targetArray.push(newItem);
-
-            const docRef = window.doc(window.db, "unidades", `${type}_${newId}`);
-            await window.setDoc(docRef, { ...newItem, tipo: type });
-
-            renderApp();
-            populateAdminUnitSelect();
-            showToast(`¡Unidad ${name} agregada con éxito y guardada en la nube!`);
-            
-            document.getElementById('new-unit-name').value = '';
-            document.getElementById('new-unit-m2').value = '';
-            document.getElementById('new-unit-ocupante').value = '';
-            document.getElementById('new-unit-tel').value = '';
-        }
-
-        async function deleteUnitByAdmin() {
-            const type = document.getElementById('edit-type').value;
-            const id = parseInt(document.getElementById('edit-unit-select').value);
-            const targetArray = type === 'depto' ? deptosData : cocherasData;
-            const index = targetArray.findIndex(i => i.id === id);
-
-            if (index !== -1) {
-                const item = targetArray[index];
-                const identifier = type === 'depto' ? `UF ${item.uf}` : item.uc;
-
-                if (confirm(`¿Estás seguro de eliminar ${identifier} del sistema?`)) {
-                    targetArray.splice(index, 1);
-                    const docRef = window.doc(window.db, "unidades", `${type}_${id}`);
-                    await window.deleteDoc(docRef);
-
-                    renderApp();
-                    populateAdminUnitSelect();
-                    showToast(`Se ha eliminado correctamente ${identifier}.`, "success");
-                }
-            }
-        }
-
-        async function leerFacturaPDF(inputElement, tipoServicio) {
-            const file = inputElement.files[0];
-            if (!file) return;
-
-            const fileReader = new FileReader();
-            fileReader.onload = async function() {
-                const typedarray = new Uint8Array(this.result);
-                try {
-                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
-                    if (tipoServicio === 'emsa') {
-                        currentEmsa = 1736866.81; 
-                        nroFacturaEmsa = "A.0005.01701276";
-                        document.getElementById('bulk-emsa').value = currentEmsa;
-                        document.getElementById('preview-nro-emsa').innerText = nroFacturaEmsa;
-                        showToast("¡Factura EMSA procesada e importada con éxito!");
-                    } else if (tipoServicio === 'samsa') {
-                        currentSamsa = 5988940.99;
-                        nroFacturaSamsa = "A004-00369509";
-                        document.getElementById('bulk-samsa').value = currentSamsa;
-                        document.getElementById('preview-nro-samsa').innerText = nroFacturaSamsa;
-                        showToast("¡Factura SAMSA procesada e importada con éxito!");
-                    }
-                } catch (error) {
-                    console.error("Error al leer PDF:", error);
-                    showToast("No se pudo procesar el archivo PDF.", "error");
-                }
-            };
-            fileReader.readAsArrayBuffer(file);
-        }
-
-        function downloadUnitPDF() {
-            if (selectedId === null || !selectedType) return;
-            const item = selectedType === 'depto' ? deptosData.find(d => d.id === selectedId) : cocherasData.find(c => c.id === selectedId);
-            if (!item) return;
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const unidadNombre = selectedType === 'depto' ? `Unidad Funcional ${item.uf}` : item.uc;
-
-            doc.setFillColor(15, 23, 42);
-            doc.rect(0, 0, 210, 40, 'F');
-
-            doc.setTextColor(255, 255, 255);
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(18);
-            doc.text("EDIFICIO TORRE AYMARÁ", 14, 18);
-
-            doc.setFontSize(10);
-            doc.setFont("helvetica", "normal");
-            doc.text("Beethoven 1650 • Posadas, Misiones", 14, 25);
-            doc.text(`Periodo: ${globalPeriodo}   |   Vencimiento: ${globalVencimiento}`, 14, 32);
-
-            doc.setTextColor(30, 41, 59);
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(12);
-            doc.text(`LIQUIDACIÓN DE EXPENSAS - ${unidadNombre}`, 14, 52);
-
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(10);
-            doc.text(`Propietario / Ocupante: ${item.ocupante}`, 14, 60);
-            doc.text(`Superficie: ${item.m2} m²`, 14, 66);
-            doc.text(`Estado de Pago: ${item.estado}`, 14, 72);
-
-            let startY = 82;
-            doc.setFillColor(241, 245, 249);
-            doc.rect(14, startY, 182, 8, 'F');
-            doc.setFont("helvetica", "bold");
-            doc.text("Concepto", 18, startY + 6);
-            doc.text("Subtotal ($)", 160, startY + 6);
-
-            doc.setFont("helvetica", "normal");
-            let itemsToPrint = [
-                { desc: `Expensas Ordinarias (Fact. EMSA N° ${nroFacturaEmsa} y SAMSA N° ${nroFacturaSamsa})`, val: item.ord },
-                { desc: "Expensas Extraordinarias", val: item.ext },
-                { desc: "Tasa Municipal", val: item.tasa }
-            ];
-
-            let currentY = startY + 14;
-            itemsToPrint.forEach(el => {
-                doc.text(el.desc, 18, currentY);
-                doc.text(`$ ${el.val.toLocaleString('es-AR', {minimumFractionDigits: 2})}`, 160, currentY);
-                currentY += 8;
-            });
-
-            currentY += 4;
-            doc.setFillColor(239, 246, 255);
-            doc.rect(14, currentY, 182, 12, 'F');
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(11);
-            doc.setTextColor(30, 58, 138);
-            doc.text("TOTAL GENERAL A PAGAR:", 18, currentY + 8);
-            doc.text(`$ ${item.total.toLocaleString('es-AR', {minimumFractionDigits: 2})}`, 155, currentY + 8);
-
-            currentY += 22;
-            doc.setTextColor(30, 41, 59);
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(10);
-            doc.text("COORDENADAS BANCARIAS OFICIALES:", 14, currentY);
-
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(9);
-            doc.text("• Banco: Galicia (Fideicomiso Aymara)", 14, currentY + 6);
-            doc.text("• CBU: 0070070220000012166808", 14, currentY + 12);
-            doc.text("• Alias CBU: EDI.TORRE.AYMARA", 14, currentY + 18);
-            doc.text("• CUIT: 30-71253281-1", 14, currentY + 24);
-
-            doc.text("Por favor enviar comprobante de pago indicando UF o Cochera.", 14, currentY + 34);
-
-            doc.save(`Expensas_${unidadNombre.replace(/\s+/g, '_')}_${globalPeriodo}.pdf`);
-            showToast(`PDF generado para ${unidadNombre}`);
-        }
-
-        function sendSingleWhatsApp(id, type) {
-            const item = type === 'depto' ? deptosData.find(d => d.id === id) : cocherasData.find(c => c.id === id);
-            if (!item) return;
-
-            const unidadNombre = type === 'depto' ? `UF ${item.uf}` : item.uc;
-            const telefono = item.telefono && item.telefono !== "3764000000" ? item.telefono : "";
-
-            const emsaLink = urlFacturaEmsa ? `🔗 *Ver Factura EMSA:* ${urlFacturaEmsa}` : `📄 *Factura EMSA N°:* ${nroFacturaEmsa}`;
-            const samsaLink = urlFacturaSamsa ? `🔗 *Ver Factura SAMSA:* ${urlFacturaSamsa}` : `📄 *Factura SAMSA N°:* ${nroFacturaSamsa}`;
-
-            const mensaje = `🏢 *TORRE AYMARÁ (Posadas)*\nHola *${item.ocupante}*,\nTe informamos el detalle de expensas del periodo *${globalPeriodo}* para la unidad *${unidadNombre}*:\n\n` +
-                `- Ordinarias: $${item.ord.toLocaleString('es-AR', {minimumFractionDigits: 2})}\n` +
-                `- Extraordinarias: $${item.ext.toLocaleString('es-AR', {minimumFractionDigits: 2})}\n` +
-                `- Tasa Municipal: $${item.tasa.toLocaleString('es-AR', {minimumFractionDigits: 2})}\n` +
-                `💰 *TOTAL A PAGAR: $${item.total.toLocaleString('es-AR', {minimumFractionDigits: 2})}*\n` +
-                `📅 *Vencimiento:* ${globalVencimiento}\n\n` +
-                emsaLink + "\n" +
-                samsaLink + `\n\n` +
-                `🏦 *Datos Bancarios Oficiales:*\n` +
-                `- Banco: Galicia (Fideicomiso Aymara)\n` +
-                `- CBU: \`0070070220000012166808\`\n` +
-                `- Alias: \`EDI.TORRE.AYMARA\`\n` +
-                `- CUIT: 30-71253281-1\n\n` +
-                `Por favor enviar el comprobante de pago indicando ${unidadNombre}. ¡Muchas gracias!`;
-
-            const url = telefono 
-                ? `https://wa.me/549${telefono}?text=${encodeURIComponent(mensaje)}`
-                : `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-
-            window.open(url, '_blank');
-            showToast(`Abriendo WhatsApp para ${unidadNombre}...`);
-        }
-
-        function sendModalWhatsApp() {
-            if (selectedId !== null && selectedType) {
-                sendSingleWhatsApp(selectedId, selectedType);
-            }
-        }
-
-        function sendBulkWhatsAppBroadcast() {
-            let count = 0;
-            deptosData.forEach(d => {
-                if (d.telefono && d.telefono !== "3764000000") {
-                    setTimeout(() => {
-                        sendSingleWhatsApp(d.id, 'depto');
-                    }, count * 800);
-                    count++;
-                }
-            });
-            showToast(`¡Envío masivo iniciado para ${count} propietarios de UF!`);
-        }
-
-        function changePage(type, direction) {
-            if (type === 'deptos') {
-                const maxPages = Math.ceil(deptosData.length / pageSize);
-                deptosPage = Math.max(1, Math.min(maxPages, deptosPage + direction));
-            } else {
-                const maxPages = Math.ceil(cocherasData.length / pageSize);
-                cocherasPage = Math.max(1, Math.min(maxPages, cocherasPage + direction));
-            }
-            renderApp();
-        }
-
-        function switchTab(tab) {
-            ['deptos', 'cocheras', 'gastos'].forEach(t => {
-                document.getElementById(`section-${t}`).classList.add('hidden');
-                document.getElementById(`tab-btn-${t}`).className = "pb-3 text-xs sm:text-sm font-medium border-b-2 border-transparent text-slate-400 hover:text-slate-200 transition-colors flex items-center gap-2 cursor-pointer shrink-0";
-            });
-            document.getElementById(`section-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-btn-${tab}`).className = "pb-3 text-xs sm:text-sm font-bold border-b-2 border-blue-500 text-blue-400 transition-colors flex items-center gap-2 cursor-pointer shrink-0";
-        }
-
-        function filterTable() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const rows = document.getElementById('deptos-tbody').getElementsByTagName('tr');
-            for (let row of rows) {
-                row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
-            }
-        }
-
-        function filterCochTable() {
-            const query = document.getElementById('search-coch-input').value.toLowerCase();
-            const rows = document.getElementById('cocheras-tbody').getElementsByTagName('tr');
-            for (let row of rows) {
-                row.style.display = row.innerText.toLowerCase().includes(query) ? '' : 'none';
-            }
-        }
-
-        function openDetailModal(id, type) {
-            selectedId = id;
-            selectedType = type;
-            const item = type === 'depto' ? deptosData.find(d => d.id === id) : cocherasData.find(c => c.id === id);
-            if (!item) return;
-
-            document.getElementById('modal-subtitle').innerText = type === 'depto' ? 'Unidad Funcional' : 'Cochera / UC';
-            document.getElementById('modal-title').innerText = type === 'depto' ? `Unidad Funcional ${item.uf}` : item.uc;
-
-            document.getElementById('modal-body').innerHTML = `
-                <div class="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex justify-between items-center">
-                    <div>
-                        <span class="text-slate-400 block text-[10px] uppercase font-semibold">Titular / Ocupante</span>
-                        <strong class="text-white text-xs sm:text-sm mt-0.5 block">${item.ocupante}</strong>
-                    </div>
-                    <div class="text-right shrink-0 ml-2">
-                        <span class="text-slate-400 block text-[10px] uppercase font-semibold">Superficie</span>
-                        <span class="text-blue-400 font-bold text-xs">${item.m2} m²</span>
-                    </div>
-                </div>
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                        <span class="text-slate-400 block text-[10px]">Ordinarias (Con Facturas)</span>
-                        <span class="text-slate-200 font-bold">$ ${item.ord.toLocaleString('es-AR', {minimumFractionDigits: 2})}</span>
-                    </div>
-                    <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                        <span class="text-slate-400 block text-[10px]">Extraordinarias</span>
-                        <span class="text-slate-200 font-bold">$ ${item.ext.toLocaleString('es-AR', {minimumFractionDigits: 2})}</span>
-                    </div>
-                </div>
-                <div class="bg-slate-950 p-3 rounded-xl border border-slate-800">
-                    <span class="text-slate-400 block text-[10px]">Tasa Municipal</span>
-                    <span class="text-slate-200 font-bold">$ ${item.tasa.toLocaleString('es-AR', {minimumFractionDigits: 2})}</span>
-                </div>
-                <div class="bg-blue-950/40 border border-blue-500/30 p-3.5 rounded-xl flex justify-between items-center">
-                    <span class="font-bold text-blue-200">Total General (${globalPeriodo}):</span>
-                    <span class="text-white font-black text-sm sm:text-base">$ ${item.total.toLocaleString('es-AR', {minimumFractionDigits: 2})}</span>
-                </div>
-                <div class="flex justify-between items-center pt-2">
-                    <span class="text-slate-400">Estado de pago:</span>
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold ${item.estado === 'Pagado' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'}">${item.estado === 'Pagado' ? 'Pagado' : 'Debe'}</span>
-                </div>
-            `;
-
-            const container = document.getElementById('admin-status-toggle-container');
-            const whatsappBtn = document.getElementById('modal-whatsapp-btn');
-
-            if (isAdmin) {
-                container.innerHTML = `
-                    <button onclick="togglePaymentStatus()" class="w-full sm:w-auto px-3.5 py-2 rounded-xl text-xs font-semibold ${item.estado === 'Pagado' ? 'bg-amber-600/20 text-amber-400 border border-amber-500/30' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-600/20'} transition-all cursor-pointer">
-                        <i class="fa-solid fa-rotate mr-1"></i> Cambiar a ${item.estado === 'Pagado' ? 'Debe' : 'Pagado'}
-                    </button>
-                `;
-                whatsappBtn.classList.remove('hidden');
-                whatsappBtn.classList.add('flex');
-            } else {
-                container.innerHTML = `<span class="text-[11px] text-slate-500 italic">Modo residente.</span>`;
-                whatsappBtn.classList.add('hidden');
-                whatsappBtn.classList.remove('flex');
-            }
-
-            document.getElementById('detail-modal').classList.remove('hidden');
-        }
-
-        async function togglePaymentStatus() {
-            const item = selectedType === 'depto' ? deptosData.find(d => d.id === selectedId) : cocherasData.find(c => c.id === selectedId);
-            if (item) {
-                item.estado = item.estado === 'Pagado' ? 'Pendiente' : 'Pagado';
-                const docRef = window.doc(window.db, "unidades", `${selectedType}_${item.id}`);
-                await window.updateDoc(docRef, { estado: item.estado });
-
-                renderApp();
-                openDetailModal(selectedId, selectedType);
-                showToast(`Estado actualizado en la nube a "${item.estado === 'Pagado' ? 'Pagado' : 'Debe'}"`);
-            }
-        }
-
-        function handleAdminAction() {
-            if (isAdmin) {
-                populateAdminUnitSelect();
-                document.getElementById('admin-panel-modal').classList.remove('hidden');
-            } else {
-                document.getElementById('pin-input').value = '';
-                document.getElementById('pin-modal').classList.remove('hidden');
-            }
-        }
-
-        function verifyPin() {
-            const pin = document.getElementById('pin-input').value;
-            if (pin === '2026') {
-                isAdmin = true;
-                closeModal('pin-modal');
-                updateAdminUI();
-                renderApp();
-                populateAdminUnitSelect();
-                document.getElementById('admin-panel-modal').classList.remove('hidden');
-                showToast('Acceso de Administrador concedido.');
-            } else {
-                showToast('PIN incorrecto. (Use 2026)', 'error');
-            }
-        }
-
-        function updateAdminUI() {
-            const badgeContainer = document.getElementById('role-badge-container');
-            const roleDot = document.getElementById('role-dot');
-            const roleText = document.getElementById('role-text');
-            const btnText = document.getElementById('admin-btn-text');
-            const btnIcon = document.getElementById('admin-btn-icon');
-            const btn = document.getElementById('admin-btn');
-
-            badgeContainer.className = "px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-            roleDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
-            roleText.innerText = "Admin";
-            btnText.innerText = "Gestión";
-            btnIcon.className = "fa-solid fa-gear";
-            btn.className = "px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition-all shadow-sm shadow-emerald-600/30 flex items-center gap-1.5 cursor-pointer";
-        }
-
-        function populateAdminUnitSelect() {
-            const type = document.getElementById('edit-type').value;
-            const select = document.getElementById('edit-unit-select');
-            const data = type === 'depto' ? deptosData : cocherasData;
-
-            select.innerHTML = data.map(item => `
-                <option value="${item.id}">${type === 'depto' ? 'UF ' + item.uf : item.uc} - ${item.ocupante}</option>
-            `).join('');
-            loadUnitDataToAdminForm();
-        }
-
-        function loadUnitDataToAdminForm() {
-            const type = document.getElementById('edit-type').value;
-            const id = parseInt(document.getElementById('edit-unit-select').value);
-            const data = type === 'depto' ? deptosData : cocherasData;
-            const item = data.find(i => i.id === id);
-
-            if (item) {
-                document.getElementById('edit-ocupante').value = item.ocupante;
-                document.getElementById('edit-telefono').value = item.telefono || "";
-                document.getElementById('edit-ord').value = item.ord;
-            }
-        }
-
-        async function saveIndividualUnitEdit() {
-            const type = document.getElementById('edit-type').value;
-            const id = parseInt(document.getElementById('edit-unit-select').value);
-            const data = type === 'depto' ? deptosData : cocherasData;
-            const item = data.find(i => i.id === id);
-
-            if (item) {
-                item.ocupante = document.getElementById('edit-ocupante').value.trim() || item.ocupante;
-                item.telefono = document.getElementById('edit-telefono').value.trim() || item.telefono;
-                item.ord = parseFloat(document.getElementById('edit-ord').value) || 0;
-                item.total = +(item.ord + item.ext + item.tasa).toFixed(2);
-
-                const docRef = window.doc(window.db, "unidades", `${type}_${item.id}`);
-                await window.setDoc(docRef, { ...item, tipo: type });
-
-                renderApp();
-                populateAdminUnitSelect();
-                document.getElementById('edit-unit-select').value = id;
-                showToast(`¡Cambios guardados en la nube para ${type === 'depto' ? 'UF ' + item.uf : item.uc}!`);
-            }
-        }
-
-        async function applyGlobalBulkServices() {
-            globalPeriodo = document.getElementById('config-periodo').value;
-            globalVencimiento = document.getElementById('config-vencimiento').value;
-            const avisoTexto = document.getElementById('config-aviso').value;
-            
-            urlFacturaEmsa = document.getElementById('input-url-emsa').value.trim();
-            urlFacturaSamsa = document.getElementById('input-url-samsa').value.trim();
-
-            document.getElementById('admin-aviso-text').innerText = avisoTexto;
-
-            currentEmsa = parseFloat(document.getElementById('bulk-emsa').value) || 0;
-            currentSamsa = parseFloat(document.getElementById('bulk-samsa').value) || 0;
-            const montoExtraUF = parseFloat(document.getElementById('bulk-ext-uf').value) || 0;
-            const montoExtraUC = parseFloat(document.getElementById('bulk-ext-uc').value) || 0;
-            const totalTasa = parseFloat(document.getElementById('bulk-tasa-total').value) || 0;
-
-            const totalM2Deptos = deptosData.reduce((acc, curr) => acc + curr.m2, 0);
-            const totalM2Coch = cocherasData.reduce((acc, curr) => acc + curr.m2, 0);
-            const totalM2General = totalM2Deptos + totalM2Coch;
-
-            if (totalM2General === 0) return;
-
-            const totalServicios = currentEmsa + currentSamsa;
-
-            showToast("Aplicando prorrateo de servicios y montos fijos diferenciados de extraordinarias...");
-
-            for (const d of deptosData) {
-                const propor = d.m2 / totalM2General;
-                d.ord = +(totalServicios * propor).toFixed(2);
-                d.tasa = +(totalTasa * propor).toFixed(2);
-                d.ext = montoExtraUF; // Fijo para UF
-                d.total = +(d.ord + d.ext + d.tasa).toFixed(2);
-                d.estado = "Pendiente";
-
-                const docRef = window.doc(window.db, "unidades", `depto_${d.id}`);
-                await window.setDoc(docRef, { ...d, tipo: 'depto' });
-            }
-
-            for (const c of cocherasData) {
-                const propor = c.m2 / totalM2General;
-                c.ord = +(totalServicios * propor).toFixed(2);
-                c.tasa = +(totalTasa * propor).toFixed(2);
-                c.ext = montoExtraUC; // Fijo para UC / Cocheras
-                c.total = +(c.ord + c.ext + c.tasa).toFixed(2);
-                c.estado = "Pendiente";
-
-                const docRef = window.doc(window.db, "unidades", `cochera_${c.id}`);
-                await window.setDoc(docRef, { ...c, tipo: 'cochera' });
-            }
-
-            renderApp();
-            closeModal('admin-panel-modal');
-            showToast(`¡Cálculos aplicados! Extraordinarias UF: $${montoExtraUF.toLocaleString('es-AR')} | UC: $${montoExtraUC.toLocaleString('es-AR')}`);
-        }
-
-        function showToast(message, type = 'success') {
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl border shadow-2xl text-xs font-medium transition-all duration-300 translate-y-2 opacity-0 ${
-                type === 'success' 
-                    ? 'bg-slate-900 border-emerald-500/30 text-emerald-300 shadow-emerald-950/50' 
-                    : 'bg-slate-900 border-rose-500/30 text-rose-300 shadow-rose-950/50'
-            }`;
-            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check text-emerald-400' : 'fa-triangle-exclamation text-rose-400'} text-sm"></i><span>${message}</span>`;
-            container.appendChild(toast);
-            setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
-            setTimeout(() => {
-                toast.classList.add('translate-y-2', 'opacity-0');
-                setTimeout(() => toast.remove(), 300);
-            }, 3500);
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
-        }
-    </script>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-sm">
+      <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">Banco</span><b id="b-banco"></b></div>
+      <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">CBU</span><b id="b-cbu" class="font-mono text-blue-400"></b></div>
+      <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">Alias</span><b id="b-alias" class="font-mono text-emerald-400"></b></div>
+      <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl"><span class="text-[11px] text-slate-400 block">CUIT</span><b id="b-cuit" class="font-mono"></b></div>
+    </div>
+    <p id="mora-info" class="text-xs text-amber-400/90"></p>
+  </section>
+
+  <nav class="flex border-b border-slate-800 gap-6 overflow-x-auto" id="tabs">
+    <button data-t="depto" onclick="tab('depto')" class="pb-3 text-sm shrink-0 cursor-pointer"><i class="fa-solid fa-house"></i> Unidades Funcionales (<span id="n-depto">0</span>)</button>
+    <button data-t="cochera" onclick="tab('cochera')" class="pb-3 text-sm shrink-0 cursor-pointer"><i class="fa-solid fa-car"></i> Cocheras (<span id="n-cochera">0</span>)</button>
+    <button data-t="resumen" onclick="tab('resumen')" class="pb-3 text-sm shrink-0 cursor-pointer"><i class="fa-solid fa-chart-pie"></i> Resumen y facturas</button>
+  </nav>
+
+  <div id="sec-depto" class="space-y-3"></div>
+  <div id="sec-cochera" class="hidden space-y-3"></div>
+  <div id="sec-resumen" class="hidden space-y-4"></div>
+</main>
+
+<footer class="border-t border-slate-800 bg-slate-950 py-5 text-center text-xs text-slate-500">Edificio Torre Aymará • Firebase + Vercel</footer>
+
+<!-- Detalle -->
+<div id="m-detail" class="modal"><div class="box max-w-lg">
+  <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+    <div><span id="m-sub" class="text-[11px] font-semibold text-blue-400"></span><h3 id="m-title" class="text-lg font-bold"></h3></div>
+    <button onclick="closeModal('m-detail')" aria-label="Cerrar" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+  <div id="m-body" class="space-y-3 text-xs"></div>
+  <div class="flex flex-wrap gap-2 justify-end pt-3 border-t border-slate-800">
+    <button onclick="descargarPDF()" class="btn bg-blue-600 hover:bg-blue-500 text-white"><i class="fa-solid fa-file-pdf"></i> Descargar PDF</button>
+    <button id="m-wa" onclick="waUnidad()" class="btn bg-emerald-600 hover:bg-emerald-500 text-white hidden"><i class="fa-brands fa-whatsapp"></i> WhatsApp</button>
+    <button onclick="closeModal('m-detail')" class="btn bg-slate-800 hover:bg-slate-700 text-slate-200">Cerrar</button>
+  </div>
+</div></div>
+
+<!-- Login -->
+<div id="m-login" class="modal"><div class="box max-w-sm">
+  <div class="text-center"><i class="fa-solid fa-shield-halved text-blue-400 text-2xl"></i><h3 class="font-bold mt-2">Acceso de administración</h3></div>
+  <div><label class="lbl" for="l-mail">Email</label><input id="l-mail" type="email" autocomplete="username" class="inp"></div>
+  <div><label class="lbl" for="l-pass">Contraseña</label><input id="l-pass" type="password" autocomplete="current-password" class="inp" onkeydown="if(event.key==='Enter')login()"></div>
+  <div class="flex gap-2">
+    <button onclick="closeModal('m-login')" class="btn bg-slate-800 text-slate-300 w-1/2">Cancelar</button>
+    <button onclick="login()" class="btn bg-blue-600 text-white w-1/2">Ingresar</button>
+  </div>
+</div></div>
+
+<!-- Cola WhatsApp -->
+<div id="m-cola" class="modal"><div class="box max-w-sm">
+  <h3 class="font-bold"><i class="fa-brands fa-whatsapp text-emerald-400"></i> Envío por WhatsApp (uno por clic)</h3>
+  <p class="text-xs text-slate-400">Un mensaje por teléfono: si un propietario tiene varias unidades, se agrupan.</p>
+  <div id="cola-info" class="text-sm bg-slate-950 border border-slate-800 rounded-xl p-3"></div>
+  <div class="flex gap-2">
+    <button onclick="closeModal('m-cola')" class="btn bg-slate-800 text-slate-300 w-1/2">Cerrar</button>
+    <button id="cola-btn" onclick="colaSiguiente()" class="btn bg-emerald-600 text-white w-1/2">Abrir y seguir</button>
+  </div>
+</div></div>
+
+<!-- Panel admin -->
+<div id="m-admin" class="modal"><div class="box max-w-2xl">
+  <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+    <h3 class="font-bold"><i class="fa-solid fa-gears text-blue-400"></i> Panel de gestión</h3>
+    <button onclick="closeModal('m-admin')" aria-label="Cerrar" class="text-slate-400 hover:text-white cursor-pointer"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
+  <div class="sec">
+    <h4 class="text-xs font-bold text-emerald-400">Aviso en cartelera</h4>
+    <textarea id="c-aviso" rows="2" class="inp resize-none"></textarea>
+    <button onclick="guardarAviso()" class="btn bg-emerald-600 text-white">Guardar aviso</button>
+  </div>
+
+  <div class="sec">
+    <h4 class="text-xs font-bold text-blue-400">Generar o recalcular un período</h4>
+    <p class="text-[11px] text-slate-400">Igual que el libro de Excel: cada UF paga su porcentaje de m² totales (propios + comunes) sobre el presupuesto ordinario y sobre EMSA + SAMSA. La tasa municipal de las UF se reparte por m². Las cocheras pagan un importe fijo y la tasa por m². Se traslada el saldo anterior y se suma la mora sobre el total del período anterior. Si el período ya existe, se conservan los pagos.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div><label class="lbl" for="g-mes">Mes del período</label><input id="g-mes" type="month" class="inp"></div>
+      <div><label class="lbl" for="g-venc">Fecha de vencimiento</label><input id="g-venc" type="date" class="inp"></div>
+      <div class="sm:col-span-2"><label class="lbl" for="g-pres">Gastos ordinarios del mes a repartir entre las UF ($)</label><input id="g-pres" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="g-nroemsa">N° factura EMSA</label><input id="g-nroemsa" class="inp"></div>
+      <div><label class="lbl" for="g-emsa">Importe EMSA ($)</label><input id="g-emsa" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="g-nrosamsa">N° factura SAMSA</label><input id="g-nrosamsa" class="inp"></div>
+      <div><label class="lbl" for="g-samsa">Importe SAMSA ($)</label><input id="g-samsa" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="g-urlemsa">Enlace web factura EMSA</label><input id="g-urlemsa" placeholder="https://..." class="inp"></div>
+      <div><label class="lbl" for="g-urlsamsa">Enlace web factura SAMSA</label><input id="g-urlsamsa" placeholder="https://..." class="inp"></div>
+      <div><label class="lbl" for="g-tasa">Tasa municipal total de las UF ($)</label><input id="g-tasa" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="g-tasam2">Tasa municipal por m² de cochera ($)</label><input id="g-tasam2" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="g-m2c">Ordinarias por m² de cochera ($, solo cocheras sin importe fijo)</label><input id="g-m2c" type="number" step="0.01" class="inp"></div>
+      <div></div>
+      <div><label class="lbl" for="g-extuf">Extraordinarias UF (fijo $)</label><input id="g-extuf" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="g-extuc">Extraordinarias cochera (fijo $)</label><input id="g-extuc" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="g-r1">Recargo si paga tarde dentro del mes (%)</label><input id="g-r1" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="g-r2">Recargo si paga al mes siguiente o queda impago (%)</label><input id="g-r2" type="number" step="0.01" class="inp"></div>
+    </div>
+    <p class="text-[11px] text-slate-400">El reparto entre pre-consorcio y fideicomiso no se carga: se calcula solo con los m² de las unidades entregadas y sin entregar.</p>
+    <div class="flex flex-col sm:flex-row gap-2">
+      <button onclick="generarPeriodo()" class="btn bg-blue-600 hover:bg-blue-500 text-white flex-1">Generar / recalcular período</button>
+      <button onclick="abrirCola()" class="btn bg-emerald-600 hover:bg-emerald-500 text-white flex-1"><i class="fa-brands fa-whatsapp"></i> Enviar deudas por WhatsApp</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h4 class="text-xs font-bold text-indigo-400">Editar unidad y ajustes del período seleccionado</h4>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div><label class="lbl" for="e-tipo">Tipo</label><select id="e-tipo" onchange="poblarEdit()" class="inp"><option value="depto">Unidad Funcional (UF)</option><option value="cochera">Cochera (UC)</option></select></div>
+      <div><label class="lbl" for="e-unit">Unidad</label><select id="e-unit" onchange="cargarEdit()" class="inp"></select></div>
+      <div><label class="lbl" for="e-piso">Piso (ej: 4, P.B., Piso 1)</label><input id="e-piso" class="inp"></div>
+      <div><label class="lbl" for="e-letra">Letra (solo UF)</label><input id="e-letra" maxlength="2" class="inp"></div>
+      <div><label class="lbl" for="e-num">N° de UF / N° de UC</label><input id="e-num" type="number" class="inp"></div>
+      <div><label class="lbl" for="e-nro">N° de cochera (ej: 1 C, solo UC)</label><input id="e-nro" class="inp"></div>
+      <div><label class="lbl" for="e-m2">Superficie total (m²)</label><input id="e-m2" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="e-ordfijo">Ordinarias fijas de cochera ($, opcional)</label><input id="e-ordfijo" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="e-ocup">Propietario / ocupante</label><input id="e-ocup" class="inp"></div>
+      <div><label class="lbl" for="e-tel">WhatsApp (ej: 3764123456)</label><input id="e-tel" class="inp"></div>
+      <label class="sm:col-span-2 flex items-center gap-2 text-xs text-slate-300"><input id="e-sin" type="checkbox"> Sin entregar (expensas a cargo del fideicomiso)</label>
+      <div><label class="lbl" for="e-ord">Ordinarias ($)</label><input id="e-ord" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="e-serv">EMSA / SAMSA ($)</label><input id="e-serv" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="e-ext">Extraordinarias ($)</label><input id="e-ext" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="e-tasa">Tasa municipal ($)</label><input id="e-tasa" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="e-deuda">Saldo anterior ($, negativo = a favor)</label><input id="e-deuda" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="e-rec">Recargo por mora ($)</label><input id="e-rec" type="number" step="0.01" class="inp"></div>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="guardarUnidad()" class="btn bg-indigo-600 hover:bg-indigo-500 text-white flex-1">Guardar cambios</button>
+      <button onclick="borrarUnidad()" class="btn bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30"><i class="fa-solid fa-trash"></i> Eliminar</button>
+    </div>
+  </div>
+
+  <div class="sec">
+    <h4 class="text-xs font-bold text-blue-400">Agregar unidad nueva</h4>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div><label class="lbl" for="n-tipo">Tipo</label><select id="n-tipo" class="inp"><option value="depto">UF</option><option value="cochera">Cochera</option></select></div>
+      <div><label class="lbl" for="n-piso">Piso (ej: 19, P.B.)</label><input id="n-piso" class="inp"></div>
+      <div><label class="lbl" for="n-letra">Letra (solo UF)</label><input id="n-letra" maxlength="2" class="inp"></div>
+      <div><label class="lbl" for="n-num">N° de UF / UC</label><input id="n-num" type="number" class="inp"></div>
+      <div><label class="lbl" for="n-nro">N° de cochera (ej: 73 C)</label><input id="n-nro" class="inp"></div>
+      <div><label class="lbl" for="n-m2">Superficie total (m²)</label><input id="n-m2" type="number" step="0.01" class="inp"></div>
+      <div><label class="lbl" for="n-ocup">Propietario</label><input id="n-ocup" class="inp"></div>
+      <div><label class="lbl" for="n-tel">WhatsApp</label><input id="n-tel" class="inp"></div>
+      <label class="flex items-end gap-2 text-xs text-slate-300 pb-2"><input id="n-sin" type="checkbox"> Sin entregar</label>
+    </div>
+    <button onclick="agregarUnidad()" class="btn bg-emerald-600 hover:bg-emerald-500 text-white w-full">Agregar unidad (luego recalculá el período)</button>
+  </div>
+
+  <div class="sec">
+    <h4 class="text-xs font-bold text-rose-400">Eliminar un período</h4>
+    <p class="text-[11px] text-slate-400">Borra el período que está elegido en el selector de arriba (liquidaciones y pagos). Útil para sacar períodos de prueba.</p>
+    <button onclick="eliminarPeriodo()" class="btn bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30"><i class="fa-solid fa-trash"></i> Eliminar el período elegido</button>
+  </div>
+
+</div></div>
+
+<!-- Cartel de confirmación -->
+<div id="m-confirm" class="modal" style="z-index:70" role="alertdialog" aria-modal="true" aria-labelledby="cf-title" aria-describedby="cf-msg"><div class="box max-w-sm text-center">
+  <div id="cf-icon"></div>
+  <h3 id="cf-title" class="text-base font-bold text-white"></h3>
+  <p id="cf-msg" class="text-sm text-slate-300 whitespace-pre-line"></p>
+  <div class="flex gap-2 pt-1">
+    <button id="cf-cancel" class="btn bg-slate-800 hover:bg-slate-700 text-slate-200 w-1/2">Cancelar</button>
+    <button id="cf-ok" class="btn w-1/2 text-white"></button>
+  </div>
+</div></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyD26xo3g7jONLQEBxOnxTyj0rt3sH0MiDw",
+  authDomain: "torre-aymara-app.firebaseapp.com",
+  projectId: "torre-aymara-app",
+  storageBucket: "torre-aymara-app.firebasestorage.app",
+  messagingSenderId: "702123606766",
+  appId: "1:702123606766:web:5eda7a16b5308678f0e9ff"
+});
+const db = getFirestore(app), auth = getAuth(app);
+
+/* ---------- Constantes y utilidades ---------- */
+const BANCO = { banco: "Galicia (Fideicomiso Aymara)", cbu: "0070070220000012166808", alias: "EDI.TORRE.AYMARA", cuit: "30-71253281-1" };
+const PS = 10;
+const MES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+const S = { user:null, isAdmin:false, units:[], priv:{}, periodos:[], pid:null, liqs:{}, gen:{aviso:''}, tab:'depto',
+            q:{depto:'',cochera:''}, page:{depto:1,cochera:1}, sel:null, cola:[], ci:0 };
+
+const $ = id => document.getElementById(id);
+window.$ = $;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const r2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
+const $f = n => '$ ' + (+n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const hoy = () => new Date().toLocaleDateString('sv-SE');
+const fdate = s => s ? s.split('-').reverse().join('/') : '—';
+const plabel = id => id ? `${MES[+id.slice(5,7)-1]}-${id.slice(2,4)}` : '—';
+const nextMonth = id => { if (!id) return hoy().slice(0,7); let [y,m] = id.split('-').map(Number); if (++m > 12) { m = 1; y++; } return `${y}-${String(m).padStart(2,'0')}`; };
+// Nombres: acepta el formato nuevo (piso/letra/uf/uc/nro) y el viejo (uf/uc como texto).
+const uname = u => u.tipo === 'depto'
+  ? (u.piso === 'Amenities' ? 'Amenities' : u.letra !== undefined ? `${u.piso}° ${u.letra}` : String(u.nombre || u.uf || ''))
+  : (typeof u.uc === 'number' ? `UC ${u.uc}` : String(u.nombre || u.uc || ''));
+const usub = u => u.tipo === 'depto'
+  ? (typeof u.uf === 'number' ? `UF ${u.uf}` : '')
+  : (u.nro ? `Cochera ${u.nro} · ${u.piso}${u.ufVinculada ? ' · depto ' + String(u.ufVinculada).replace(/^(\d+)\s+/, '$1° ') : ''}` : '');
+const ufull = u => [uname(u), usub(u)].filter(Boolean).join(' · ');
+// Orden de las listas: por N° de UF (Amenities al final) y por N° de UC.
+const numOrden = u => u.tipo === 'depto' ? (typeof u.uf === 'number' ? u.uf : 1e6) : (typeof u.uc === 'number' ? u.uc : 1e6);
+const porNumero = (a, b) => numOrden(a) - numOrden(b) || (a.orden || 0) - (b.orden || 0);
+// Cartel de confirmación propio (reemplaza al confirm() del navegador). Devuelve true o false.
+function confirmar(msg, o = {}) {
+  return new Promise(res => {
+    const ok = $('cf-ok'), peligro = !!o.peligro;
+    $('cf-title').textContent = o.titulo || '¿Confirmar?';
+    $('cf-msg').textContent = msg;
+    ok.textContent = o.boton || 'Aceptar';
+    ok.className = 'btn w-1/2 text-white ' + (peligro ? 'bg-rose-600 hover:bg-rose-500' : 'bg-blue-600 hover:bg-blue-500');
+    $('cf-icon').className = 'mx-auto w-12 h-12 rounded-full flex items-center justify-center text-xl ' + (peligro ? 'bg-rose-500/15 text-rose-400' : 'bg-blue-500/15 text-blue-400');
+    $('cf-icon').innerHTML = `<i class="fa-solid ${peligro ? 'fa-triangle-exclamation' : 'fa-circle-question'}"></i>`;
+    const key = e => { if (e.key === 'Escape') done(false); };
+    const done = v => { document.removeEventListener('keydown', key); closeModal('m-confirm'); res(v); };
+    ok.onclick = () => done(true); $('cf-cancel').onclick = () => done(false);
+    document.addEventListener('keydown', key); openModal('m-confirm'); (peligro ? $('cf-cancel') : ok).focus();
+  });
+}
+const clean = o => JSON.parse(JSON.stringify(o));
+const pct = n => (+n || 0).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '%';
+const per = () => S.periodos.find(p => p.id === S.pid) || {};
+const ocup = u => u.ocupante ?? S.priv[u.id]?.ocupante ?? '';
+const telOk = t => { const d = String(t || '').replace(/\D/g, ''); return d && d !== '3764000000' ? d : ''; };
+
+function toast(msg, type = 'success') {
+  const t = document.createElement('div');
+  t.className = `flex items-center gap-2 px-4 py-3 rounded-xl border shadow-2xl text-xs bg-slate-900 ${type === 'success' ? 'border-emerald-500/30 text-emerald-300' : 'border-rose-500/30 text-rose-300'}`;
+  const s = document.createElement('span'); s.textContent = msg; t.appendChild(s);
+  $('toasts').appendChild(t); setTimeout(() => t.remove(), 4000);
+}
+const openModal = id => { $(id).classList.remove('hidden'); $(id).classList.add('flex'); };
+const closeModal = id => { $(id).classList.add('hidden'); $(id).classList.remove('flex'); };
+const safe = fn => async (...a) => { try { return await fn(...a); } catch (e) { console.error(e); toast('Error: ' + (e.code || e.message), 'error'); } };
+async function commit(ops) { for (let i = 0; i < ops.length; i += 450) { const b = writeBatch(db); ops.slice(i, i+450).forEach(f => f(b)); await b.commit(); } }
+
+/* ---------- Cálculo ---------- */
+// Reparte `monto` proporcionalmente a m², en centavos, sin diferencias de redondeo.
+function prorratear(m2s, monto) {
+  const tc = Math.round(monto * 100), w = m2s.map(m => Math.round(m * 100)), sum = w.reduce((a,b) => a+b, 0);
+  if (!sum) return m2s.map(() => 0);
+  const out = w.map(x => Math.floor(tc * x / sum));
+  let resto = tc - out.reduce((a,b) => a+b, 0);
+  for (let i = 0; resto > 0; i = (i+1) % out.length, resto--) out[i]++;
+  return out.map(c => c / 100);
+}
+function tot(l) {
+  const total = r2(l.ord + (l.serv || 0) + l.ext + l.tasa + (l.deudaAnterior || 0) + (l.recargo || 0));
+  const pagado = r2((l.pagos || []).reduce((a,p) => a + p.monto, 0));
+  return { total, pagado, saldo: r2(total - pagado) };
+}
+// Recargo según fecha de pago: mismo mes del vencimiento = recargo1; meses posteriores = recargo2.
+function tasaMora(f, c) {
+  if (!c || !c.vencimiento || f <= c.vencimiento) return 0;
+  return (f.slice(0,7) === c.vencimiento.slice(0,7) ? c.recargo1 : c.recargo2) / 100;
+}
+// Mora del período anterior, como en el libro de Excel: se calcula sobre el TOTAL de ese período
+// (incluye saldo y mora anteriores). Pago tardío dentro del mes: recargo1. Lo que sigue impago al
+// generar el período nuevo: recargo2.
+function calcMora(prev, pc) {
+  pc = pc || {};
+  let resto = tot(prev).total, rec = 0;
+  [...(prev.pagos || [])].sort((a,b) => a.fecha.localeCompare(b.fecha)).forEach(p => {
+    const b = Math.min(Math.max(resto, 0), p.monto); rec += b * tasaMora(p.fecha, pc); resto -= p.monto;
+  });
+  if (resto > 0.005) rec += resto * (pc.recargo2 || 0) / 100;
+  return r2(rec);
+}
+function estado(u, l) {
+  if (u.sinEntregar) return ['Fideicomiso', 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'];
+  if (!l) return ['Entregada', 'bg-slate-800 text-slate-400 border-slate-700'];
+  const t = tot(l), venc = per().vencimiento && hoy() > per().vencimiento;
+  if (t.saldo <= 0.005) return ['Pagado', 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'];
+  return [(t.pagado > 0 ? 'Parcial' : 'Debe') + (venc ? ' ⚠' : ''), 'bg-amber-500/10 text-amber-400 border-amber-500/20'];
+}
+
+/* ---------- Carga de datos ---------- */
+async function cargarPrivados() {
+  S.priv = {};
+  if (!S.isAdmin) return;
+  (await getDocs(collection(db, 'privado'))).forEach(d => S.priv[d.id] = d.data());
+}
+async function leerLiqs(pid) {
+  const m = {}; (await getDocs(collection(db, 'periodos', pid, 'liq'))).forEach(d => m[d.id] = d.data()); return m;
+}
+async function cargarPeriodo() { S.liqs = S.pid ? await leerLiqs(S.pid) : {}; }
+async function cargar() {
+  try {
+    $('err').classList.add('hidden');
+    const [u, g, p] = await Promise.all([getDocs(collection(db, 'unidades')), getDoc(doc(db, 'config', 'general')), getDocs(collection(db, 'periodos'))]);
+    S.units = u.docs.map(d => ({ ...d.data(), id: d.id })).sort(porNumero);
+    S.gen = g.exists() ? g.data() : { aviso: '' };
+    S.periodos = p.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => b.id.localeCompare(a.id));
+    if (!S.periodos.some(x => x.id === S.pid)) S.pid = S.gen.periodoActual && S.periodos.some(x => x.id === S.gen.periodoActual) ? S.gen.periodoActual : (S.periodos[0]?.id || null);
+    await cargarPeriodo(); await cargarPrivados();
+  } catch (e) {
+    console.error(e);
+    $('err').textContent = 'No se pudieron cargar los datos desde la nube (' + (e.code || e.message) + '). No se muestran datos de respaldo para evitar confusiones.';
+    $('err').classList.remove('hidden');
+  }
+  renderAll();
+}
+async function cambiarPeriodo(v) { S.pid = v; await cargarPeriodo(); renderAll(); }
+
+/* ---------- Autenticación ---------- */
+onAuthStateChanged(auth, async user => {
+  S.user = user; S.isAdmin = false;
+  if (user) {
+    try { S.isAdmin = (await getDoc(doc(db, 'admins', user.uid))).exists(); } catch (e) {}
+    if (!S.isAdmin) toast('Este usuario no tiene permisos de administrador.', 'error');
+  }
+  await cargarPrivados(); renderAll();
+});
+async function login() {
+  try { await signInWithEmailAndPassword(auth, $('l-mail').value.trim(), $('l-pass').value); closeModal('m-login'); $('l-pass').value = ''; if (S.isAdmin) adminBtn(); }
+  catch (e) { toast('Email o contraseña incorrectos.', 'error'); }
+}
+const salir = () => signOut(auth);
+function adminBtn() {
+  if (!S.user) { openModal('m-login'); return; }
+  if (!S.isAdmin) { toast('Sin permisos de administrador.', 'error'); return; }
+  prefillAdmin(); openModal('m-admin');
+}
+
+/* ---------- Render ---------- */
+function shell(t) {
+  $('sec-' + t).innerHTML = `
+    <div class="flex flex-col sm:flex-row justify-between gap-3">
+      <p class="text-xs text-slate-400">Tocá una fila para ver el detalle y descargar el PDF.</p>
+      <div class="relative w-full sm:w-72"><i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-500 text-xs"></i>
+        <input id="q-${t}" aria-label="Buscar" placeholder="Buscar unidad..." oninput="buscar('${t}',this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-blue-500"></div>
+    </div>
+    <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl overflow-hidden">
+      <div class="overflow-x-auto"><table class="w-full text-left text-xs whitespace-nowrap"><thead id="th-${t}" class="bg-slate-900/90 text-slate-400"></thead><tbody id="tb-${t}" class="divide-y divide-slate-800/60"></tbody></table></div>
+      <div class="p-3 bg-slate-900/50 border-t border-slate-800 flex justify-between items-center text-xs">
+        <span id="pg-${t}" class="text-slate-400"></span>
+        <div class="flex gap-2"><button onclick="pagina('${t}',-1)" class="btn bg-slate-800 text-slate-200 !py-1.5">Anterior</button><button onclick="pagina('${t}',1)" class="btn bg-blue-600 text-white !py-1.5">Siguiente</button></div>
+      </div>
+    </div>`;
+}
+function lista(t) {
+  const q = S.q[t].toLowerCase();
+  return S.units.filter(u => u.tipo === t && (!q || (ufull(u) + ' ' + ocup(u)).toLowerCase().includes(q)));
+}
+function renderTabla(t) {
+  const L = lista(t), pages = Math.max(1, Math.ceil(L.length / PS)), A = S.isAdmin;
+  S.page[t] = Math.min(S.page[t], pages);
+  const s = (S.page[t] - 1) * PS, rows = L.slice(s, s + PS);
+  const cols = ['Unidad','m²','Titular','Ordinarias','EMSA/SAMSA','Extra','Tasa','Saldo ant.','Mora','Total','Saldo','Estado', A ? 'WA' : null].filter(Boolean);
+  $('th-' + t).innerHTML = `<tr>${cols.map(h => `<th class="p-3 font-semibold">${h}</th>`).join('')}</tr>`;
+  $('tb-' + t).innerHTML = rows.map(u => {
+    const l = S.liqs[u.id], [lb, cl] = estado(u, l), c = v => `<td class="p-3 text-slate-300">${v}</td>`, x = l ? tot(l) : null;
+    return `<tr onclick="detalle('${esc(u.id)}')" class="hover:bg-slate-900/60 cursor-pointer">
+      <td class="p-3"><div class="font-bold ${t === 'depto' ? 'text-blue-400' : 'text-indigo-400'}">${esc(uname(u))}</div><div class="text-[10px] text-slate-500">${esc(usub(u))}</div></td>${c(u.m2 + ' m²')}
+      <td class="p-3 text-slate-200 max-w-[200px] truncate">${esc(ocup(u))}</td>
+      ${l ? c($f(l.ord)) + c(t === 'depto' ? $f(l.serv || 0) : '—') + c($f(l.ext)) + c($f(l.tasa)) + c($f(l.deudaAnterior || 0)) + c($f(l.recargo || 0)) + `<td class="p-3 font-bold text-white">${$f(x.total)}</td>` + c($f(u.sinEntregar ? x.total : x.saldo)) : '<td class="p-3 text-slate-500" colspan="8">Sin liquidación en este período</td>'}
+      <td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-semibold border ${cl}">${lb}</span></td>
+      ${A ? `<td class="p-3"><button onclick="event.stopPropagation();waUnidad('${esc(u.id)}')" aria-label="WhatsApp" class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white rounded-lg cursor-pointer"><i class="fa-brands fa-whatsapp"></i></button></td>` : ''}
+    </tr>`;
+  }).join('') || `<tr><td class="p-6 text-center text-slate-500" colspan="13">Sin resultados</td></tr>`;
+  $('pg-' + t).textContent = L.length ? `Mostrando ${s+1}-${Math.min(s+PS, L.length)} de ${L.length}` : '';
+}
+function renderResumen() {
+  const p = per(), L = S.units.map(u => ({ u, l: S.liqs[u.id] })).filter(x => x.l);
+  const sum = (a, f) => r2(a.reduce((n, x) => n + f(x), 0));
+  const cobr = L.filter(x => !x.u.sinEntregar), fidL = L.filter(x => x.u.sinEntregar);
+  const total = sum(cobr, x => tot(x.l).total), pagado = sum(cobr, x => tot(x.l).pagado);
+  // Reparto pre-consorcio / fideicomiso: sale de los m² totales de las UF (entregadas vs. todas, con Amenities).
+  const ufs = S.units.filter(u => u.tipo === 'depto'), m2t = ufs.reduce((a, u) => a + u.m2, 0), m2e = ufs.filter(u => !u.sinEntregar).reduce((a, u) => a + u.m2, 0);
+  const pPre = m2t ? m2e / m2t * 100 : 0, pFid = m2t ? 100 - pPre : 0, serv = r2((p.emsa || 0) + (p.samsa || 0));
+  const fidCosto = sum(fidL.filter(x => x.u.tipo === 'depto'), x => x.l.ord + (x.l.serv || 0) + x.l.ext + x.l.tasa);
+  const card = (t, v, sub, cl = 'text-white') => `<div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-5"><span class="text-xs text-slate-400">${t}</span><div class="text-xl font-black ${cl} mt-1">${v}</div><span class="text-xs text-slate-400">${sub}</span></div>`;
+  $('sec-resumen').innerHTML = !p.id ? '<p class="text-slate-400 text-sm">Todavía no hay períodos cargados.</p>' : `
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      ${card('<i class="fa-solid fa-bolt text-amber-400"></i> EMSA (energía)', $f(p.emsa), 'Factura N° ' + esc(p.nroEmsa || 'S/N'))}
+      ${card('<i class="fa-solid fa-droplet text-blue-400"></i> SAMSA (agua)', $f(p.samsa), 'Factura N° ' + esc(p.nroSamsa || 'S/N'))}
+      ${card('Gastos ordinarios del mes', $f(p.presupuestoOrd), 'Se reparte por m² totales entre todas las UF', 'text-emerald-400')}
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      ${card('A cobrar (unidades entregadas)', $f(total), 'Incluye saldo anterior y mora')}
+      ${card('Cobrado', $f(pagado), total ? (pagado / total * 100).toFixed(1) + '% del total' : '', 'text-emerald-400')}
+      ${card('Saldo pendiente', $f(r2(total - pagado)), '', 'text-amber-400')}
+    </div>
+    <div class="bg-indigo-950/30 border border-indigo-500/30 rounded-2xl p-5 text-sm space-y-2">
+      <div><b class="text-indigo-300">Reparto entre pre-consorcio y fideicomiso</b> <span class="text-xs text-slate-400">(se calcula solo, por m² totales de las UF)</span></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+        <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3">Pre-consorcio: propietarios de ${ufs.filter(u => !u.sinEntregar).length} unidades entregadas<br><b class="text-base text-white">${pct(pPre)}</b> · ${m2e.toLocaleString('es-AR', { maximumFractionDigits: 2 })} de ${m2t.toLocaleString('es-AR', { maximumFractionDigits: 2 })} m²<br>EMSA + SAMSA: <b>${$f(serv * pPre / 100)}</b></div>
+        <div class="bg-slate-950/60 border border-slate-800 rounded-xl p-3">Fideicomiso: ${ufs.filter(u => u.sinEntregar).length} unidades sin entregar y Amenities<br><b class="text-base text-white">${pct(pFid)}</b> · ${(m2t - m2e).toLocaleString('es-AR', { maximumFractionDigits: 2 })} m²<br>EMSA + SAMSA: <b>${$f(serv * pFid / 100)}</b> · Total del período a su cargo: <b>${$f(fidCosto)}</b></div>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+      ${[['EMSA', p.urlEmsa], ['SAMSA', p.urlSamsa]].map(([n, u]) => `<div class="bg-slate-900 border border-slate-800 rounded-xl p-4">Factura ${n}: ${/^https?:\/\//.test(u || '') ? `<a class="text-blue-400 underline" target="_blank" rel="noopener" href="${esc(u)}">ver factura</a>` : '<span class="text-slate-500">sin enlace</span>'}</div>`).join('')}
+    </div>`;
+}
+function renderAll() {
+  const p = per(), A = S.isAdmin;
+  $('aviso').textContent = S.gen.aviso || 'Sin avisos.';
+  $('b-banco').textContent = BANCO.banco; $('b-cbu').textContent = BANCO.cbu; $('b-alias').textContent = BANCO.alias; $('b-cuit').textContent = BANCO.cuit;
+  $('h-venc').textContent = fdate(p.vencimiento);
+  $('sel-periodo').innerHTML = S.periodos.map(x => `<option value="${esc(x.id)}" ${x.id === S.pid ? 'selected' : ''}>${plabel(x.id)}</option>`).join('') || '<option>—</option>';
+  $('mora-info').textContent = p.id ? `Pagos después del vencimiento: +${p.recargo1}% el mes siguiente si se paga dentro del mes del vencimiento, +${p.recargo2}% si se paga en el mes posterior.` : '';
+  $('n-depto').textContent = S.units.filter(u => u.tipo === 'depto').length;
+  $('n-cochera').textContent = S.units.filter(u => u.tipo === 'cochera').length;
+  $('role').textContent = A ? 'Administrador' : 'Residente';
+  $('role').className = 'px-3 py-1.5 rounded-lg text-xs ' + (A ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-800 text-slate-300');
+  $('btn-admin').innerHTML = S.user ? '<i class="fa-solid fa-gear"></i> Gestión' : '<i class="fa-solid fa-lock"></i> Ingresar';
+  $('btn-out').classList.toggle('hidden', !S.user);
+  renderTabla('depto'); renderTabla('cochera'); renderResumen(); tab(S.tab);
+}
+function tab(t) {
+  S.tab = t;
+  ['depto','cochera','resumen'].forEach(x => $('sec-' + x).classList.toggle('hidden', x !== t));
+  document.querySelectorAll('#tabs button').forEach(b => b.className = 'pb-3 text-sm shrink-0 cursor-pointer border-b-2 ' + (b.dataset.t === t ? 'border-blue-500 text-blue-400 font-bold' : 'border-transparent text-slate-400 hover:text-slate-200'));
+}
+function buscar(t, v) { S.q[t] = v; S.page[t] = 1; renderTabla(t); }
+function pagina(t, d) { S.page[t] = Math.max(1, S.page[t] + d); renderTabla(t); }
+
+/* ---------- Detalle y pagos ---------- */
+function detalle(uid) {
+  const u = S.units.find(x => x.id === uid); if (!u) return;
+  S.sel = uid; const l = S.liqs[uid], A = S.isAdmin;
+  $('m-sub').textContent = u.tipo === 'depto' ? 'Unidad funcional' + (typeof u.uf === 'number' ? ' N° ' + u.uf : '') : 'Unidad complementaria' + (u.nro ? ' · cochera ' + u.nro + ' · ' + u.piso : '');
+  $('m-title').textContent = uname(u);
+  const row = (k, v, cl = '') => `<div class="flex justify-between py-1 ${cl}"><span class="text-slate-400">${k}</span><strong>${$f(v)}</strong></div>`;
+  const mm = u.m2Propios != null ? `<span class="text-[10px] text-slate-400 block">${u.m2Propios} propios + ${u.m2Comunes} comunes</span>` : '';
+  let h = `<div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between gap-3"><div><span class="text-[10px] text-slate-400 block">Titular${u.rol ? ' (' + esc(u.rol.toLowerCase()) + ')' : ''}</span><b>${esc(ocup(u) || '—')}</b></div><div class="text-right shrink-0"><span class="text-[10px] text-slate-400 block">Superficie</span><b class="text-blue-400">${u.m2} m²</b>${mm}</div></div>`;
+  if (!l) h += '<p class="text-slate-400">Sin liquidación para este período.</p>';
+  else {
+    const t = tot(l);
+    h += `<div class="bg-slate-950 p-3 rounded-xl border border-slate-800">${row('Ordinarias', l.ord)}${u.tipo === 'depto' ? row('EMSA / SAMSA', l.serv || 0) : ''}${row('Extraordinarias', l.ext)}${row('Tasa municipal', l.tasa)}${row('Saldo anterior', l.deudaAnterior || 0)}${row('Recargo por mora', l.recargo || 0)}</div>
+      <div class="bg-blue-950/40 border border-blue-500/30 p-3 rounded-xl flex justify-between"><b class="text-blue-200">Total ${plabel(S.pid)}</b><b class="text-base">${$f(t.total)}</b></div>`;
+    if (u.sinEntregar) h += `<div class="bg-indigo-950/30 border border-indigo-500/30 p-3 rounded-xl">Unidad sin entregar: estas expensas están a cargo del fideicomiso.<br>Importe a cargo del fideicomiso: <b>${$f(t.total)}</b></div>`;
+    else {
+      h += `<div class="bg-slate-950 p-3 rounded-xl border border-slate-800">${row('Pagado', t.pagado, 'text-emerald-400')}${row('Saldo', t.saldo, t.saldo > 0.005 ? 'text-amber-400' : '')}`;
+      (l.pagos || []).forEach((g, i) => h += `<div class="flex justify-between text-[11px] text-slate-400 border-t border-slate-800 pt-1 mt-1"><span>${fdate(g.fecha)} ${esc(g.nota || '')}</span><span>${$f(g.monto)} ${A ? `<button onclick="quitarPago(${i})" aria-label="Quitar pago" class="text-rose-400 ml-2 cursor-pointer"><i class="fa-solid fa-trash"></i></button>` : ''}</span></div>`);
+      h += '</div>';
+      if (A) h += `<div class="sec"><h4 class="text-xs font-bold text-emerald-400">Registrar pago</h4><div class="grid grid-cols-3 gap-2"><div><label class="lbl" for="p-monto">Monto</label><input id="p-monto" type="number" step="0.01" value="${Math.max(0, t.saldo)}" class="inp"></div><div><label class="lbl" for="p-fecha">Fecha</label><input id="p-fecha" type="date" value="${hoy()}" class="inp"></div><div><label class="lbl" for="p-nota">Nota</label><input id="p-nota" class="inp"></div></div><button onclick="registrarPago()" class="btn bg-emerald-600 text-white w-full">Registrar pago</button></div>`;
+    }
+  }
+  $('m-body').innerHTML = h;
+  $('m-wa').classList.toggle('hidden', !A);
+  openModal('m-detail');
+}
+async function registrarPago() {
+  const l = S.liqs[S.sel], monto = parseFloat($('p-monto').value), fecha = $('p-fecha').value;
+  if (!l || !(monto > 0) || !fecha) return toast('Completá monto y fecha.', 'error');
+  const pagos = [...(l.pagos || []), { fecha, monto: r2(monto), nota: $('p-nota').value.trim() }];
+  await updateDoc(doc(db, 'periodos', S.pid, 'liq', S.sel), { pagos });
+  l.pagos = pagos; renderAll(); detalle(S.sel); toast('Pago registrado.');
+}
+async function quitarPago(i) {
+  const l = S.liqs[S.sel]; if (!l || !(await confirmar('Se saca este pago del registro de la unidad.', { titulo: '¿Quitar este pago?', boton: 'Quitar pago', peligro: true }))) return;
+  const pagos = l.pagos.filter((_, k) => k !== i);
+  await updateDoc(doc(db, 'periodos', S.pid, 'liq', S.sel), { pagos });
+  l.pagos = pagos; renderAll(); detalle(S.sel);
+}
+
+/* ---------- PDF ---------- */
+function descargarPDF() {
+  const u = S.units.find(x => x.id === S.sel), l = S.liqs[S.sel], p = per(); if (!u || !l) return;
+  const { jsPDF } = window.jspdf, d = new jsPDF(), t = tot(l);
+  d.setFillColor(15, 23, 42); d.rect(0, 0, 210, 40, 'F'); d.setTextColor(255);
+  d.setFont('helvetica', 'bold'); d.setFontSize(18); d.text('EDIFICIO TORRE AYMARÁ', 14, 18);
+  d.setFont('helvetica', 'normal'); d.setFontSize(10);
+  d.text('Beethoven 1650 • Posadas, Misiones', 14, 25);
+  d.text(`Período: ${plabel(S.pid)}   |   Vencimiento: ${fdate(p.vencimiento)}`, 14, 32);
+  d.setTextColor(30, 41, 59); d.setFont('helvetica', 'bold'); d.setFontSize(12);
+  d.text(d.splitTextToSize(`LIQUIDACIÓN DE EXPENSAS - ${ufull(u)}`, 182), 14, 52);
+  d.setFont('helvetica', 'normal'); d.setFontSize(10);
+  let y = 60;
+  d.text(d.splitTextToSize(`Titular: ${ocup(u) || '-'}`, 182), 14, y); y += 6;
+  d.text(`Superficie: ${u.m2} m²`, 14, y); y += 10;
+  d.setFillColor(241, 245, 249); d.rect(14, y, 182, 8, 'F'); d.setFont('helvetica', 'bold');
+  d.text('Concepto', 18, y + 6); d.text('Importe', 165, y + 6); d.setFont('helvetica', 'normal'); y += 14;
+  const items = [[u.tipo === 'depto' ? 'Expensas ordinarias (prorrateo por m²)' : 'Expensas ordinarias cochera', l.ord]];
+  if (u.tipo === 'depto') items.push([`Servicios EMSA N° ${p.nroEmsa || 'S/N'} y SAMSA N° ${p.nroSamsa || 'S/N'} (prorrateo por m²)`, l.serv || 0]);
+  items.push(['Expensas extraordinarias', l.ext], ['Tasa municipal', l.tasa], ['Saldo anterior', l.deudaAnterior || 0], ['Recargo por mora', l.recargo || 0]);
+  items.forEach(([k, v]) => { const lines = d.splitTextToSize(k, 130); d.text(lines, 18, y); d.text($f(v), 165, y); y += 6 * lines.length + 2; });
+  y += 2; d.setFillColor(239, 246, 255); d.rect(14, y, 182, 12, 'F'); d.setFont('helvetica', 'bold'); d.setFontSize(11); d.setTextColor(30, 58, 138);
+  d.text('TOTAL A PAGAR:', 18, y + 8); d.text($f(t.total), 160, y + 8); y += 20;
+  d.setTextColor(30, 41, 59); d.setFontSize(10);
+  if (u.sinEntregar) { d.text('Unidad sin entregar: expensas a cargo del fideicomiso.', 14, y); y += 10; }
+  else { d.text(`Pagado: ${$f(t.pagado)}      Saldo: ${$f(t.saldo)}`, 14, y); y += 10; }
+  d.text(d.splitTextToSize(`Pago fuera de término: +${p.recargo1}% el mes siguiente (si se paga dentro del mes) / +${p.recargo2}% (si se paga el mes posterior).`, 182), 14, y); y += 14;
+  d.text('DATOS BANCARIOS', 14, y); d.setFont('helvetica', 'normal'); d.setFontSize(9);
+  [`Banco: ${BANCO.banco}`, `CBU: ${BANCO.cbu}`, `Alias: ${BANCO.alias}`, `CUIT: ${BANCO.cuit}`, 'Enviar comprobante indicando UF o cochera.'].forEach((s, i) => d.text(s, 14, y + 6 + i * 6));
+  d.save(`Expensas_${uname(u).replace(/[^\w]+/g, '_')}_${plabel(S.pid)}.pdf`);
+}
+
+/* ---------- WhatsApp ---------- */
+function waUrl(tel, items) {
+  const p = per(), total = items.reduce((a, i) => a + i.t.saldo, 0), nombre = ocup(items[0].u) || 'propietario';
+  const lin = items.map(i => `• *${ufull(i.u)}*: ${$f(i.t.saldo)}` + (i.l.recargo ? ` (incluye mora ${$f(i.l.recargo)})` : '')).join('\n');
+  const msg = `🏢 *TORRE AYMARÁ (Posadas)*\nHola *${nombre}*, el detalle de expensas del período *${plabel(S.pid)}*:\n\n${lin}\n\n💰 *TOTAL: ${$f(total)}*\n📅 *Vencimiento:* ${fdate(p.vencimiento)}\n` +
+    `ℹ️ Pagos posteriores al vencimiento: +${p.recargo1}% el mes siguiente (dentro del mes) o +${p.recargo2}% (mes posterior).\n` +
+    (p.urlEmsa ? `\n🔗 Factura EMSA: ${p.urlEmsa}` : '') + (p.urlSamsa ? `\n🔗 Factura SAMSA: ${p.urlSamsa}` : '') +
+    `\n\n🏦 *Datos bancarios*\n- Banco: ${BANCO.banco}\n- CBU: ${BANCO.cbu}\n- Alias: ${BANCO.alias}\n- CUIT: ${BANCO.cuit}\n\nPor favor enviar el comprobante indicando la unidad. ¡Gracias!`;
+  return `https://wa.me/${tel ? '549' + tel : ''}?text=${encodeURIComponent(msg)}`;
+}
+function waUnidad(uid = S.sel) {
+  const u = S.units.find(x => x.id === uid), l = S.liqs[uid]; if (!u || !l) return toast('Sin liquidación.', 'error');
+  window.open(waUrl(telOk(S.priv[uid]?.telefono), [{ u, l, t: tot(l) }]), '_blank');
+}
+function abrirCola() {
+  const g = new Map();
+  S.units.forEach(u => {
+    const l = S.liqs[u.id]; if (u.sinEntregar || !l) return;
+    const t = tot(l), tel = telOk(S.priv[u.id]?.telefono); if (t.saldo <= 0.005 || !tel) return;
+    if (!g.has(tel)) g.set(tel, []); g.get(tel).push({ u, l, t });
+  });
+  S.cola = [...g.entries()]; S.ci = 0;
+  if (!S.cola.length) return toast('No hay deudores con teléfono cargado.', 'error');
+  openModal('m-cola'); renderCola();
+}
+function renderCola() {
+  const fin = S.ci >= S.cola.length; $('cola-btn').classList.toggle('hidden', fin);
+  if (fin) { $('cola-info').textContent = 'Listo: se recorrieron todos los contactos.'; return; }
+  const [, it] = S.cola[S.ci];
+  $('cola-info').innerHTML = `<b>${S.ci + 1}/${S.cola.length}</b> · ${esc(ocup(it[0].u))}<br><span class="text-xs text-slate-400">${it.map(i => esc(ufull(i.u))).join(', ')}</span>`;
+}
+function colaSiguiente() { const [tel, it] = S.cola[S.ci]; window.open(waUrl(tel, it), '_blank'); S.ci++; renderCola(); }
+
+/* ---------- Administración ---------- */
+function prefillAdmin() {
+  const p = S.periodos[0] || {}, m = nextMonth(p.id), set = (id, v) => $(id).value = v ?? '';
+  $('c-aviso').value = S.gen.aviso || '';
+  set('g-mes', m); set('g-venc', m + '-10');
+  ['g-nroemsa','g-emsa','g-nrosamsa','g-samsa','g-urlemsa','g-urlsamsa'].forEach(i => set(i, ''));
+  set('g-pres', p.presupuestoOrd ?? 10000000); set('g-tasa', p.tasaUF ?? ''); set('g-tasam2', p.tasaM2Coch ?? 124.86);
+  set('g-m2c', p.valorM2Coch ?? 278.05); set('g-extuf', p.extUF ?? 25000); set('g-extuc', p.extUC ?? 6000);
+  set('g-r1', p.recargo1 ?? 5); set('g-r2', p.recargo2 ?? 10);
+  poblarEdit();
+}
+async function guardarAviso() {
+  await setDoc(doc(db, 'config', 'general'), { aviso: $('c-aviso').value.trim() }, { merge: true });
+  S.gen.aviso = $('c-aviso').value.trim(); renderAll(); toast('Aviso guardado.');
+}
+async function generarPeriodo() {
+  const n = id => $(id).value === '' ? null : parseFloat($(id).value), mes = $('g-mes').value, venc = $('g-venc').value;
+  const c = { vencimiento: venc, emsa: n('g-emsa'), samsa: n('g-samsa'), presupuestoOrd: n('g-pres'), tasaUF: n('g-tasa'), tasaM2Coch: n('g-tasam2'),
+    extUF: n('g-extuf'), extUC: n('g-extuc'), valorM2Coch: n('g-m2c'), recargo1: n('g-r1'), recargo2: n('g-r2'),
+    nroEmsa: $('g-nroemsa').value.trim(), nroSamsa: $('g-nrosamsa').value.trim(), urlEmsa: $('g-urlemsa').value.trim(), urlSamsa: $('g-urlsamsa').value.trim() };
+  const req = ['emsa','samsa','presupuestoOrd','tasaUF','tasaM2Coch','extUF','extUC','valorM2Coch','recargo1','recargo2'];
+  if (!mes || !venc || req.some(k => c[k] === null || isNaN(c[k]) || c[k] < 0)) return toast('Completá el mes, el vencimiento y todos los importes.', 'error');
+  if (!S.units.length) return toast('No hay unidades cargadas.', 'error');
+  const existe = S.periodos.some(x => x.id === mes);
+  if (!(await confirmar(existe ? `El período ${plabel(mes)} ya existe. Se recalculan los importes: se conservan los pagos, pero se pierden los ajustes manuales.` : `Se va a generar la liquidación de ${plabel(mes)} para todas las unidades.`, { titulo: existe ? '¿Recalcular el período?' : '¿Generar el período?', boton: existe ? 'Recalcular' : 'Generar', peligro: existe }))) return;
+
+  const prevId = S.periodos.map(x => x.id).filter(i => i < mes).sort().pop(), pc = S.periodos.find(x => x.id === prevId);
+  const prevL = prevId ? await leerLiqs(prevId) : {}, curL = existe ? await leerLiqs(mes) : {};
+  // Las UF (entregadas o no, con Amenities) se reparten por m² totales. Las cocheras: importe fijo y tasa por m².
+  const ufs = S.units.filter(u => u.tipo === 'depto'), w = ufs.map(u => u.m2), idx = {};
+  ufs.forEach((u, i) => idx[u.id] = i);
+  const ordUF = prorratear(w, c.presupuestoOrd), srvUF = prorratear(w, r2(c.emsa + c.samsa)), tasUF = prorratear(w, c.tasaUF), ops = [];
+  S.units.forEach(u => {
+    const i = idx[u.id];
+    const l = u.tipo === 'depto' ? { ord: ordUF[i], serv: srvUF[i], ext: c.extUF, tasa: tasUF[i] }
+      : { ord: u.ordFijo ?? r2(u.m2 * c.valorM2Coch), serv: 0, ext: c.extUC, tasa: r2(u.m2 * c.tasaM2Coch) };
+    Object.assign(l, { deudaAnterior: 0, recargo: 0, pagos: curL[u.id]?.pagos || [] });
+    const pv = prevL[u.id];
+    if (u.sinEntregar) { l.fid = true; l.pagos = []; }                       // a cargo del fideicomiso: no arrastra saldo ni mora
+    else if (pv && !pv.fid) { l.deudaAnterior = tot(pv).saldo; l.recargo = calcMora(pv, pc); }
+    ops.push(b => b.set(doc(db, 'periodos', mes, 'liq', u.id), l));
+  });
+  ops.push(b => b.set(doc(db, 'periodos', mes), c));
+  ops.push(b => b.set(doc(db, 'config', 'general'), { periodoActual: mes }, { merge: true }));
+  await commit(ops);
+  S.pid = mes; await cargar(); closeModal('m-admin'); toast(`Período ${plabel(mes)} ${existe ? 'recalculado' : 'generado'}.`);
+}
+function poblarEdit() {
+  const t = $('e-tipo').value;
+  $('e-unit').innerHTML = S.units.filter(u => u.tipo === t).map(u => `<option value="${esc(u.id)}">${esc(ufull(u))} - ${esc(ocup(u))}</option>`).join('');
+  cargarEdit();
+}
+function cargarEdit() {
+  const u = S.units.find(x => x.id === $('e-unit').value), set = (i, v) => $(i).value = v ?? '';
+  if (!u) return;
+  const l = S.liqs[u.id], pv = S.priv[u.id] || {}, dep = u.tipo === 'depto';
+  set('e-piso', u.piso); set('e-letra', dep ? u.letra : ''); set('e-num', dep ? u.uf : u.uc); set('e-nro', dep ? '' : u.nro); set('e-ordfijo', dep ? '' : u.ordFijo);
+  set('e-m2', u.m2); set('e-ocup', ocup(u)); set('e-tel', pv.telefono); $('e-sin').checked = !!u.sinEntregar;
+  set('e-ord', l?.ord); set('e-serv', l?.serv); set('e-ext', l?.ext); set('e-tasa', l?.tasa); set('e-deuda', l?.deudaAnterior); set('e-rec', l?.recargo);
+}
+async function guardarUnidad() {
+  const u = S.units.find(x => x.id === $('e-unit').value); if (!u) return;
+  const dep = u.tipo === 'depto', m2 = parseFloat($('e-m2').value), piso = $('e-piso').value.trim(), numero = parseInt($('e-num').value);
+  if (!(m2 > 0) || !piso || isNaN(numero) || (dep && !$('e-letra').value.trim())) return toast('Completá piso, letra (UF), número y superficie.', 'error');
+  Object.assign(u, { piso: dep && !isNaN(+piso) ? +piso : piso, m2, sinEntregar: $('e-sin').checked, ocupante: $('e-ocup').value.trim() });
+  if (dep) Object.assign(u, { letra: $('e-letra').value.trim().toUpperCase(), uf: numero });
+  else Object.assign(u, { uc: numero, nro: $('e-nro').value.trim(), ordFijo: $('e-ordfijo').value === '' ? null : parseFloat($('e-ordfijo').value) });
+  S.priv[u.id] = { telefono: $('e-tel').value.trim() };
+  const num = i => parseFloat($(i).value) || 0, { id, ...resto } = u, ops = [
+    b => b.set(doc(db, 'unidades', u.id), clean(resto)),
+    b => b.set(doc(db, 'privado', u.id), S.priv[u.id])];
+  const l = S.liqs[u.id];
+  if (l && $('e-ord').value !== '') {
+    Object.assign(l, { ord: num('e-ord'), serv: num('e-serv'), ext: num('e-ext'), tasa: num('e-tasa'), deudaAnterior: num('e-deuda'), recargo: num('e-rec') });
+    if (u.sinEntregar) { l.fid = true; l.pagos = []; } else delete l.fid;
+    ops.push(b => b.set(doc(db, 'periodos', S.pid, 'liq', u.id), l));
+  }
+  await commit(ops); renderAll(); poblarEdit(); $('e-unit').value = u.id; cargarEdit(); toast('Cambios guardados. Si cambiaste m² o el estado de entrega, recalculá el período.');
+}
+async function agregarUnidad() {
+  const tipo = $('n-tipo').value, dep = tipo === 'depto', piso = $('n-piso').value.trim(), letra = $('n-letra').value.trim().toUpperCase();
+  const m2 = parseFloat($('n-m2').value), numero = parseInt($('n-num').value);
+  if (!piso || !(m2 > 0) || isNaN(numero) || (dep && !letra)) return toast('Completá piso, letra (UF), número y superficie.', 'error');
+  const id = `${tipo}_${Date.now().toString(36)}`, orden = Math.max(0, ...S.units.filter(x => x.tipo === tipo).map(x => x.orden || 0)) + 1;
+  const base = { tipo, m2, orden, sinEntregar: $('n-sin').checked, ocupante: $('n-ocup').value.trim() };
+  const u = dep ? { ...base, piso: isNaN(+piso) ? piso : +piso, letra, uf: numero } : { ...base, piso, uc: numero, nro: $('n-nro').value.trim() };
+  const pv = { telefono: $('n-tel').value.trim() };
+  await commit([b => b.set(doc(db, 'unidades', id), clean(u)), b => b.set(doc(db, 'privado', id), pv)]);
+  S.units.push({ id, ...u }); S.units.sort(porNumero); S.priv[id] = pv; renderAll(); poblarEdit();
+  ['n-piso','n-letra','n-num','n-nro','n-m2','n-ocup','n-tel'].forEach(i => $(i).value = ''); toast(`${uname(u)} agregada. Recalculá el período para incluirla en la liquidación.`);
+}
+async function borrarUnidad() {
+  const u = S.units.find(x => x.id === $('e-unit').value); if (!u) return;
+  if (!(await confirmar(`Se elimina ${ufull(u)} del padrón. Los períodos ya liquidados conservan su historial.`, { titulo: '¿Eliminar la unidad?', boton: 'Eliminar', peligro: true }))) return;
+  await commit([b => b.delete(doc(db, 'unidades', u.id)), b => b.delete(doc(db, 'privado', u.id))]);
+  S.units = S.units.filter(x => x.id !== u.id); delete S.priv[u.id]; renderAll(); poblarEdit(); toast('Unidad eliminada.');
+}
+// Borra el período que está seleccionado (liquidaciones y pagos incluidos). Sirve para sacar períodos de prueba.
+async function eliminarPeriodo() {
+  const id = S.pid; if (!id) return toast('No hay período seleccionado.', 'error');
+  if (!(await confirmar(`Se borran todas las liquidaciones y pagos de ${plabel(id)}. Esta acción no se puede deshacer.`, { titulo: `¿Eliminar el período ${plabel(id)}?`, boton: 'Eliminar período', peligro: true }))) return;
+  const liq = await leerLiqs(id), ops = Object.keys(liq).map(k => b => b.delete(doc(db, 'periodos', id, 'liq', k)));
+  const resto = S.periodos.map(x => x.id).filter(x => x !== id).sort().pop() || null;
+  ops.push(b => b.delete(doc(db, 'periodos', id)), b => b.set(doc(db, 'config', 'general'), { periodoActual: resto }, { merge: true }));
+  await commit(ops); S.pid = resto; await cargar(); closeModal('m-admin'); toast(`Período ${plabel(id)} eliminado.`);
+}
+
+/* ---------- Inicio ---------- */
+Object.assign(window, Object.fromEntries(Object.entries({
+  cambiarPeriodo, login, salir, adminBtn, tab, buscar, pagina, detalle, registrarPago, quitarPago, descargarPDF, waUnidad, abrirCola, colaSiguiente,
+  guardarAviso, generarPeriodo, poblarEdit, cargarEdit, guardarUnidad, agregarUnidad, borrarUnidad, eliminarPeriodo, closeModal
+}).map(([k, f]) => [k, safe(f)])));
+shell('depto'); shell('cochera'); tab('depto');
+document.addEventListener('DOMContentLoaded', () => {});
+cargar();
+</script>
 </body>
 </html>
