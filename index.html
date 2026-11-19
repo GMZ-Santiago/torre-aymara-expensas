@@ -210,7 +210,7 @@ body { background: radial-gradient(1200px 600px at 85% -10%, rgba(205,167,82,.10
 
   <div class="sec">
     <h4 class="text-xs font-bold text-blue-400">Generar o recalcular un período</h4>
-    <p class="text-[11px] text-slate-400">Igual que el libro de Excel: cada UF paga su porcentaje de m² totales (propios + comunes) sobre el presupuesto ordinario y sobre EMSA + SAMSA. La tasa municipal de las UF se reparte por m². Las cocheras reparten por m² su propio total de ordinarias y de tasa municipal. Se traslada el saldo anterior y se suma la mora sobre el total del período anterior. Si el período ya existe, se conservan los pagos.</p>
+    <p class="text-[11px] text-slate-400">Igual que el libro de Excel: cada UF paga su porcentaje de m² totales (propios + comunes) sobre el presupuesto ordinario y sobre SAMSA y la parte de EMSA que les toca (por defecto 87,68%; el 12,32% restante de EMSA se reparte por m² entre las cocheras). La tasa municipal de las UF se reparte por m². Las cocheras reparten por m² su propio total de ordinarias y de tasa municipal. Se traslada el saldo anterior y se suma la mora sobre el total del período anterior. Si el período ya existe, se conservan los pagos.</p>
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <div><label class="lbl" for="g-mes">Mes del período</label><input id="g-mes" type="month" class="inp"></div>
       <div><label class="lbl" for="g-venc">Fecha de vencimiento</label><input id="g-venc" type="date" class="inp"></div>
@@ -219,6 +219,7 @@ body { background: radial-gradient(1200px 600px at 85% -10%, rgba(205,167,82,.10
       <div><label class="lbl" for="g-emsa">Importe EMSA ($)</label><input id="g-emsa" type="number" step="0.01" class="inp"></div>
       <div><label class="lbl" for="g-nrosamsa">N° factura SAMSA</label><input id="g-nrosamsa" class="inp"></div>
       <div><label class="lbl" for="g-samsa">Importe SAMSA ($)</label><input id="g-samsa" type="number" step="0.01" class="inp"></div>
+      <div class="sm:col-span-2"><label class="lbl" for="g-pemsa">% de EMSA que corresponde a las unidades funcionales (el resto se reparte entre las cocheras)</label><input id="g-pemsa" type="number" step="0.01" min="0" max="100" class="inp"></div>
       <div><label class="lbl" for="g-urlemsa">Enlace web factura EMSA</label><input id="g-urlemsa" placeholder="https://..." class="inp"></div>
       <div><label class="lbl" for="g-urlsamsa">Enlace web factura SAMSA</label><input id="g-urlsamsa" placeholder="https://..." class="inp"></div>
       <div><label class="lbl" for="g-tasa">Tasa municipal total de las UF ($)</label><input id="g-tasa" type="number" step="0.01" class="inp"></div>
@@ -521,7 +522,7 @@ function renderTabla(t) {
     return `<tr onclick="detalle('${esc(u.id)}')" class="hover:bg-slate-900/60 cursor-pointer">
       <td class="p-3"><div class="font-bold ${t === 'depto' ? 'text-blue-400' : 'text-indigo-400'}">${esc(uname(u))}</div><div class="text-[10px] text-slate-500">${esc(usub(u))}</div></td>${c(u.m2 + ' m²')}
       <td class="p-3 text-slate-200 max-w-[200px] truncate">${esc(ocup(u))}</td>
-      ${l ? c($f(l.ord)) + c(t === 'depto' ? $f(l.serv || 0) : '—') + c($f(l.ext)) + c($f(l.tasa)) + (A ? c($f(l.deudaAnterior || 0)) + c($f(l.recargo || 0)) : '') + `<td class="p-3 font-bold text-white">${$f(x.total)}</td>` + (A ? c($f(u.sinEntregar ? x.total : x.saldo)) : '') : `<td class="p-3 text-slate-500" colspan="${A ? 8 : 5}">Sin liquidación en este período</td>`}
+      ${l ? c($f(l.ord)) + c($f(l.serv || 0)) + c($f(l.ext)) + c($f(l.tasa)) + (A ? c($f(l.deudaAnterior || 0)) + c($f(l.recargo || 0)) : '') + `<td class="p-3 font-bold text-white">${$f(x.total)}</td>` + (A ? c($f(u.sinEntregar ? x.total : x.saldo)) : '') : `<td class="p-3 text-slate-500" colspan="${A ? 8 : 5}">Sin liquidación en este período</td>`}
       ${A ? `<td class="p-3"><span class="px-2.5 py-1 rounded-full text-[10px] font-semibold border ${cl}">${lb}</span></td>` : ''}
       ${A ? `<td class="p-3"><button onclick="event.stopPropagation();waUnidad('${esc(u.id)}')" aria-label="WhatsApp" class="px-2.5 py-1 bg-emerald-600/20 hover:bg-emerald-600 text-emerald-300 hover:text-white rounded-lg cursor-pointer"><i class="fa-brands fa-whatsapp"></i></button></td>` : ''}
     </tr>`;
@@ -544,14 +545,14 @@ function renderResumen() {
   const total = sum(cobr, x => tot(x.l).total), pagado = sum(cobr, x => tot(x.l).pagado);
   // Reparto pre-consorcio / fideicomiso: sale de los m² totales de las UF (entregadas vs. todas, con Amenities).
   const ufs = S.units.filter(u => u.tipo === 'depto'), m2t = ufs.reduce((a, u) => a + u.m2, 0), m2e = ufs.filter(u => !u.sinEntregar).reduce((a, u) => a + u.m2, 0);
-  const pPre = m2t ? m2e / m2t * 100 : 0, pFid = m2t ? 100 - pPre : 0, serv = r2((p.emsa || 0) + (p.samsa || 0));
+  const pPre = m2t ? m2e / m2t * 100 : 0, pFid = m2t ? 100 - pPre : 0, serv = r2((p.emsa || 0) + (p.samsa || 0)), pe = p.pctEmsaUF ?? 100, servUF = r2((p.emsa || 0) * pe / 100 + (p.samsa || 0)), servUC = r2(serv - servUF);
   const fidCosto = sum(fidL.filter(x => x.u.tipo === 'depto'), x => x.l.ord + (x.l.serv || 0) + x.l.ext + x.l.tasa);
   const card = (t, v, sub, cl = 'text-white') => `<div class="glass p-5"><span class="text-xs text-slate-400">${t}</span><div class="text-xl font-black ${cl} mt-1">${v}</div><span class="text-xs text-slate-400">${sub}</span></div>`;
   box.innerHTML = facturas + `
     <div class="flex items-center gap-2 text-[11px] text-amber-300/90"><i class="fa-solid fa-eye-slash"></i> Lo que sigue lo ve solo la administración.</div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       ${card('Gastos ordinarios del mes', $f(p.presupuestoOrd), 'Se reparte por m² totales entre todas las UF', 'text-emerald-400')}
-      ${card('EMSA + SAMSA', $f(serv), 'Se reparte por m² entre todas las UF')}
+      ${card('EMSA + SAMSA', $f(serv), `UF ${$f(servUF)} (${pct(pe)} de EMSA + SAMSA) · cocheras ${$f(servUC)}`)}
       ${card('Tasa municipal', $f((p.tasaUF || 0) + (p.tasaCoch || 0)), `UF ${$f(p.tasaUF || 0)} · cocheras ${$f(p.tasaCoch || 0)}`)}
     </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -562,8 +563,8 @@ function renderResumen() {
     <div class="bg-indigo-950/40 backdrop-blur border border-indigo-500/30 rounded-2xl p-5 text-sm space-y-2">
       <div><b class="text-indigo-300">Reparto entre pre-consorcio y fideicomiso</b> <span class="text-xs text-slate-400">(se calcula solo, por m² totales de las UF)</span></div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-        <div class="bg-slate-950/50 border border-white/10 rounded-xl p-3">Pre-consorcio: propietarios de ${ufs.filter(u => !u.sinEntregar).length} unidades entregadas<br><b class="text-base text-white">${pct(pPre)}</b> · ${m2e.toLocaleString('es-AR', { maximumFractionDigits: 2 })} de ${m2t.toLocaleString('es-AR', { maximumFractionDigits: 2 })} m²<br>EMSA + SAMSA: <b>${$f(serv * pPre / 100)}</b></div>
-        <div class="bg-slate-950/50 border border-white/10 rounded-xl p-3">Fideicomiso: ${ufs.filter(u => u.sinEntregar).length} unidades sin entregar y Amenities<br><b class="text-base text-white">${pct(pFid)}</b> · ${(m2t - m2e).toLocaleString('es-AR', { maximumFractionDigits: 2 })} m²<br>EMSA + SAMSA: <b>${$f(serv * pFid / 100)}</b> · Total del período a su cargo: <b>${$f(fidCosto)}</b></div>
+        <div class="bg-slate-950/50 border border-white/10 rounded-xl p-3">Pre-consorcio: propietarios de ${ufs.filter(u => !u.sinEntregar).length} unidades entregadas<br><b class="text-base text-white">${pct(pPre)}</b> · ${m2e.toLocaleString('es-AR', { maximumFractionDigits: 2 })} de ${m2t.toLocaleString('es-AR', { maximumFractionDigits: 2 })} m²<br>EMSA + SAMSA: <b>${$f(servUF * pPre / 100)}</b></div>
+        <div class="bg-slate-950/50 border border-white/10 rounded-xl p-3">Fideicomiso: ${ufs.filter(u => u.sinEntregar).length} unidades sin entregar y Amenities<br><b class="text-base text-white">${pct(pFid)}</b> · ${(m2t - m2e).toLocaleString('es-AR', { maximumFractionDigits: 2 })} m²<br>EMSA + SAMSA: <b>${$f(servUF * pFid / 100)}</b> · Total del período a su cargo: <b>${$f(fidCosto)}</b></div>
       </div>
     </div>`;
 }
@@ -607,7 +608,7 @@ function detalle(uid) {
   if (!l) h += '<p class="text-slate-400">Sin liquidación para este período.</p>';
   else {
     const t = tot(l);
-    h += `<div class="bg-slate-950 p-3 rounded-xl border border-slate-800">${row('Ordinarias', l.ord)}${u.tipo === 'depto' ? row('EMSA / SAMSA', l.serv || 0) : ''}${row('Extraordinarias', l.ext)}${row('Tasa municipal', l.tasa)}${A ? row('Saldo anterior', l.deudaAnterior || 0) + row('Recargo por mora', l.recargo || 0) : ''}</div>
+    h += `<div class="bg-slate-950 p-3 rounded-xl border border-slate-800">${row('Ordinarias', l.ord)}${row(u.tipo === 'depto' ? 'EMSA / SAMSA' : 'EMSA (energía)', l.serv || 0)}${row('Extraordinarias', l.ext)}${row('Tasa municipal', l.tasa)}${A ? row('Saldo anterior', l.deudaAnterior || 0) + row('Recargo por mora', l.recargo || 0) : ''}</div>
       <div class="bg-blue-950/40 border border-blue-500/30 p-3 rounded-xl flex justify-between"><b class="text-blue-200">${A ? 'Total' : 'Expensa'} ${plabel(S.pid)}</b><b class="text-base">${$f(t.total)}</b></div>`;
     if (u.sinEntregar) h += `<div class="bg-indigo-950/30 border border-indigo-500/30 p-3 rounded-xl">Unidad sin entregar: estas expensas están a cargo del fideicomiso.<br>Importe a cargo del fideicomiso: <b>${$f(t.total)}</b></div>`;
     else if (!A) h += '<p class="text-[11px] text-slate-400">El saldo anterior, los recargos y los pagos de tu unidad te los informa la administración.</p>';
@@ -659,6 +660,7 @@ function descargarPDF() {
   d.text('Concepto', 18, y + 6); d.text('Importe', 165, y + 6); d.setFont('helvetica', 'normal'); y += 14;
   const items = [[u.tipo === 'depto' ? 'Expensas ordinarias (prorrateo por m²)' : 'Expensas ordinarias cochera', l.ord]];
   if (u.tipo === 'depto') items.push([`Servicios EMSA N° ${p.nroEmsa || 'S/N'} y SAMSA N° ${p.nroSamsa || 'S/N'} (prorrateo por m²)`, l.serv || 0]);
+  else if (l.serv) items.push([`Servicio EMSA N° ${p.nroEmsa || 'S/N'} (prorrateo por m² entre cocheras)`, l.serv]);
   items.push(['Expensas extraordinarias', l.ext], ['Tasa municipal', l.tasa]); if (S.isAdmin) items.push(['Saldo anterior', l.deudaAnterior || 0], ['Recargo por mora', l.recargo || 0]);
   items.forEach(([k, v]) => { const lines = d.splitTextToSize(k, 130); d.text(lines, 18, y); d.text($f(v), 165, y); y += 6 * lines.length + 2; });
   y += 2; d.setFillColor(239, 246, 255); d.rect(14, y, 182, 12, 'F'); d.setFont('helvetica', 'bold'); d.setFontSize(11); d.setTextColor(30, 58, 138);
@@ -766,7 +768,7 @@ function prefillAdmin() {
   set('g-pres', p.presupuestoOrd ?? 10000000); set('g-tasa', p.tasaUF ?? '');
   set('g-tasam2', p.tasaCoch ?? (p.tasaM2Coch != null ? r2(m2c * p.tasaM2Coch) : totC('tasa')));
   set('g-m2c', p.ordCoch ?? (p.valorM2Coch != null ? r2(m2c * p.valorM2Coch) : totC('ord'))); set('g-extuf', p.extUF ?? 25000); set('g-extuc', p.extUC ?? 6000);
-  set('g-r1', p.recargo1 ?? 5); set('g-r2', p.recargo2 ?? 10);
+  set('g-pemsa', p.pctEmsaUF ?? 87.68); set('g-r1', p.recargo1 ?? 5); set('g-r2', p.recargo2 ?? 10);
   poblarEdit();
 }
 async function guardarAviso() {
@@ -776,10 +778,11 @@ async function guardarAviso() {
 async function generarPeriodo() {
   const n = id => $(id).value === '' ? null : parseFloat($(id).value), mes = $('g-mes').value, venc = $('g-venc').value;
   const c = { vencimiento: venc, emsa: n('g-emsa'), samsa: n('g-samsa'), presupuestoOrd: n('g-pres'), tasaUF: n('g-tasa'), tasaCoch: n('g-tasam2'),
-    extUF: n('g-extuf'), extUC: n('g-extuc'), ordCoch: n('g-m2c'), recargo1: n('g-r1'), recargo2: n('g-r2'),
+    extUF: n('g-extuf'), extUC: n('g-extuc'), ordCoch: n('g-m2c'), recargo1: n('g-r1'), recargo2: n('g-r2'), pctEmsaUF: n('g-pemsa'),
     nroEmsa: $('g-nroemsa').value.trim(), nroSamsa: $('g-nrosamsa').value.trim(), urlEmsa: $('g-urlemsa').value.trim(), urlSamsa: $('g-urlsamsa').value.trim() };
-  const req = ['emsa','samsa','presupuestoOrd','tasaUF','tasaCoch','extUF','extUC','ordCoch','recargo1','recargo2'];
+  const req = ['emsa','samsa','presupuestoOrd','tasaUF','tasaCoch','extUF','extUC','ordCoch','recargo1','recargo2','pctEmsaUF'];
   if (!mes || !venc || req.some(k => c[k] === null || isNaN(c[k]) || c[k] < 0)) return toast('Completá el mes, el vencimiento y todos los importes.', 'error');
+  if (c.pctEmsaUF > 100) return toast('El porcentaje de EMSA para las UF no puede superar 100.', 'error');
   if (!S.units.length) return toast('No hay unidades cargadas.', 'error');
   const existe = S.periodos.some(x => x.id === mes);
   if (!(await confirmar(existe ? `El período ${plabel(mes)} ya existe. Se recalculan los importes: se conservan los pagos, pero se pierden los ajustes manuales.` : `Se va a generar la liquidación de ${plabel(mes)} para todas las unidades.`, { titulo: existe ? '¿Recalcular el período?' : '¿Generar el período?', boton: existe ? 'Recalcular' : 'Generar', peligro: existe }))) return;
@@ -792,11 +795,11 @@ async function generarPeriodo() {
   const cos = S.units.filter(u => u.tipo === 'cochera'), wc = cos.map(u => u.m2), idc = {};
   cos.forEach((u, i) => idc[u.id] = i);
   const ordC = prorratear(wc, c.ordCoch), tasC = prorratear(wc, c.tasaCoch);
-  const ordUF = prorratear(w, c.presupuestoOrd), srvUF = prorratear(w, r2(c.emsa + c.samsa)), tasUF = prorratear(w, c.tasaUF), ops = [];
+  const ordUF = prorratear(w, c.presupuestoOrd), emsaUF = r2(c.emsa * c.pctEmsaUF / 100), emsaUC = r2(c.emsa - emsaUF), srvC = prorratear(wc, emsaUC), srvUF = prorratear(w, r2(emsaUF + c.samsa)), tasUF = prorratear(w, c.tasaUF), ops = [];
   S.units.forEach(u => {
     const i = idx[u.id];
     const l = u.tipo === 'depto' ? { ord: ordUF[i], serv: srvUF[i], ext: c.extUF, tasa: tasUF[i] }
-      : { ord: ordC[idc[u.id]], serv: 0, ext: c.extUC, tasa: tasC[idc[u.id]] };
+      : { ord: ordC[idc[u.id]], serv: srvC[idc[u.id]], ext: c.extUC, tasa: tasC[idc[u.id]] };
     Object.assign(l, { deudaAnterior: 0, recargo: 0, pagos: curL[u.id]?.pagos || [] });
     const pv = prevL[u.id];
     if (u.sinEntregar) { l.fid = true; l.pagos = []; }                       // a cargo del fideicomiso: no arrastra saldo ni mora
@@ -975,7 +978,7 @@ async function saveBal(pid, b) { await setDoc(doc(db, 'privado', 'balance_' + pi
 // Igual que la hoja "Balance" del libro: solo cuentan las unidades que registraron un pago ("Pagado").
 // Sus conceptos del mes se suman por rubro y lo cobrado por encima de eso (deuda anterior + recargos) va a "mora y expensas vencidas".
 function ingresosDe(liqs) {
-  const r = { ordUF: 0, ordUC: 0, tasaUF: 0, tasaUC: 0, serv: 0, extUF: 0, extUC: 0, cobUF: 0, cobUC: 0, pend: 0, fidFact: 0, nPagan: 0 };
+  const r = { ordUF: 0, ordUC: 0, tasaUF: 0, tasaUC: 0, serv: 0, servUF: 0, servUC: 0, extUF: 0, extUC: 0, cobUF: 0, cobUC: 0, pend: 0, fidFact: 0, nPagan: 0 };
   S.units.forEach(u => {
     const l = liqs[u.id]; if (!l) return; const d = u.tipo === 'depto';
     if (u.sinEntregar) { r.fidFact += l.ord + (l.serv || 0) + l.ext + l.tasa; return; }
@@ -983,12 +986,12 @@ function ingresosDe(liqs) {
     if (!(l.pagos || []).length) return;
     r.nPagan++; r[d ? 'cobUF' : 'cobUC'] += t.pagado;
     if (l.debe) return;   // marcada "Debe" a mano: lo cobrado cuenta, pero sus conceptos no
-    r[d ? 'ordUF' : 'ordUC'] += l.ord; r[d ? 'tasaUF' : 'tasaUC'] += l.tasa; r.serv += l.serv || 0; r[d ? 'extUF' : 'extUC'] += l.ext;
+    r[d ? 'ordUF' : 'ordUC'] += l.ord; r[d ? 'tasaUF' : 'tasaUC'] += l.tasa; r.serv += l.serv || 0; r[d ? 'servUF' : 'servUC'] += l.serv || 0; r[d ? 'extUF' : 'extUC'] += l.ext;
   });
   Object.keys(r).forEach(k => r[k] = r2(r[k]));
   r.fact = r2(r.ordUF + r.ordUC + r.tasaUF + r.tasaUC + r.serv + r.extUF + r.extUC);       // Ingreso por expensas UF y UC
-  r.moraUF = r2(r.cobUF - (r.ordUF + r.tasaUF + r.serv + r.extUF));                         // Intereses por mora UF + exp. vencida
-  r.moraUC = r2(r.cobUC - (r.ordUC + r.tasaUC + r.extUC));                                  // Intereses por mora UC + exp. vencida
+  r.moraUF = r2(r.cobUF - (r.ordUF + r.tasaUF + r.servUF + r.extUF));                         // Intereses por mora UF + exp. vencida
+  r.moraUC = r2(r.cobUC - (r.ordUC + r.tasaUC + r.servUC + r.extUC));                                  // Intereses por mora UC + exp. vencida
   r.cobrado = r2(r.cobUF + r.cobUC);
   r.gastosComunes = r2(r.ordUF + r.ordUC + r.tasaUF + r.tasaUC + r.serv); r.extra = r2(r.extUF + r.extUC);
   return r;
@@ -1041,7 +1044,7 @@ function renderBalance() {
   const kpi = (k, t, v, sub, tone, ico) => `<div class="glass p-4 relative overflow-hidden"><i class="fa-solid ${ico} absolute -right-2 -bottom-3 text-6xl opacity-[.07]"></i><span class="text-[11px] uppercase tracking-wider text-slate-400">${t}</span>
     <div class="text-[17px] sm:text-2xl whitespace-nowrap font-black mt-1 ${tone}" data-k="${k}" data-count="${v}">${$f(v)}</div><span class="text-[11px] text-slate-400">${sub}</span></div>`;
   const tono = v => v >= 0 ? 'text-emerald-400' : 'text-rose-400';
-  const filas = [['Expensas comunes · unidades funcionales', ing.ordUF], ['Expensas comunes · cocheras', ing.ordUC], ['Tasa municipal · unidades funcionales', ing.tasaUF], ['Tasa municipal · cocheras', ing.tasaUC], ['EMSA + SAMSA prorrateados', ing.serv], ['Extraordinarias · unidades funcionales', ing.extUF], ['Extraordinarias · cocheras', ing.extUC]];
+  const filas = [['Expensas comunes · unidades funcionales', ing.ordUF], ['Expensas comunes · cocheras', ing.ordUC], ['Tasa municipal · unidades funcionales', ing.tasaUF], ['Tasa municipal · cocheras', ing.tasaUC], ['EMSA + SAMSA · unidades funcionales', ing.servUF], ['EMSA · cocheras', ing.servUC], ['Extraordinarias · unidades funcionales', ing.extUF], ['Extraordinarias · cocheras', ing.extUC]];
   // Gastos por rubro
   const porRubro = Object.keys(RUBROS).map(k => ({ k, n: RUBROS[k][0], c: RUBROS[k][2], v: sumM(b.gastos.filter(g => (g.rubro || 'otro') === k)) })).filter(r => r.v > 0).sort((a, c) => c.v - a.v);
   const ejec = (real, rec) => rec > 0 ? Math.round(real / rec * 100) : 0;
@@ -1234,7 +1237,7 @@ function balancePDF() {
   d.setFillColor(11, 17, 33); d.rect(0, 0, 210, 38, 'F'); d.setTextColor(255); d.setFont('helvetica', 'bold'); d.setFontSize(18); d.text('EDIFICIO TORRE AYMARÁ', 14, 16);
   d.setFont('helvetica', 'normal'); d.setFontSize(10); d.text('Beethoven 1650 • Posadas, Misiones', 14, 23); d.text(`BALANCE DEL PERÍODO ${plabel(S.pid)}`, 14, 31); y = 50;
   titulo('INGRESO POR EXPENSAS');
-  [['Expensas comunes · unidades funcionales', ing.ordUF], ['Expensas comunes · cocheras', ing.ordUC], ['Tasa municipal · unidades funcionales', ing.tasaUF], ['Tasa municipal · cocheras', ing.tasaUC], ['EMSA y SAMSA prorrateados', ing.serv], ['Extraordinarias · unidades funcionales', ing.extUF], ['Extraordinarias · cocheras', ing.extUC]].forEach(([k, v]) => linea(k, v, { i: 3 }));
+  [['Expensas comunes · unidades funcionales', ing.ordUF], ['Expensas comunes · cocheras', ing.ordUC], ['Tasa municipal · unidades funcionales', ing.tasaUF], ['Tasa municipal · cocheras', ing.tasaUC], ['EMSA y SAMSA · unidades funcionales', ing.servUF], ['EMSA · cocheras', ing.servUC], ['Extraordinarias · unidades funcionales', ing.extUF], ['Extraordinarias · cocheras', ing.extUC]].forEach(([k, v]) => linea(k, v, { i: 3 }));
   linea('Ingreso por expensas UF y UC', ing.fact, { b: 1 });
   titulo('OTROS INGRESOS'); linea('Intereses por mora UF + expensa vencida del mes en curso', ing.moraUF, { i: 3 }); linea('Intereses por mora UC + expensa vencida del mes en curso', ing.moraUC, { i: 3 }); x.b.otros.forEach(o => linea(o.concepto, o.monto, { i: 3 })); linea('Total otros ingresos', r2(ing.moraUF + ing.moraUC + x.otros), { b: 1 });
   linea('TOTAL EXPENSAS + OTROS INGRESOS', x.ingTot, { b: 1, s: 11, c: [6, 95, 70] });
