@@ -15,8 +15,8 @@
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-display: 'Playfair Display', Georgia, serif;
-  --color-slate-50: #f3f7ff; --color-slate-100: #e4ecfb; --color-slate-200: #cbd9f3; --color-slate-300: #a9bfe6;
-  --color-slate-400: #86a0d3; --color-slate-500: #6382bd; --color-slate-600: #46659f; --color-slate-700: #3a609f;
+  --color-slate-50: #ffffff; --color-slate-100: #f4f8ff; --color-slate-200: #e8f0ff; --color-slate-300: #d8e4fb;
+  --color-slate-400: #bccef0; --color-slate-500: #98afdc; --color-slate-600: #6f8ec8; --color-slate-700: #3a609f;
   --color-slate-800: #2b4f8c; --color-slate-900: #20427a; --color-slate-950: #183564;
   --color-blue-300: #f1dca6; --color-blue-400: #e6c57c; --color-blue-500: #cda752; --color-blue-600: #94701f;
   --color-blue-950: #33497a;
@@ -26,7 +26,7 @@
   .lbl { @apply block text-[11px] text-slate-400 mb-1; }
   .btn { @apply px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer transition inline-flex items-center justify-center gap-1.5 active:scale-[.97] focus-visible:outline-2 focus-visible:outline-blue-400; }
   .glass-btn { @apply bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200; }
-  .glass, .card { @apply bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,.28)]; }
+  .glass, .card { background: linear-gradient(180deg, rgba(70,112,182,.36) 0%, rgba(44,82,146,.32) 100%); @apply backdrop-blur-xl border border-white/20 rounded-2xl shadow-[0_10px_34px_rgba(8,20,50,.35),inset_0_1px_0_rgba(255,255,255,.12)]; }
   .card { @apply p-4 sm:p-6; }
   .sec { @apply bg-slate-950/60 p-4 rounded-xl border border-white/10 space-y-3; }
   .modal { @apply fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-3 z-50; }
@@ -139,9 +139,9 @@ body { background: linear-gradient(180deg, var(--color-slate-950) 0, var(--color
 <main class="max-w-7xl mx-auto px-4 py-6 w-full space-y-5 flex-grow">
   <div id="err" class="hidden bg-rose-950/60 border border-rose-500/40 text-rose-200 rounded-xl p-3 text-xs"></div>
 
-  <section class="bg-blue-950/50 backdrop-blur border border-blue-500/30 rounded-2xl p-4 flex gap-3">
-    <i class="fa-solid fa-bullhorn text-blue-400 mt-1"></i>
-    <div><h2 class="text-xs font-bold text-blue-400">Avisos de la administración</h2><p id="aviso" class="text-sm text-slate-200 mt-1"></p></div>
+  <section class="bg-gradient-to-r from-amber-400/40 to-orange-400/25 backdrop-blur border border-amber-300/50 rounded-2xl p-4 flex gap-3 shadow-[0_8px_28px_rgba(245,158,11,.15)]">
+    <i class="fa-solid fa-bullhorn text-amber-300 mt-1"></i>
+    <div><h2 class="text-xs font-bold text-amber-200">Avisos de la administración</h2><p id="aviso" class="text-sm text-slate-200 mt-1"></p></div>
   </section>
 
   <section class="card space-y-4">
@@ -414,9 +414,15 @@ const usub = u => u.tipo === 'depto'
   ? (typeof u.uf === 'number' ? `UF ${u.uf}` : '')
   : (u.nro ? `Cochera ${u.nro} · ${u.piso}${u.ufVinculada ? ' · depto ' + String(u.ufVinculada).replace(/^(\d+)\s+/, '$1° ') : ''}` : '');
 const ufull = u => [uname(u), usub(u)].filter(Boolean).join(' · ');
-// Orden de las listas: por N° de UF (Amenities al final) y por N° de UC.
+// Orden de las listas: UF por piso y letra (A, B, C…; Amenities al final). Cocheras según el departamento al que están
+// asignadas (piso y letra); las que no tienen departamento van al final, por número.
 const numOrden = u => u.tipo === 'depto' ? (typeof u.uf === 'number' ? u.uf : 1e6) : (typeof u.uc === 'number' ? u.uc : 1e6);
-const porNumero = (a, b) => numOrden(a) - numOrden(b) || (a.orden || 0) - (b.orden || 0);
+const claveOrden = u => {
+  if (u.tipo === 'depto') return [u.piso === 'Amenities' ? 1e6 : (parseInt(u.piso) || 1e5), String(u.letra || '').toUpperCase(), numOrden(u)];
+  const v = String(u.ufVinculada || '').match(/^(\d+)\s*([A-Za-z])/);
+  return [v ? +v[1] : 1e5, v ? v[2].toUpperCase() : '', numOrden(u)];
+};
+const porNumero = (a, b) => { const x = claveOrden(a), y = claveOrden(b); return x[0] - y[0] || x[1].localeCompare(y[1]) || x[2] - y[2] || (a.orden || 0) - (b.orden || 0); };
 // Cartel de confirmación propio (reemplaza al confirm() del navegador). Devuelve true o false.
 function confirmar(msg, o = {}) {
   return new Promise(res => {
@@ -568,9 +574,9 @@ function shell(t) {
       <div class="relative w-full sm:w-72"><i class="fa-solid fa-magnifying-glass absolute left-3.5 top-2.5 text-slate-500 text-xs"></i>
         <input id="q-${t}" aria-label="Buscar" placeholder="Buscar unidad..." oninput="buscar('${t}',this.value)" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs focus:outline-none focus:border-blue-500"></div>
     </div>
-    <div class="bg-slate-950/60 border border-slate-800/80 rounded-2xl overflow-hidden">
-      <div class="overflow-x-auto"><table class="w-full text-left text-xs whitespace-nowrap"><thead id="th-${t}" class="bg-slate-900/90 text-slate-400"></thead><tbody id="tb-${t}" class="divide-y divide-slate-800/60"></tbody></table></div>
-      <div class="p-3 bg-slate-900/50 border-t border-slate-800 flex justify-between items-center text-xs">
+    <div class="glass overflow-hidden">
+      <div class="overflow-x-auto"><table class="w-full text-left text-[13px] whitespace-nowrap"><thead id="th-${t}" class="bg-slate-950/45 text-slate-300"></thead><tbody id="tb-${t}" class="divide-y divide-white/10"></tbody></table></div>
+      <div class="p-3 bg-slate-950/30 border-t border-white/10 flex justify-between items-center text-xs">
         <span id="pg-${t}" class="text-slate-400"></span>
         <div class="flex gap-2"><button onclick="pagina('${t}',-1)" class="btn bg-slate-800 text-slate-200 !py-1.5">Anterior</button><button onclick="pagina('${t}',1)" class="btn bg-blue-600 text-white !py-1.5">Siguiente</button></div>
       </div>
@@ -588,7 +594,7 @@ function renderTabla(t) {
   $('th-' + t).innerHTML = `<tr>${cols.map(h => `<th class="p-3 font-semibold">${h}</th>`).join('')}</tr>`;
   $('tb-' + t).innerHTML = rows.map(u => {
     const l = S.liqs[u.id], [lb, cl] = A ? estado(u, l) : ['', ''], c = v => `<td class="p-3 text-slate-300">${v}</td>`, x = l ? tot(l) : null;
-    return `<tr onclick="detalle('${esc(u.id)}')" class="hover:bg-slate-900/60 cursor-pointer">
+    return `<tr onclick="detalle('${esc(u.id)}')" class="hover:bg-white/10 cursor-pointer">
       <td class="p-3"><div class="font-bold ${t === 'depto' ? 'text-blue-400' : 'text-indigo-400'}">${esc(uname(u))}</div><div class="text-[10px] text-slate-500">${esc(usub(u))}</div></td>${c(u.m2 + ' m²')}
       <td class="p-3 text-slate-200 max-w-[200px] truncate">${esc(ocup(u))}</td>
       ${l ? c($f(l.ord)) + c($f(l.serv || 0)) + c($f(l.ext)) + c($f(l.tasa)) + (A ? c($f(l.deudaAnterior || 0)) + c($f(l.recargo || 0)) : '') + `<td class="p-3 font-bold text-white">${$f(x.total)}</td>` + (A ? c($f(u.sinEntregar ? x.total : x.saldo)) : '') : `<td class="p-3 text-slate-500" colspan="${A ? 8 : 5}">Sin liquidación en este período</td>`}
@@ -859,9 +865,10 @@ async function generarPeriodo() {
   const prevId = S.periodos.map(x => x.id).filter(i => i < mes).sort().pop(), pc = S.periodos.find(x => x.id === prevId);
   const prevL = prevId ? await leerLiqs(prevId) : {}, curL = existe ? await leerLiqs(mes) : {};
   // Las UF (entregadas o no, con Amenities) se reparten por m² totales. Las cocheras reparten por m² su propio total.
-  const ufs = S.units.filter(u => u.tipo === 'depto'), w = ufs.map(u => u.m2), idx = {};
+  const porUF = (a, b) => numOrden(a) - numOrden(b) || (a.orden || 0) - (b.orden || 0);   // el reparto de centavos sigue el orden de numeración, no el de pantalla
+  const ufs = S.units.filter(u => u.tipo === 'depto').sort(porUF), w = ufs.map(u => u.m2), idx = {};
   ufs.forEach((u, i) => idx[u.id] = i);
-  const cos = S.units.filter(u => u.tipo === 'cochera'), wc = cos.map(u => u.m2), idc = {};
+  const cos = S.units.filter(u => u.tipo === 'cochera').sort(porUF), wc = cos.map(u => u.m2), idc = {};
   cos.forEach((u, i) => idc[u.id] = i);
   const ordC = prorratear(wc, c.ordCoch), tasC = prorratear(wc, c.tasaCoch);
   const ordUF = prorratear(w, c.presupuestoOrd), emsaUF = r2(c.emsa * c.pctEmsaUF / 100), emsaUC = r2(c.emsa - emsaUF), srvC = prorratear(wc, emsaUC), srvUF = prorratear(w, r2(emsaUF + c.samsa)), tasUF = prorratear(w, c.tasaUF), ops = [];
