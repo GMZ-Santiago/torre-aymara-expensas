@@ -11,6 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 <style type="text/tailwindcss">
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
@@ -279,6 +280,11 @@ body { background: linear-gradient(180deg, var(--color-slate-950) 0, var(--color
       <div><label class="lbl" for="g-mes">Mes del período</label><input id="g-mes" type="month" class="inp"></div>
       <div><label class="lbl" for="g-venc">Fecha de vencimiento</label><input id="g-venc" type="date" class="inp"></div>
       <div class="sm:col-span-2"><label class="lbl" for="g-pres">Gastos ordinarios del mes a repartir entre las UF ($)</label><input id="g-pres" type="number" step="0.01" class="inp"></div>
+      <div class="sm:col-span-2 rounded-xl border border-dashed border-white/25 bg-white/5 p-3">
+        <label class="btn bg-blue-600 hover:bg-blue-500 text-white" for="g-pdf"><i class="fa-solid fa-file-pdf"></i> Leer factura PDF (EMSA y/o SAMSA)</label>
+        <input id="g-pdf" type="file" accept="application/pdf" multiple class="hidden" onchange="leerFacturaPDF(this)">
+        <p id="g-pdf-msg" class="text-[11px] text-slate-300 mt-2">Elegí el PDF de EMSA o de SAMSA (o los dos juntos): se completan solos el número y el importe. El archivo se lee en tu navegador, no se sube a ningún lado. Revisá los datos antes de generar.</p>
+      </div>
       <div><label class="lbl" for="g-nroemsa">N° factura EMSA</label><input id="g-nroemsa" class="inp"></div>
       <div><label class="lbl" for="g-emsa">Importe EMSA ($)</label><input id="g-emsa" type="number" step="0.01" class="inp"></div>
       <div><label class="lbl" for="g-nrosamsa">N° factura SAMSA</label><input id="g-nrosamsa" class="inp"></div>
@@ -1367,10 +1373,66 @@ function balancePDF() {
   d.save(`Balance_Torre_Aymara_${plabel(S.pid)}.pdf`);
 }
 
+/* ---------- Lectura de facturas PDF (EMSA / SAMSA) ---------- */
+const numAR = t => parseFloat(t.replace(/\./g, '').replace(',', '.'));
+function parseFactura(txt) {
+  let m;
+  if (/Liquidaci[oó]n de servicios p[uú]blicos/i.test(txt)) {
+    const nro = (m = txt.match(/\b([A-C])\s*[-.]?\s*(\d{3,4})-(\d{8})\b/)) ? `${m[1]}${m[2]}-${m[3]}` : '';
+    // El orden del texto en el PDF de SAMSA varía: se toma el importe "$ X" que más veces se repite (Total, Posición, Broche).
+    const cuenta = {};
+    for (const x of txt.matchAll(/\$\s*([\d.]+,\d{2})/g)) cuenta[x[1]] = (cuenta[x[1]] || 0) + 1;
+    const top = Object.entries(cuenta).sort((p, q) => q[1] - p[1] || numAR(q[0]) - numAR(p[0]))[0];
+    const tot = (m = txt.match(/Total\s*\$\s*([\d.]+,\d{2})/)) ? numAR(m[1]) : (top && top[1] >= 2 ? numAR(top[0]) : null);
+    return { tipo: 'samsa', nro, total: tot };
+  }
+  m = txt.match(/\b([A-C])\s*[.\-\s]\s*(\d{4})\s*[.\-\s]\s*(\d{8})\b/);
+  if (m) {
+    const t = txt.match(/(?:^|\n)\s*TOTAL\s+\$?\s*([\d.]+,\d{2})/);
+    return { tipo: 'emsa', nro: `${m[1]} ${m[2]}-${m[3]}`, total: t ? numAR(t[1]) : null };
+  }
+  return null;
+}
+async function textoPDF(file) {
+  const lib = window.pdfjsLib;
+  if (!lib) throw new Error('No se pudo cargar el lector de PDF. Revisá la conexión y recargá la página.');
+  lib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  const pdf = await lib.getDocument({ data: await file.arrayBuffer() }).promise;
+  let out = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const items = (await (await pdf.getPage(i)).getTextContent()).items;
+    let y = null;
+    for (const it of items) {
+      const yy = Math.round(it.transform[5]);
+      if (y !== null && Math.abs(yy - y) > 2) out += '\n';
+      else if (y !== null) out += ' ';
+      out += it.str; y = yy;
+    }
+    out += '\n';
+  }
+  return out;
+}
+async function leerFacturaPDF(input) {
+  const files = [...input.files]; input.value = '';
+  const msg = $('g-pdf-msg'), res = [];
+  for (const f of files) {
+    try {
+      const d = parseFactura(await textoPDF(f));
+      if (!d || !d.nro || d.total == null) { res.push(`✗ ${f.name}: no pude reconocer el número o el total, cargalo a mano.`); continue; }
+      const put = (i, v) => $(i).value = v;
+      if (d.tipo === 'emsa') { put('g-nroemsa', d.nro); put('g-emsa', d.total.toFixed(2)); }
+      else { put('g-nrosamsa', d.nro); put('g-samsa', d.total.toFixed(2)); }
+      res.push(`✓ ${d.tipo.toUpperCase()} ${d.nro} · ${$f(d.total)}`);
+    } catch (e) { console.error(e); res.push(`✗ ${f.name}: ${e.message}`); }
+  }
+  msg.textContent = res.join('  |  ') + '  — Verificá que coincida con la factura.';
+  toast(res.some(r => r[0] === '✓') ? 'Factura leída: revisá los datos' : 'No se pudo leer la factura', res.some(r => r[0] === '✓') ? 'success' : 'error');
+}
+
 /* ---------- Inicio ---------- */
 Object.assign(window, Object.fromEntries(Object.entries({
   cambiarPeriodo, login, salir, adminBtn, tab, buscar, pagina, detalle, registrarPago, quitarPago, marcarDebe, descargarPDF, waUnidad, abrirCola, colaModo, colaSiguiente, colaReiniciar, copiarGrupo, importarTelefonos,
-  heroGo, heroSet, guardarAviso, guardarFondo, protegerDatos, generarPeriodo, renderBalance, cargarEvolucion, guardarCajaCfg, abrirGasto, conceptoElegido, guardarGasto, borrarGasto, abrirOtro, guardarOtro, borrarOtro, importarServicios, copiarMesAnterior, gastosCSV, balancePDF, poblarEdit, cargarEdit, guardarUnidad, agregarUnidad, borrarUnidad, eliminarPeriodo, closeModal
+  leerFacturaPDF, heroGo, heroSet, guardarAviso, guardarFondo, protegerDatos, generarPeriodo, renderBalance, cargarEvolucion, guardarCajaCfg, abrirGasto, conceptoElegido, guardarGasto, borrarGasto, abrirOtro, guardarOtro, borrarOtro, importarServicios, copiarMesAnterior, gastosCSV, balancePDF, poblarEdit, cargarEdit, guardarUnidad, agregarUnidad, borrarUnidad, eliminarPeriodo, closeModal
 }).map(([k, f]) => [k, safe(f)])));
 $('mg-rubro').innerHTML = Object.entries(RUBROS).map(([k, r]) => `<option value="${k}">${r[0]}</option>`).join('');
 $('dl-conceptos').innerHTML = CONCEPTOS.map(c => `<option value="${esc(c[0])}">`).join('');
